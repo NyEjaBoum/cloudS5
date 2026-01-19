@@ -1,0 +1,86 @@
+/* Container général */
+.page-container {
+  max-width: 900px;
+  margin: 40px auto;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 6px 24px rgba(102, 126, 234, 0.08);
+  padding: 40px 32px;
+  min-height: 400px;
+}
+
+.page-title {
+  font-size: 2rem;
+  color: #667eea;
+  font-weight: 700;
+  margin-bottom: 32px;
+  text-align: center;
+  letter-spacing: -1px;
+}
+
+/* --- Recapitulatif --- */
+.recap-cards {
+  display: flex;
+  gap: 24px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.recap-card {
+  background: #f5f8ff;
+  border: 1.5px solid #e2e8f0;
+  border-radius: 12px;
+  padding: 32px 24px;
+  min-width: 180px;
+  text-align: center;
+  box-shadow: 0 2px 8px rgba(102, 126, 234, 0.06);
+  transition: box-shadow 0.2s;
+}
+
+.recap-card:hover {
+  box-shadow: 0 4px 16px rgba(102, 126, 234, 0.12);
+}
+
+.recap-label {
+  color: #667eea;
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.recap-value {
+  font-size: 2rem;
+  font-weight: 800;
+  color: #2d3748;
+}
+
+/* --- Carte Placeholder --- */
+.carte-placeholder {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 320px;
+  background: #f5f8ff;
+  border-radius: 12px;
+  border: 1.5px dashed #667eea;
+  margin-top: 32px;
+}
+
+.carte-fake {
+  text-align: center;
+  color: #667eea;
+  font-size: 1.2rem;
+}
+
+/* Responsive */
+@media (max-width: 900px) {
+  .page-container {
+    padding: 24px 8px;
+  }
+  .recap-cards {
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+  }
+}
