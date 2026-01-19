@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import com.projetCloud.projetCloud.dto.RecapSignalementDto;
 import com.projetCloud.projetCloud.dto.ApiResponse;
 import com.projetCloud.projetCloud.service.SignalementService;
+import com.projetCloud.projetCloud.dto.InfosSignalementDto;
 
 import java.util.List;
 
@@ -52,6 +53,16 @@ public class SignalementController {
         try {
             RecapSignalementDto recap = signalementService.getRecapitulatif();
             return new ApiResponse<>("success", recap, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    @GetMapping("/infos")
+    public ApiResponse<List<InfosSignalementDto>> getInfosSignalement() {
+        try {
+            List<InfosSignalementDto> infos = signalementService.getInfosSignalement();
+            return new ApiResponse<>("success", infos, null);
         } catch (Exception e) {
             return new ApiResponse<>("error", null, e.getMessage());
         }
