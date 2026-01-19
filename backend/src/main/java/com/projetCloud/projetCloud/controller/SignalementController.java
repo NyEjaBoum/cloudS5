@@ -5,6 +5,9 @@ import com.projetCloud.projetCloud.repository.signalement.SignalementRepository;
 import com.projetCloud.projetCloud.service.FirebaseSignalementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+import com.projetCloud.projetCloud.dto.RecapSignalementDto;
+import com.projetCloud.projetCloud.dto.ApiResponse;
+import com.projetCloud.projetCloud.service.SignalementService;
 
 import java.util.List;
 
@@ -18,7 +21,10 @@ public class SignalementController {
     @Autowired
     private FirebaseSignalementService firebaseSignalementService;
 
-    // GET /api/signalements : liste tous les signalements
+
+    @Autowired
+    private SignalementService signalementService;
+
     @GetMapping
     public List<Signalement> getAllSignalements() {
         return signalementRepository.findAll();
@@ -39,5 +45,15 @@ public class SignalementController {
         List<Signalement> signalements = signalementRepository.findAll();
         signalements.forEach(firebaseSignalementService::syncSignalement);
         return "Tous les signalements ont été synchronisés avec Firebase";
+    }
+
+    @GetMapping("/recapitulatif")
+    public ApiResponse<RecapSignalementDto> getRecapitulatif() {
+        try {
+            RecapSignalementDto recap = signalementService.getRecapitulatif();
+            return new ApiResponse<>("success", recap, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
     }
 }
