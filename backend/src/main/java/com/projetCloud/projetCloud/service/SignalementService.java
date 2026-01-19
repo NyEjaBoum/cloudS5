@@ -7,12 +7,19 @@ import org.springframework.stereotype.Service;
 import com.projetCloud.projetCloud.dto.InfosSignalementDto;
 import java.util.List;
 import java.util.stream.Collectors;
+import com.projetCloud.projetCloud.model.signalement.Signalement;
+import com.projetCloud.projetCloud.model.signalement.SignalementHistorique;
+import com.projetCloud.projetCloud.service.SignalementHistoriqueService;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class SignalementService {
 
     @Autowired
     private SignalementRepository signalementRepository;
+
+    @Autowired
+    private SignalementHistoriqueService signalementHistoriqueService;
 
     public RecapSignalementDto getRecapitulatif() {
         Object[] row = signalementRepository.getRecapitulatifRaw().get(0);
@@ -22,6 +29,67 @@ public class SignalementService {
             ((Number) row[2]).doubleValue(),
             ((Number) row[3]).doubleValue()
         );
+    }
+
+    @Transactional
+    public Signalement save(Signalement signalement){
+        Signalement saved = signalementRepository.save(signalement);
+
+        SignalementHistorique historique = new SignalementHistorique();
+        historique.setSignalement(saved);
+        historique.setAncienStatut(saved.getStatut());
+        historique.setNouveauStatut(saved.getStatut());
+        historique.setDateChangement(saved.getDateCreation());
+        historique.setUtilisateur(saved.getUtilisateur());
+        signalementHistoriqueService.save(historique);
+
+        return saved;
+    }
+
+    @Transactional
+    public Signalement update(Long id, Signalement updated) {
+        Signalement signalement = getById(id);
+        signalement.setTitre(updated.getTitre());
+        signalement.setDescription(updated.getDescription());
+        signalement.setStatut(updated.getStatut());
+        signalement.setLatitude(updated.getLatitude());
+        signalement.setLongitude(updated.getLongitude());
+        signalement.setSurfaceM2(updated.getSurfaceM2());
+        signalement.setBudget(updated.getBudget());
+        signalement.setEntreprise(updated.getEntreprise());
+        // Ajoute d'autres champs si besoin
+
+        Signalement saved = signalementRepository.save(signalement);
+
+        // Historique
+        SignalementHistorique historique = new SignalementHistorique();
+        historique.setSignalement(saved);
+        historique.setAncienStatut(signalement.getStatut());
+        historique.setNouveauStatut(updated.getStatut());
+        historique.setDateChangement(java.time.LocalDateTime.now());
+        historique.setUtilisateur(signalement.getUtilisateur());
+        signalementHistoriqueService.save(historique);
+
+        return saved;
+    }
+
+    @Transactional
+    public Signalement annuler(Long id) {
+        Signalement signalement = getById(id);
+        Integer ancienStatut = signalement.getStatut();
+        signalement.setStatut(21); // 21 = annulé/effacé
+        Signalement saved = signalementRepository.save(signalement);
+
+        // Historique
+        SignalementHistorique historique = new SignalementHistorique();
+        historique.setSignalement(saved);
+        historique.setAncienStatut(ancienStatut);
+        historique.setNouveauStatut(21);
+        historique.setDateChangement(java.time.LocalDateTime.now());
+        historique.setUtilisateur(signalement.getUtilisateur());
+        signalementHistoriqueService.save(historique);
+
+        return saved;
     }
 
     public List<InfosSignalementDto> getInfosSignalement() {
@@ -41,5 +109,10 @@ public class SignalementService {
             result.add(dto);
         }
         return result;
+    }
+
+    public Signalement getById(Long id) {
+        return signalementRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Signalement non trouvé"));
     }
 }
