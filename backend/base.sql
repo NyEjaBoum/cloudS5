@@ -42,7 +42,8 @@ CREATE TABLE utilisateurs (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
     mot_de_passe VARCHAR(255) NOT NULL, -- Hashé avec BCrypt
-    nom_complet VARCHAR(100) NOT NULL,
+    nom VARCHAR(100) NOT NULL,
+    prenom VARCHAR(100) NOT NULL,
     role_id INT REFERENCES roles(id) ON DELETE SET NULL,
     tentatives_echouees INT DEFAULT 0,
     compte_bloque BOOLEAN DEFAULT FALSE,
