@@ -31,6 +31,16 @@ public class SignalementController {
         return signalementRepository.findAll();
     }
 
+    @PostMapping
+    public ApiResponse<Signalement> createSignalement(@RequestBody Signalement signalement) {
+        try {
+            Signalement saved = signalementService.save(signalement);
+            return new ApiResponse<>("success", saved, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
     // POST /api/signalements/sync/{id} : synchronise un signalement vers Firebase
     @PostMapping("/sync/{id}")
     public String syncSignalement(@PathVariable Long id) {
