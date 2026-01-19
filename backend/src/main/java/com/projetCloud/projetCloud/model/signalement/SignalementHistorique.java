@@ -15,8 +15,8 @@ public class SignalementHistorique {
     @JoinColumn(name = "id_signalement")
     private Signalement signalement;
 
-    private String ancienStatut;
-    private String nouveauStatut;
+    private Integer ancienStatut;
+    private Integer nouveauStatut;
     private LocalDateTime dateChangement;
 
     @ManyToOne
@@ -30,10 +30,10 @@ public class SignalementHistorique {
     public void setId(Long id) { this.id = id; }
     public Signalement getSignalement() { return signalement; }
     public void setSignalement(Signalement signalement) { this.signalement = signalement; }
-    public String getAncienStatut() { return ancienStatut; }
-    public void setAncienStatut(String ancienStatut) { this.ancienStatut = ancienStatut; }
-    public String getNouveauStatut() { return nouveauStatut; }
-    public void setNouveauStatut(String nouveauStatut) { this.nouveauStatut = nouveauStatut; }
+    public Integer getAncienStatut() { return ancienStatut; }
+    public void setAncienStatut(Integer ancienStatut) { this.ancienStatut = ancienStatut; }
+    public Integer getNouveauStatut() { return nouveauStatut; }
+    public void setNouveauStatut(Integer nouveauStatut) { this.nouveauStatut = nouveauStatut; }
     public LocalDateTime getDateChangement() { return dateChangement; }
     public void setDateChangement(LocalDateTime dateChangement) { this.dateChangement = dateChangement; }
     public Utilisateur getUtilisateur() { return utilisateur; }

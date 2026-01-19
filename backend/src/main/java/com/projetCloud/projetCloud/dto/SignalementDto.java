@@ -1,21 +1,23 @@
 package com.projetCloud.projetCloud.dto;
+import com.projetCloud.projetCloud.model.signalement.Signalement;
+import com.projetCloud.projetCloud.model.entreprise.Entreprise;
 
 public class SignalementDto {
     private Long id;
     private String titre;
     private String description;
-    private String statut;
+    private Integer statut;
     private Double latitude;
     private Double longitude;
     private Double surfaceM2;
     private Double budget;
-    private String entreprise;
+    private Entreprise entreprise;
     private String dateCreation; // Utilise String pour simplifier la sérialisation
 
     public SignalementDto() {}
 
     // Constructeur à partir de l'entité Signalement
-    public SignalementDto(com.projetCloud.projetCloud.model.signalement.Signalement s) {
+    public SignalementDto(Signalement s) {
         this.id = s.getId();
         this.titre = s.getTitre();
         this.description = s.getDescription();
@@ -38,8 +40,8 @@ public class SignalementDto {
     public String getDescription() { return description; }
     public void setDescription(String description) { this.description = description; }
 
-    public String getStatut() { return statut; }
-    public void setStatut(String statut) { this.statut = statut; }
+    public Integer getStatut() { return statut; }
+    public void setStatut(Integer statut) { this.statut = statut; }
 
     public Double getLatitude() { return latitude; }
     public void setLatitude(Double latitude) { this.latitude = latitude; }
@@ -53,8 +55,8 @@ public class SignalementDto {
     public Double getBudget() { return budget; }
     public void setBudget(Double budget) { this.budget = budget; }
 
-    public String getEntreprise() { return entreprise; }
-    public void setEntreprise(String entreprise) { this.entreprise = entreprise; }
+    public Entreprise getEntreprise() { return entreprise; }
+    public void setEntreprise(Entreprise entreprise) { this.entreprise = entreprise; }
 
     public String getDateCreation() { return dateCreation; }
     public void setDateCreation(String dateCreation) { this.dateCreation = dateCreation; }
