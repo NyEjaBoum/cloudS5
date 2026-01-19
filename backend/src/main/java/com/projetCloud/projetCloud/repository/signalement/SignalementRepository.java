@@ -8,4 +8,7 @@ import java.util.List;
 public interface SignalementRepository extends JpaRepository<Signalement, Long> {
     @Query(value = "SELECT nombre_points, total_surface, total_budget, avancement_pourcent FROM vue_recapitulatif_signalement", nativeQuery = true)
     List<Object[]> getRecapitulatifRaw();
+
+    @Query(value = "SELECT id, titre, description, statut, surface_m2, budget, entreprise, date_creation FROM vue_infos_signalement", nativeQuery = true)
+    List<Object[]> getInfosSignalementRaw();
 }
