@@ -74,3 +74,27 @@ SELECT
   END AS avancement_pourcent
 FROM signalements
 WHERE statut <> 21;
+
+DROP VIEW IF EXISTS vue_infos_signalement;
+CREATE OR REPLACE VIEW vue_infos_signalement AS
+SELECT
+  s.id,
+  s.titre,
+  s.description,
+  s.statut,
+  s.latitude,
+  s.longitude,
+  s.surface_m2,
+  s.budget,
+  e.id AS id_entreprise,
+  e.nom AS entreprise,
+  e.adresse AS entreprise_adresse,
+  e.contact AS entreprise_contact,
+  u.id AS id_utilisateur,
+  u.nom AS utilisateur_nom,
+  u.prenom AS utilisateur_prenom,
+  u.email AS utilisateur_email,
+  s.date_creation
+FROM signalements s
+LEFT JOIN entreprises e ON s.id_entreprise = e.id
+LEFT JOIN utilisateurs u ON s.id_utilisateur = u.id;
