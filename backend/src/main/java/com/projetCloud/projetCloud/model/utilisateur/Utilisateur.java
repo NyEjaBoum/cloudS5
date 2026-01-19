@@ -13,7 +13,8 @@ public class Utilisateur {
 
     private String email;
     private String motDePasse;
-    private String nomComplet;
+    private String nom;
+    private String prenom;
 
     @ManyToOne
     @JoinColumn(name = "role_id")
@@ -33,8 +34,10 @@ public class Utilisateur {
     public void setEmail(String email) { this.email = email; }
     public String getMotDePasse() { return motDePasse; }
     public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
-    public String getNomComplet() { return nomComplet; }
-    public void setNomComplet(String nomComplet) { this.nomComplet = nomComplet; }
+    public String getNom() { return nom; }
+    public void setNom(String nom) { this.nom = nom; }
+    public String getPrenom() { return prenom; }
+    public void setPrenom(String prenom) { this.prenom = prenom; }
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
     public Integer getTentativesEchouees() { return tentativesEchouees; }
