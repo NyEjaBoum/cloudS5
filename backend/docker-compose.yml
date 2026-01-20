@@ -1,0 +1,28 @@
+services:
+  # Base de données PostgreSQL
+  postgres:
+    image: postgres:15-alpine
+    container_name: projetcloud-db
+    environment:
+      POSTGRES_DB: projetcloud
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mamaika77
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ../../base/base_donnees.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+
+  # Serveur de tuiles STATIQUES
+  tile-server:
+    image: nginx:alpine
+    container_name: tana-tile-server
+    volumes:
+      - ../../map-data/antananarivo/tiles:/usr/share/nginx/html
+    ports:
+      - "8080:80"
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
