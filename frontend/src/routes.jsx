@@ -3,7 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import LoginPage from "./pages/LoginPage.jsx";
 import RegisterPage from "./pages/RegisterPage.jsx";
 import RecapPage from "./pages/RecapPage.jsx";
-import CartePage from "./pages/CartePage.jsx";
+import CartePage from "./pages/visiteur/CartePage.jsx";
 import DashboardManager from "./pages/manager/Dashboard.jsx";
 import UsersManager from "./pages/manager/Users.jsx";
 import SignalementsManager from "./pages/manager/Signalements.jsx";
