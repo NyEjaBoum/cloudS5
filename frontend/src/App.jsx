@@ -47,6 +47,13 @@ function App() {
     alert(`Signalement: ${marker.titre}\nStatut: ${marker.statut === 1 ? 'Nouveau' : marker.statut === 11 ? 'En cours' : 'Terminé'}`);
   };
 
+  // Convertir les signalements au format attendu par CarteOffline
+  const markers = signalements.map(sig => ({
+    position: [sig.latitude, sig.longitude],
+    popup: `<strong>${sig.titre}</strong><br/>${sig.description}<br/>Statut: ${sig.statut === 1 ? 'Nouveau' : sig.statut === 11 ? 'En cours' : 'Terminé'}`,
+    ...sig
+  }));
+
   return (
     <div style={{
       maxWidth: '1200px',
@@ -79,7 +86,7 @@ function App() {
       <main>
         <div style={{ marginBottom: '20px' }}>
           <CarteOffline 
-            markers={signalements}
+            markers={markers}
             onMarkerClick={handleMarkerClick}
           />
         </div>
