@@ -1,16 +1,18 @@
 package com.projetCloud.projetCloud.dto;
+
 import com.projetCloud.projetCloud.model.signalement.Signalement;
 import com.projetCloud.projetCloud.model.entreprise.Entreprise;
+import java.math.BigDecimal;
 
 public class SignalementDto {
     private Long id;
     private String titre;
     private String description;
     private Integer statut;
-    private Double latitude;
-    private Double longitude;
-    private Double surfaceM2;
-    private Double budget;
+    private BigDecimal latitude;
+    private BigDecimal longitude;
+    private BigDecimal surfaceM2;
+    private BigDecimal budget;
     private Entreprise entreprise;
     private String dateCreation; // Utilise String pour simplifier la sérialisation
 
@@ -43,17 +45,17 @@ public class SignalementDto {
     public Integer getStatut() { return statut; }
     public void setStatut(Integer statut) { this.statut = statut; }
 
-    public Double getLatitude() { return latitude; }
-    public void setLatitude(Double latitude) { this.latitude = latitude; }
+    public BigDecimal getLatitude() { return latitude; }
+    public void setLatitude(BigDecimal latitude) { this.latitude = latitude; }
 
-    public Double getLongitude() { return longitude; }
-    public void setLongitude(Double longitude) { this.longitude = longitude; }
+    public BigDecimal getLongitude() { return longitude; }
+    public void setLongitude(BigDecimal longitude) { this.longitude = longitude; }
 
-    public Double getSurfaceM2() { return surfaceM2; }
-    public void setSurfaceM2(Double surfaceM2) { this.surfaceM2 = surfaceM2; }
+    public BigDecimal getSurfaceM2() { return surfaceM2; }
+    public void setSurfaceM2(BigDecimal surfaceM2) { this.surfaceM2 = surfaceM2; }
 
-    public Double getBudget() { return budget; }
-    public void setBudget(Double budget) { this.budget = budget; }
+    public BigDecimal getBudget() { return budget; }
+    public void setBudget(BigDecimal budget) { this.budget = budget; }
 
     public Entreprise getEntreprise() { return entreprise; }
     public void setEntreprise(Entreprise entreprise) { this.entreprise = entreprise; }

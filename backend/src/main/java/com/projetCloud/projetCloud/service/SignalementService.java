@@ -11,6 +11,7 @@ import com.projetCloud.projetCloud.model.signalement.Signalement;
 import com.projetCloud.projetCloud.model.signalement.SignalementHistorique;
 import com.projetCloud.projetCloud.service.SignalementHistoriqueService;
 import org.springframework.transaction.annotation.Transactional;
+import java.math.BigDecimal;
 
 @Service
 public class SignalementService {
@@ -25,9 +26,9 @@ public class SignalementService {
         Object[] row = signalementRepository.getRecapitulatifRaw().get(0);
         return new RecapSignalementDto(
             ((Number) row[0]).longValue(),
-            ((Number) row[1]).doubleValue(),
-            ((Number) row[2]).doubleValue(),
-            ((Number) row[3]).doubleValue()
+            row[1] != null ? new BigDecimal(row[1].toString()) : null,
+            row[2] != null ? new BigDecimal(row[2].toString()) : null,
+            row[3] != null ? new BigDecimal(row[3].toString()) : null
         );
     }
 
