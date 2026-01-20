@@ -6,6 +6,7 @@ import com.projetCloud.projetCloud.service.FirebaseSignalementService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import com.projetCloud.projetCloud.dto.RecapSignalementDto;
+import com.projetCloud.projetCloud.dto.SignalementCpl;
 import com.projetCloud.projetCloud.dto.ApiResponse;
 import com.projetCloud.projetCloud.service.SignalementService;
 import com.projetCloud.projetCloud.dto.InfosSignalementDto;
@@ -25,6 +26,16 @@ public class SignalementController {
 
     @Autowired
     private SignalementService signalementService;
+
+    @GetMapping("/complet")
+    public ApiResponse<List<SignalementCpl>> getAllSignalementCpl() {
+        try {
+            List<SignalementCpl> dtos = signalementService.getAllSignalementCpl();
+            return new ApiResponse<>("success", dtos, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
 
     @GetMapping
     public List<Signalement> getAllSignalements() {
