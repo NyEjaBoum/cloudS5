@@ -11,9 +11,12 @@ CREATE DATABASE projetcloud;
 -- =========================
 -- Table des rôles
 -- =========================
+-- =========================
+-- Table des rôles
+-- =========================
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
-    nom VARCHAR(50) UNIQUE NOT NULL -- Ex : UTILISATEUR / MANAGER
+    nom VARCHAR(50) UNIQUE NOT NULL
 );
 
 -- =========================
@@ -41,7 +44,7 @@ CREATE TABLE entreprises (
 CREATE TABLE utilisateurs (
     id SERIAL PRIMARY KEY,
     email VARCHAR(255) UNIQUE NOT NULL,
-    mot_de_passe VARCHAR(255) NOT NULL, -- Hashé avec BCrypt
+    mot_de_passe VARCHAR(255) NOT NULL,
     nom VARCHAR(100) NOT NULL,
     prenom VARCHAR(100) NOT NULL,
     role_id INT REFERENCES roles(id) ON DELETE SET NULL,
@@ -52,17 +55,17 @@ CREATE TABLE utilisateurs (
 );
 
 -- =========================
--- Table des signalements
+-- Table des signalements (travaux routiers)
 -- =========================
 CREATE TABLE signalements (
     id SERIAL PRIMARY KEY,
     titre VARCHAR(255) NOT NULL,
     description TEXT,
-    statut INTEGER DEFAULT 1, -- 1: Nouveau, 11/21: En cours, 99: Terminé, 0: Effacé
-    latitude DOUBLE PRECISION NOT NULL,
-    longitude DOUBLE PRECISION NOT NULL,
-    surface_m2 DOUBLE PRECISION,
-    budget DOUBLE PRECISION,
+    statut INTEGER DEFAULT 1, 
+    latitude NUMERIC(9,6) NOT NULL,
+    longitude NUMERIC(9,6) NOT NULL,
+    surface_m2 NUMERIC(10,2),
+    budget NUMERIC(15,2),
     id_entreprise INT REFERENCES entreprises(id) ON DELETE SET NULL,
     id_utilisateur INT NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
     date_creation TIMESTAMP DEFAULT NOW()
@@ -81,7 +84,7 @@ CREATE TABLE signalement_historique (
 );
 
 -- =========================
--- Table des sessions (offline / JWT)
+-- Table des sessions (JWT / offline)
 -- =========================
 CREATE TABLE sessions (
     id SERIAL PRIMARY KEY,
