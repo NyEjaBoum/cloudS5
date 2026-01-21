@@ -1,4 +1,3 @@
-version: '3.8'
 services:
   postgres:
     image: postgres:15
@@ -12,5 +11,30 @@ services:
       - "5432:5432"
     volumes:
       - pgdata:/var/lib/postgresql/data
+      - ../base/base.sql:/docker-entrypoint-initdb.d/01_base.sql:ro
+      - ../base/base_donnees.sql:/docker-entrypoint-initdb.d/02_base_donnees.sql:ro
+
+  backend:
+    build: .
+    container_name: backend_app
+    depends_on:
+      - postgres
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://postgres:5432/projetcloud
+      SPRING_DATASOURCE_USERNAME: postgres
+      SPRING_DATASOURCE_PASSWORD: mamaika77
+      # Ajoute d'autres variables si besoin
+    ports:
+      - "8080:8080"
+    restart: always
+
+  tileserver:
+    image: nginx:alpine
+    container_name: tileserver
+    ports:
+      - "8081:80"
+    volumes:
+      - ../map-data/antananarivo/tiles:/usr/share/nginx/html/tiles:ro
+
 volumes:
   pgdata:
