@@ -8,12 +8,6 @@ CREATE DATABASE projetcloud;
 -- Connexion à la nouvelle base
 \c projetcloud
 
--- =========================
--- Table des rôles
--- =========================
--- =========================
--- Table des rôles
--- =========================
 CREATE TABLE roles (
     id SERIAL PRIMARY KEY,
     nom VARCHAR(50) UNIQUE NOT NULL
