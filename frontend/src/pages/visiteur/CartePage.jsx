@@ -9,23 +9,11 @@ export default function CarteVisiteur() {
   const [signalements, setSignalements] = useState([]);
 
   useEffect(() => {
-    fetchSignalementComplet().then(setSignalements);
+    fetchSignalementComplet().then((data) => {
+      console.log("Signalements reçus:", data);
+      setSignalements(data);
+    });
   }, []);
-
-  // Préparer les marqueurs pour la carte
-  const markers = signalements
-    .filter(s => s.latitude && s.longitude)
-    .map((s) => ({
-      position: [s.latitude, s.longitude],
-      popup: `
-        <strong>${s.titre}</strong><br/>
-        Statut: ${s.statut === 1 ? "Nouveau" : s.statut === 11 ? "En cours" : s.statut === 99 ? "Terminé" : "Annulé"}<br/>
-        Surface: ${s.surfaceM2} m²<br/>
-        Budget: ${s.budget ? s.budget.toLocaleString() : "-"}<br/>
-        Entreprise: ${s.entreprise || "-"}<br/>
-        Utilisateur: ${s.utilisateurNom || ""} ${s.utilisateurPrenom || ""}
-      `,
-    }));
 
   return (
     <div style={{ background: "#f5f5f9", minHeight: "100vh", width: "100vw" }}>
@@ -54,7 +42,7 @@ export default function CarteVisiteur() {
             overflow: "hidden",
           }}
         >
-          <CarteOffline markers={markers} />
+          <CarteOffline signalements={signalements} />
         </div>
         {/* Récapitulatif à droite */}
         <div className="carte-visiteur-recap">
