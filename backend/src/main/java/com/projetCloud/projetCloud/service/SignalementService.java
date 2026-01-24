@@ -119,6 +119,33 @@ public class SignalementService {
             .orElseThrow(() -> new RuntimeException("Signalement non trouvé"));
     }
 
+    public SignalementCpl getSignalementCplById(Long id) {
+        List<Object[]> rows = signalementRepository.getSignalementCplByIdRaw(id);
+        if (rows.isEmpty()) {
+            throw new RuntimeException("Signalement non trouvé");
+        }
+        Object[] row = rows.get(0);
+        return new SignalementCpl(
+            ((Number) row[0]).longValue(),
+            (String) row[1],
+            (String) row[2],
+            (Integer) row[3],
+            row[4] != null ? new java.math.BigDecimal(row[4].toString()) : null,
+            row[5] != null ? new java.math.BigDecimal(row[5].toString()) : null,
+            row[6] != null ? new java.math.BigDecimal(row[6].toString()) : null,
+            row[7] != null ? new java.math.BigDecimal(row[7].toString()) : null,
+            row[8] != null ? ((Number) row[8]).longValue() : null,
+            (String) row[9],
+            (String) row[10],
+            (String) row[11],
+            row[12] != null ? ((Number) row[12]).longValue() : null,
+            (String) row[13],
+            (String) row[14],
+            (String) row[15],
+            row[16] != null ? row[16].toString() : null
+        );
+    }
+
     public List<SignalementCpl> getAllSignalementCpl() {
         List<Object[]> rows = signalementRepository.getSignalementCplRaw();
         List<SignalementCpl> result = new java.util.ArrayList<>();
