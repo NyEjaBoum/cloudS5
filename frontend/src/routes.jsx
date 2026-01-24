@@ -7,6 +7,7 @@ import CartePage from "./pages/visiteur/CartePage.jsx";
 import DashboardManager from "./pages/manager/Dashboard.jsx";
 import UsersManager from "./pages/manager/Users.jsx";
 import SignalementsManager from "./pages/manager/Signalements.jsx";
+import SignalementDetails from "./pages/manager/SignalementDetails.jsx";
 
 const AppRoutes = () => (
   <Router>
@@ -20,7 +21,8 @@ const AppRoutes = () => (
       <Route path="/manager" element={<DashboardManager />}>
         <Route path="users" element={<UsersManager />} />
         <Route path="signalements" element={<SignalementsManager />} />
-    </Route>
+        <Route path="signalements/:id" element={<SignalementDetails />} />
+      </Route>
     </Routes>
   </Router>
 );
