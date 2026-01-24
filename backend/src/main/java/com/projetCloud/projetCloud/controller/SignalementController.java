@@ -27,6 +27,16 @@ public class SignalementController {
     @Autowired
     private SignalementService signalementService;
 
+    @PutMapping("/{id}")
+    public ApiResponse<Signalement> updateSignalement(@PathVariable Long id, @RequestBody Signalement signalement) {
+        try {
+            Signalement updated = signalementService.update(id, signalement);
+            return new ApiResponse<>("success", updated, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
     @GetMapping("/complet")
     public ApiResponse<List<SignalementCpl>> getAllSignalementCpl() {
         try {
@@ -36,6 +46,27 @@ public class SignalementController {
             return new ApiResponse<>("error", null, e.getMessage());
         }
     }
+
+    // Dans SignalementController
+    @GetMapping("/{id}")
+    public ApiResponse<Signalement> getSignalementById(@PathVariable Long id) {
+        try {
+            Signalement signalement = signalementService.getById(id);
+            return new ApiResponse<>("success", signalement, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    // @GetMapping("/complet/{id}")
+    // public ApiResponse<SignalementCpl> getSignalementCompletById(@PathVariable Long id) {
+    //     try {
+    //         SignalementCpl signalement = signalementService.getSignalementCplById(id);
+    //         return new ApiResponse<>("success", signalement, null);
+    //     } catch (Exception e) {
+    //         return new ApiResponse<>("error", null, e.getMessage());
+    //     }
+    // }
 
     @GetMapping
     public List<Signalement> getAllSignalements() {
