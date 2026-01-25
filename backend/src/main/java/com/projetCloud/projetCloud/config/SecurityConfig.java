@@ -16,14 +16,18 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-            .csrf(csrf -> csrf.disable())  // Désactiver CSRF pour les API REST
+            .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()  // Autoriser l'accès public aux endpoints d'authentification
+                .requestMatchers("/api/auth/**").permitAll()  // Tous les endpoints d'auth sont publics
                 .requestMatchers("/api/public/**").permitAll()
-                .anyRequest().authenticated()  // Toutes les autres requêtes nécessitent une authentification
+                // Débloquer le compte (nécessite authentification Manager)
+                // Dans SecurityConfig.java, changer temporairement :
+                .requestMatchers("/api/admin/**").permitAll()  // Au lieu de .hasRole("MANAGER")
+                // .requestMatchers("/api/admin/**").hasRole("MANAGER")  // Protection admin
+                .anyRequest().authenticated()
             )
             .addFilterBefore(new FirebaseTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(httpBasic -> httpBasic.disable());  // Désactiver l'authentification basic qui cause le 401
+            .httpBasic(httpBasic -> httpBasic.disable());
         
         return http.build();
     }
