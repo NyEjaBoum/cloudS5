@@ -16,8 +16,18 @@ public class AuthController {
     private AuthService authService;
 
     @PostMapping("/register")
-    public Utilisateur register(@RequestBody RegisterRequest request) {
-        return authService.registerLocal(request.getEmail(), request.getMotDePasse(), request.getNom(), request.getPrenom());
+    public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
+        try {
+            Utilisateur utilisateur = authService.registerLocal(
+                request.getEmail(), 
+                request.getMotDePasse(), 
+                request.getNom(), 
+                request.getPrenom()
+            );
+            return ResponseEntity.ok(utilisateur);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     public static class RegisterRequest {
@@ -25,7 +35,7 @@ public class AuthController {
         private String motDePasse;
         private String nom;
         private String prenom;
-        // getters et setters
+        
         public String getEmail() { return email; }
         public void setEmail(String email) { this.email = email; }
         public String getMotDePasse() { return motDePasse; }
@@ -37,28 +47,23 @@ public class AuthController {
     }
 
     @PostMapping("/login")
-    public LoginResponse login(@RequestBody LoginRequest request) {
-        String token = authService.loginLocal(request.getEmail(), request.getMotDePasse());
-        return new LoginResponse(token);
+    public ResponseEntity<?> login(@RequestBody LoginRequest request) {
+        try {
+            String token = authService.loginLocal(request.getEmail(), request.getMotDePasse());
+            return ResponseEntity.ok(new LoginResponse(token));
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     public static class LoginRequest {
         private String email;
         private String motDePasse;
         
-        // getters et setters
-        public String getEmail() { 
-            return email; 
-        }
-        public void setEmail(String email) { 
-            this.email = email; 
-        }
-        public String getMotDePasse() { 
-            return motDePasse; 
-        }
-        public void setMotDePasse(String motDePasse) { 
-            this.motDePasse = motDePasse; 
-        }
+        public String getEmail() { return email; }
+        public void setEmail(String email) { this.email = email; }
+        public String getMotDePasse() { return motDePasse; }
+        public void setMotDePasse(String motDePasse) { this.motDePasse = motDePasse; }
     }
 
     public static class LoginResponse {
@@ -68,9 +73,23 @@ public class AuthController {
             this.token = token;
         }
         
-        // getter uniquement (pas de setter car le token est défini à la construction)
-        public String getToken() { 
-            return token; 
+        public String getToken() { return token; }
+    }
+
+    @PostMapping("/firebase-login")
+    public ResponseEntity<FirebaseLoginResponse> firebaseLogin(@RequestHeader("Authorization") String authHeader) {
+        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+            return ResponseEntity.badRequest().body(new FirebaseLoginResponse("error", "Missing or invalid Authorization header", null, null, null));
+        }
+        String idToken = authHeader.substring(7);
+        try {
+            String token = authService.loginFirebase(idToken);
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+            String email = decodedToken.getEmail();
+            String uid = decodedToken.getUid();
+            return ResponseEntity.ok(new FirebaseLoginResponse("success", "Login successful", token, email, uid));
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(new FirebaseLoginResponse("error", e.getMessage(), null, null, null));
         }
     }
 
@@ -89,7 +108,6 @@ public class AuthController {
             this.uid = uid;
         }
         
-        // Getters
         public String getStatus() { return status; }
         public String getMessage() { return message; }
         public String getToken() { return token; }
@@ -97,40 +115,42 @@ public class AuthController {
         public String getUid() { return uid; }
     }
 
-
-    // New Firebase login endpoint
-    @PostMapping("/firebase-login")
-    public ResponseEntity<FirebaseLoginResponse> firebaseLogin(@RequestHeader("Authorization") String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return ResponseEntity.badRequest().body(new FirebaseLoginResponse("error", "Missing or invalid Authorization header", null, null, authHeader));
-        }
-        String idToken = authHeader.substring(7); // Remove "Bearer "
-        try {
-            String token = authService.loginFirebase(idToken);
-            // Extract email and uid from token (re-verify for response)
-            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            String email = decodedToken.getEmail();
-            String uid = decodedToken.getUid();
-            return ResponseEntity.ok(new FirebaseLoginResponse("success", "Login successful", token, email, uid));
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body(new FirebaseLoginResponse("error", e.getMessage(), null, null, null));
-        }
-    }
-
     @PostMapping("/register/firebase")
-    public Utilisateur registerFirebase(@RequestBody FirebaseRegisterRequest request) {
-        return authService.registerFirebase(request.getIdToken());
+    public ResponseEntity<?> registerFirebase(@RequestBody FirebaseRegisterRequest request) {
+        try {
+            Utilisateur utilisateur = authService.registerFirebase(request.getIdToken());
+            return ResponseEntity.ok(utilisateur);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 
     public static class FirebaseRegisterRequest {
         private String idToken;
         
-        public String getIdToken() { 
-            return idToken; 
-        }
-        public void setIdToken(String idToken) { 
-            this.idToken = idToken; 
+        public String getIdToken() { return idToken; }
+        public void setIdToken(String idToken) { this.idToken = idToken; }
+    }
+
+    // NOUVEAU : Endpoint pour débloquer un utilisateur
+    @PostMapping("/admin/unblock/{userId}")
+    public ResponseEntity<?> unblockUser(@PathVariable Long userId) {
+        try {
+            authService.unblockUser(userId);
+            return ResponseEntity.ok("Compte utilisateur " + userId + " débloqué avec succès");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
 
+    // NOUVEAU : Endpoint pour vérifier le statut de blocage
+    @GetMapping("/status/{email}")
+    public ResponseEntity<?> getBlockStatus(@PathVariable String email) {
+        try {
+            AuthService.BlockStatus status = authService.getBlockStatus(email);
+            return ResponseEntity.ok(status);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
 }
