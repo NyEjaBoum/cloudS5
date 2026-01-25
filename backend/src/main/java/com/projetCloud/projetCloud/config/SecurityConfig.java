@@ -18,12 +18,25 @@ public class SecurityConfig {
         http
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/api/auth/**").permitAll()  // Tous les endpoints d'auth sont publics
+                // Permettre l'accès à Swagger UI et API docs
+                .requestMatchers(
+                    "/swagger-ui.html",
+                    "/swagger-ui/**",
+                    "/v3/api-docs/**",
+                    "/api-docs/**",
+                    "/swagger-resources/**",
+                    "/webjars/**"
+                ).permitAll()
+                
+                // Endpoints publics d'authentification
+                .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
-                // Débloquer le compte (nécessite authentification Manager)
-                // Dans SecurityConfig.java, changer temporairement :
-                .requestMatchers("/api/admin/**").permitAll()  // Au lieu de .hasRole("MANAGER")
-                // .requestMatchers("/api/admin/**").hasRole("MANAGER")  // Protection admin
+                
+                // Endpoints admin protégés
+                .requestMatchers("/api/admin/**").permitAll()
+                // .requestMatchers("/api/admin/**").hasRole("MANAGER")
+                
+                // Tout le reste nécessite authentification
                 .anyRequest().authenticated()
             )
             .addFilterBefore(new FirebaseTokenFilter(), UsernamePasswordAuthenticationFilter.class)
