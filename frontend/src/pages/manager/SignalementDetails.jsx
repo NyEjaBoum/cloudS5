@@ -166,7 +166,7 @@ export default function SignalementDetails() {
               )}
             </div>
             <div className="info-row">
-              <label>Longitude</label>
+              <label>longitude</label>
               {edit ? (
                 <input name="longitude" type="number" value={form.longitude || ""} onChange={handleInput} step="any" />
               ) : (
@@ -216,7 +216,7 @@ export default function SignalementDetails() {
                 </span>
               </div>
               <div className="coord-item">
-                <span className="coord-label">Longitude</span>
+                <span className="coord-label">longitude</span>
                 <span className="coord-value">
                   {form.longitude ? Number(form.longitude).toFixed(6) : "-"}
                 </span>

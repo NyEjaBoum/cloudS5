@@ -28,7 +28,7 @@ public class SignalementController {
     private SignalementService signalementService;
 
     @PutMapping("/{id}")
-    public ApiResponse<Signalement> updateSignalement(@PathVariable Long id, @RequestBody Signalement signalement) {
+    public ApiResponse<Signalement> updateSignalement(@PathVariable Integer id, @RequestBody Signalement signalement) {
         try {
             Signalement updated = signalementService.update(id, signalement);
             return new ApiResponse<>("success", updated, null);
@@ -49,7 +49,7 @@ public class SignalementController {
 
     // Dans SignalementController
     @GetMapping("/{id}")
-    public ApiResponse<Signalement> getSignalementById(@PathVariable Long id) {
+    public ApiResponse<Signalement> getSignalementById(@PathVariable Integer id) {
         try {
             Signalement signalement = signalementService.getById(id);
             return new ApiResponse<>("success", signalement, null);
@@ -59,7 +59,7 @@ public class SignalementController {
     }
 
     // @GetMapping("/complet/{id}")
-    // public ApiResponse<SignalementCpl> getSignalementCompletById(@PathVariable Long id) {
+    // public ApiResponse<SignalementCpl> getSignalementCompletById(@PathVariable Integer id) {
     //     try {
     //         SignalementCpl signalement = signalementService.getSignalementCplById(id);
     //         return new ApiResponse<>("success", signalement, null);
@@ -85,7 +85,7 @@ public class SignalementController {
 
     // POST /api/signalements/sync/{id} : synchronise un signalement vers Firebase
     @PostMapping("/sync/{id}")
-    public String syncSignalement(@PathVariable Long id) {
+    public String syncSignalement(@PathVariable Integer id) {
         Signalement signalement = signalementRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Signalement non trouvé"));
         firebaseSignalementService.syncSignalement(signalement);

@@ -32,6 +32,11 @@ public class SecurityConfig {
                 .requestMatchers("/api/auth/**").permitAll()
                 .requestMatchers("/api/public/**").permitAll()
                 
+                // Endpoints signalements publics
+                .requestMatchers(
+                    "/api/signalements/**"
+                ).permitAll()
+                
                 // Endpoints admin protégés
                 .requestMatchers("/api/admin/**").permitAll()
                 // .requestMatchers("/api/admin/**").hasRole("MANAGER")

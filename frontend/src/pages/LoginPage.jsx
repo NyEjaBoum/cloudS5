@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { loginFirebase } from "../api/auth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -8,6 +10,26 @@ export default function LoginPage() {
     password: "",
     rememberMe: false
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
+
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      const token = await loginFirebase(idToken);
+      localStorage.setItem("jwt", token);
+      navigate("/manager");
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
+  };
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -17,10 +39,30 @@ export default function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login:", formData);
-    // Appel API ici
+    setLoading(true);
+    setError("");
+    try {
+      let token;
+      // Mode offline/local : login classique
+      const res = await fetch("http://localhost:8080/api/auth/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: formData.email,
+          motDePasse: formData.password
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Login failed");
+      token = data.token || data.data?.token;
+      localStorage.setItem("jwt", token);
+      navigate("/manager");
+    } catch (err) {
+      setError(err.message);
+    }
+    setLoading(false);
   };
 
   return (
@@ -69,8 +111,10 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button type="submit" className="btn-primary">
-          Login
+        {error && <div className="error" style={{ color: "#e53e3e", marginBottom: 16 }}>{error}</div>}
+
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <div className="auth-footer">
@@ -83,16 +127,21 @@ export default function LoginPage() {
         <div className="divider">or</div>
 
         <div className="social-login">
-          <button type="button" className="social-btn facebook">
+          <button type="button" className="social-btn facebook" disabled>
             <i className="fab fa-facebook-f"></i>
           </button>
-          <button type="button" className="social-btn twitter">
+          <button type="button" className="social-btn twitter" disabled>
             <i className="fab fa-twitter"></i>
           </button>
-          <button type="button" className="social-btn github">
+          <button type="button" className="social-btn github" disabled>
             <i className="fab fa-github"></i>
           </button>
-          <button type="button" className="social-btn google">
+          <button
+            type="button"
+            className="social-btn google"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
             <i className="fab fa-google"></i>
           </button>
         </div>
