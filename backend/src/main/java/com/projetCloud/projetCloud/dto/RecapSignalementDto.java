@@ -3,12 +3,12 @@ package com.projetCloud.projetCloud.dto;
 import java.math.BigDecimal;
 
 public class RecapSignalementDto {
-    private Long nombrePoints;
+    private Integer nombrePoints;
     private BigDecimal totalSurface;
     private BigDecimal totalBudget;
     private BigDecimal avancementPourcent;
 
-    public RecapSignalementDto(Long nombrePoints, BigDecimal totalSurface, BigDecimal totalBudget, BigDecimal avancementPourcent) {
+    public RecapSignalementDto(Integer nombrePoints, BigDecimal totalSurface, BigDecimal totalBudget, BigDecimal avancementPourcent) {
         this.nombrePoints = nombrePoints;
         this.totalSurface = totalSurface;
         this.totalBudget = totalBudget;
@@ -16,8 +16,8 @@ public class RecapSignalementDto {
     }
 
     // Getters et setters
-    public Long getNombrePoints() { return nombrePoints; }
-    public void setNombrePoints(Long nombrePoints) { this.nombrePoints = nombrePoints; }
+    public Integer getNombrePoints() { return nombrePoints; }
+    public void setNombrePoints(Integer nombrePoints) { this.nombrePoints = nombrePoints; }
     public BigDecimal getTotalSurface() { return totalSurface; }
     public void setTotalSurface(BigDecimal totalSurface) { this.totalSurface = totalSurface; }
     public BigDecimal getTotalBudget() { return totalBudget; }

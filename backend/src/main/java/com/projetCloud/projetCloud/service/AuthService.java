@@ -117,7 +117,7 @@ public class AuthService {
         utilisateurRepository.save(utilisateur);
 
         // Generate JWT token
-        long expirationMillis = jwtExpirationHours * 60 * 60 * 1000L;
+        Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
         String token = Jwts.builder()
             .setSubject(utilisateur.getEmail())
             .setIssuedAt(new Date())
@@ -167,7 +167,7 @@ public class AuthService {
             }
 
             // Générer JWT
-            long expirationMillis = jwtExpirationHours * 60 * 60 * 1000L;
+            Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
             String token = Jwts.builder()
                 .setSubject(utilisateur.getEmail())
                 .setIssuedAt(new Date())
@@ -224,7 +224,7 @@ public class AuthService {
     }
 
     // Nouvelle méthode pour débloquer un utilisateur
-    public void unblockUser(Long userId) {
+    public void unblockUser(Integer userId) {
         Utilisateur utilisateur = utilisateurRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
         

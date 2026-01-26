@@ -269,7 +269,7 @@ public class AuthController {
     @PostMapping("/admin/unblock/{userId}")
     public ResponseEntity<?> unblockUser(
         @Parameter(description = "ID de l'utilisateur à débloquer", example = "1", required = true)
-        @PathVariable Long userId) {
+        @PathVariable Integer userId) {
         
         try {
             authService.unblockUser(userId);

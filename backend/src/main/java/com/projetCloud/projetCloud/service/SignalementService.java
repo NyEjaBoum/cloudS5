@@ -27,7 +27,7 @@ public class SignalementService {
     public RecapSignalementDto getRecapitulatif() {
         Object[] row = signalementRepository.getRecapitulatifRaw().get(0);
         return new RecapSignalementDto(
-            ((Number) row[0]).longValue(),
+            ((Number) row[0]).intValue(),
             row[1] != null ? new BigDecimal(row[1].toString()) : null,
             row[2] != null ? new BigDecimal(row[2].toString()) : null,
             row[3] != null ? new BigDecimal(row[3].toString()) : null
@@ -50,7 +50,7 @@ public class SignalementService {
     }
 
     @Transactional
-    public Signalement update(Long id, Signalement updated) {
+    public Signalement update(Integer id, Signalement updated) {
         Signalement signalement = getById(id);
         signalement.setTitre(updated.getTitre());
         signalement.setDescription(updated.getDescription());
@@ -77,7 +77,7 @@ public class SignalementService {
     }
 
     @Transactional
-    public Signalement annuler(Long id) {
+    public Signalement annuler(Integer id) {
         Signalement signalement = getById(id);
         Integer ancienStatut = signalement.getStatut();
         signalement.setStatut(21); // 21 = annulé/effacé
@@ -100,7 +100,7 @@ public class SignalementService {
         List<InfosSignalementDto> result = new java.util.ArrayList<>();
         for (Object[] row : rows) {
             InfosSignalementDto dto = new InfosSignalementDto(
-                ((Number) row[0]).longValue(),
+                ((Number) row[0]).intValue(),
                 (String) row[1],
                 (String) row[2],
                 (Integer) row[3],
@@ -114,19 +114,19 @@ public class SignalementService {
         return result;
     }
 
-    public Signalement getById(Long id) {
+    public Signalement getById(Integer id) {
         return signalementRepository.findById(id)
             .orElseThrow(() -> new RuntimeException("Signalement non trouvé"));
     }
 
-    public SignalementCpl getSignalementCplById(Long id) {
+    public SignalementCpl getSignalementCplById(Integer id) {
         List<Object[]> rows = signalementRepository.getSignalementCplByIdRaw(id);
         if (rows.isEmpty()) {
             throw new RuntimeException("Signalement non trouvé");
         }
         Object[] row = rows.get(0);
         return new SignalementCpl(
-            ((Number) row[0]).longValue(),
+            ((Number) row[0]).intValue(),
             (String) row[1],
             (String) row[2],
             (Integer) row[3],
@@ -134,11 +134,11 @@ public class SignalementService {
             row[5] != null ? new java.math.BigDecimal(row[5].toString()) : null,
             row[6] != null ? new java.math.BigDecimal(row[6].toString()) : null,
             row[7] != null ? new java.math.BigDecimal(row[7].toString()) : null,
-            row[8] != null ? ((Number) row[8]).longValue() : null,
+            row[8] != null ? ((Number) row[8]).intValue() : null,
             (String) row[9],
             (String) row[10],
             (String) row[11],
-            row[12] != null ? ((Number) row[12]).longValue() : null,
+            row[12] != null ? ((Number) row[12]).intValue() : null,
             (String) row[13],
             (String) row[14],
             (String) row[15],
@@ -151,7 +151,7 @@ public class SignalementService {
         List<SignalementCpl> result = new java.util.ArrayList<>();
         for (Object[] row : rows) {
             SignalementCpl dto = new SignalementCpl(
-                ((Number) row[0]).longValue(),
+                ((Number) row[0]).intValue(),
                 (String) row[1],
                 (String) row[2],
                 (Integer) row[3],
@@ -159,11 +159,11 @@ public class SignalementService {
                 row[5] != null ? new java.math.BigDecimal(row[5].toString()) : null,
                 row[6] != null ? new java.math.BigDecimal(row[6].toString()) : null,
                 row[7] != null ? new java.math.BigDecimal(row[7].toString()) : null,
-                row[8] != null ? ((Number) row[8]).longValue() : null,
+                row[8] != null ? ((Number) row[8]).intValue() : null,
                 (String) row[9],
                 (String) row[10],
                 (String) row[11],
-                row[12] != null ? ((Number) row[12]).longValue() : null,
+                row[12] != null ? ((Number) row[12]).intValue() : null,
                 (String) row[13],
                 (String) row[14],
                 (String) row[15],

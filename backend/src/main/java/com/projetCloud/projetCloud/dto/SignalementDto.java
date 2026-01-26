@@ -5,7 +5,7 @@ import com.projetCloud.projetCloud.model.entreprise.Entreprise;
 import java.math.BigDecimal;
 
 public class SignalementDto {
-    private Long id;
+    private Integer id;
     private String titre;
     private String description;
     private Integer statut;
@@ -33,8 +33,8 @@ public class SignalementDto {
     }
 
     // Getters et Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
