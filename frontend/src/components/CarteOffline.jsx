@@ -1,5 +1,6 @@
 import React, { useEffect } from 'react';
 import { MapContainer, TileLayer, Marker, Popup } from 'react-leaflet';
+import { Link } from "react-router-dom";
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 
@@ -89,6 +90,24 @@ const CarteOffline = ({
                     </div>
                     <div style={{ fontSize: 13, color: "#718096" }}>
                       <b>Utilisateur :</b> {s.utilisateurNom || ""} {s.utilisateurPrenom || ""}
+                    </div>
+                    {/* Lien vers la page de détails */}
+                    <div style={{ marginTop: 10 }}>
+                      <button
+                        onClick={() => onMarkerClick && onMarkerClick(s)}
+                        style={{
+                          color: "#667eea",
+                          textDecoration: "underline",
+                          fontWeight: 600,
+                          fontSize: 14,
+                          background: "none",
+                          border: "none",
+                          cursor: "pointer",
+                          padding: 0
+                        }}
+                      >
+                        Voir détails →
+                      </button>
                     </div>
                   </div>
                 </Popup>

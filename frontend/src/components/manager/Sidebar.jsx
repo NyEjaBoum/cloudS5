@@ -20,6 +20,10 @@ export default function Sidebar() {
           <i className="fas fa-users"></i>
           Liste des utilisateurs
         </NavLink>
+        <NavLink to="/manager/register-user" className="sidebar-link">
+          <i className="fas fa-user-plus"></i>
+          Créer un utilisateur
+        </NavLink>
       </div>
 
       <div className="sidebar-block">

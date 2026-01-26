@@ -3,7 +3,7 @@ package com.projetCloud.projetCloud.dto;
 import java.math.BigDecimal;
 
 public class SignalementCpl {
-    private Long id;
+    private Integer id;
     private String titre;
     private String description;
     private Integer statut;
@@ -11,21 +11,21 @@ public class SignalementCpl {
     private BigDecimal longitude;
     private BigDecimal surfaceM2;
     private BigDecimal budget;
-    private Long idEntreprise;
+    private Integer idEntreprise;
     private String entreprise;
     private String entrepriseAdresse;
     private String entrepriseContact;
-    private Long idUtilisateur;
+    private Integer idUtilisateur;
     private String utilisateurNom;
     private String utilisateurPrenom;
     private String utilisateurEmail;
     private String dateCreation;
 
     public SignalementCpl(
-        Long id, String titre, String description, Integer statut,
+        Integer id, String titre, String description, Integer statut,
         BigDecimal latitude, BigDecimal longitude, BigDecimal surfaceM2, BigDecimal budget,
-        Long idEntreprise, String entreprise, String entrepriseAdresse, String entrepriseContact,
-        Long idUtilisateur, String utilisateurNom, String utilisateurPrenom, String utilisateurEmail,
+        Integer idEntreprise, String entreprise, String entrepriseAdresse, String entrepriseContact,
+        Integer idUtilisateur, String utilisateurNom, String utilisateurPrenom, String utilisateurEmail,
         String dateCreation
     ) {
         this.id = id;
@@ -47,8 +47,8 @@ public class SignalementCpl {
         this.dateCreation = dateCreation;
     }
 
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
@@ -71,8 +71,8 @@ public class SignalementCpl {
     public BigDecimal getBudget() { return budget; }
     public void setBudget(BigDecimal budget) { this.budget = budget; }
 
-    public Long getIdEntreprise() { return idEntreprise; }
-    public void setIdEntreprise(Long idEntreprise) { this.idEntreprise = idEntreprise; }
+    public Integer getIdEntreprise() { return idEntreprise; }
+    public void setIdEntreprise(Integer idEntreprise) { this.idEntreprise = idEntreprise; }
 
     public String getEntreprise() { return entreprise; }
     public void setEntreprise(String entreprise) { this.entreprise = entreprise; }
@@ -83,8 +83,8 @@ public class SignalementCpl {
     public String getEntrepriseContact() { return entrepriseContact; }
     public void setEntrepriseContact(String entrepriseContact) { this.entrepriseContact = entrepriseContact; }
 
-    public Long getIdUtilisateur() { return idUtilisateur; }
-    public void setIdUtilisateur(Long idUtilisateur) { this.idUtilisateur = idUtilisateur; }
+    public Integer getIdUtilisateur() { return idUtilisateur; }
+    public void setIdUtilisateur(Integer idUtilisateur) { this.idUtilisateur = idUtilisateur; }
 
     public String getUtilisateurNom() { return utilisateurNom; }
     public void setUtilisateurNom(String utilisateurNom) { this.utilisateurNom = utilisateurNom; }

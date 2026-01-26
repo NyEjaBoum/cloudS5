@@ -14,5 +14,10 @@ export default defineConfig({
     preprocessorOptions: {
       // Options CSS si nécessaire
     }
+  },
+  server: {
+    proxy: {
+      '/api': 'http://localhost:8080'
+    }
   }
 })

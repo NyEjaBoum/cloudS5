@@ -7,41 +7,35 @@ import org.springframework.security.config.annotation.web.configuration.EnableWe
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import com.projetCloud.projetCloud.security.FirebaseTokenFilter;
+import com.projetCloud.projetCloud.security.JwtAuthenticationFilter;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.http.HttpMethod;
 
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
 
     @Bean
+    public JwtAuthenticationFilter jwtAuthenticationFilter() {
+        return new JwtAuthenticationFilter();
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
+            .cors(cors -> {})
             .csrf(csrf -> csrf.disable())
             .authorizeHttpRequests(auth -> auth
-                // Permettre l'accès à Swagger UI et API docs
-                .requestMatchers(
-                    "/swagger-ui.html",
-                    "/swagger-ui/**",
-                    "/v3/api-docs/**",
-                    "/api-docs/**",
-                    "/swagger-resources/**",
-                    "/webjars/**"
-                ).permitAll()
-                
-                // Endpoints publics d'authentification
+                .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+                .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                 .requestMatchers("/api/auth/**").permitAll()
-                .requestMatchers("/api/public/**").permitAll()
-                
-                // Endpoints admin protégés
-                .requestMatchers("/api/admin/**").permitAll()
-                // .requestMatchers("/api/admin/**").hasRole("MANAGER")
-                
-                // Tout le reste nécessite authentification
+                .requestMatchers("/api/signalements/recapitulatif").permitAll() // <-- Ajoute cette ligne
+                .requestMatchers("/api/signalements/complet").permitAll()      // <-- Ajoute cette ligne
                 .anyRequest().authenticated()
             )
-            .addFilterBefore(new FirebaseTokenFilter(), UsernamePasswordAuthenticationFilter.class)
-            .httpBasic(httpBasic -> httpBasic.disable());
-        
+            .addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
+            // .addFilterBefore(new FirebaseTokenFilter(), UsernamePasswordAuthenticationFilter.class);
+
         return http.build();
     }
 

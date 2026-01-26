@@ -7,7 +7,7 @@ import jakarta.persistence.*;
 public class ActionRole {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "role_id", nullable = false)
@@ -19,8 +19,8 @@ public class ActionRole {
     public ActionRole() {}
 
     // Getters et setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
 
     public Role getRole() { return role; }
     public void setRole(Role role) { this.role = role; }
