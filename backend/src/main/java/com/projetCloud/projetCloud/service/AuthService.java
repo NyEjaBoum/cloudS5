@@ -12,11 +12,15 @@ import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.SignatureAlgorithm;
 import java.util.Date;
 import io.jsonwebtoken.security.Keys;
+import jakarta.annotation.PostConstruct;
 import javax.crypto.SecretKey;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseToken;
 import org.springframework.beans.factory.annotation.Value;
 import java.time.LocalDateTime;
+import com.projetCloud.projetCloud.repository.role.ActionRoleRepository;
+import org.springframework.web.server.ResponseStatusException;
+import org.springframework.http.HttpStatus;
 
 @Service
 public class AuthService {
@@ -25,7 +29,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final BCryptPasswordEncoder passwordEncoder;
     private final SessionsRepository sessionsRepository;
-    private final SecretKey jwtSecret = Keys.secretKeyFor(SignatureAlgorithm.HS256);
+    private final ActionRoleRepository actionRoleRepository;
 
     @Value("${auth.max.attempts:3}")
     private int maxAttempts;
@@ -33,17 +37,76 @@ public class AuthService {
     @Value("${jwt.expiration.hours:24}")
     private int jwtExpirationHours;
 
-    public AuthService(UtilisateurRepository utilisateurRepository, 
-                       RoleRepository roleRepository, 
-                       BCryptPasswordEncoder passwordEncoder, 
-                       SessionsRepository sessionsRepository) {
+    @Value("${jwt.secret}")
+    private String jwtSecretString;
+
+    private SecretKey jwtSecret;
+
+    @PostConstruct
+    public void init() {
+        this.jwtSecret = Keys.hmacShaKeyFor(jwtSecretString.getBytes());
+    }
+
+    public AuthService(UtilisateurRepository utilisateurRepository,
+                    RoleRepository roleRepository,
+                    BCryptPasswordEncoder passwordEncoder,
+                    SessionsRepository sessionsRepository,
+                    ActionRoleRepository actionRoleRepository) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.passwordEncoder = passwordEncoder;
         this.sessionsRepository = sessionsRepository;
+        this.actionRoleRepository = actionRoleRepository;
+    }
+
+    public String getRoleFromToken(String token) {
+        try {
+            var claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecret)
+                .build()
+                .parseClaimsJws(token.replace("Bearer ", ""))
+                .getBody();
+            return claims.get("role", String.class);
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
+    public Utilisateur getUserFromToken(String token) {
+        try {
+            if (token == null || token.isBlank()) {
+                System.out.println("[AuthService] Token manquant ou vide");
+                return null;
+            }
+            System.out.println("[AuthService] Token reçu: " + token);
+            var claims = Jwts.parserBuilder()
+                .setSigningKey(jwtSecret)
+                .build()
+                .parseClaimsJws(token.replace("Bearer ", ""))
+                .getBody();
+            String email = claims.getSubject();
+            System.out.println("[AuthService] Email extrait du token: " + email);
+            Utilisateur user = utilisateurRepository.findByEmail(email)
+                .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
+            System.out.println("[AuthService] Utilisateur trouvé: " + user.getEmail() + " (id=" + user.getId() + ")");
+            return user;
+        } catch (Exception e) {
+            System.out.println("[AuthService] Erreur lors de la récupération de l'utilisateur depuis le token : " + e.getMessage());
+            e.printStackTrace();
+            return null;
+        }
+    }
+
+    public boolean hasPermission(Utilisateur utilisateur, String action) {
+        Role role = utilisateur.getRole();
+        return actionRoleRepository.existsByRoleAndAction(role, action);
     }
 
     public Utilisateur registerLocal(String email, String motDePasse, String nom, String prenom) {
+
+        // if (!hasPermission(utilisateur, "CREER_UTILISATEUR")) {
+        //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission refusée");
+        // }
         // Check email unique
         if (utilisateurRepository.findByEmail(email).isPresent()) {
             throw new IllegalArgumentException("Email already exists");
@@ -120,6 +183,8 @@ public class AuthService {
         Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
         String token = Jwts.builder()
             .setSubject(utilisateur.getEmail())
+            .claim("role", utilisateur.getRole().getId()
+) // <-- ajoute cette ligne
             .setIssuedAt(new Date())
             .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
             .signWith(jwtSecret)
@@ -135,58 +200,102 @@ public class AuthService {
         return token;
     }
 
+
     public String loginFirebase(String idToken) {
-        try {
-            // Vérifier le token Firebase
-            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            
-            String email = decodedToken.getEmail();
-            String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
-            
-            // Vérifier si l'utilisateur existe
-            Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
-            if (utilisateur == null) {
-                // Créer l'utilisateur si inexistant
-                Role utilisateurRole = roleRepository.findByNom("UTILISATEUR")
-                    .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found"));
-                utilisateur = new Utilisateur();
-                utilisateur.setEmail(email);
-                utilisateur.setNom(nomComplet);
-                utilisateur.setPrenom(nomComplet);
-                utilisateur.setMotDePasse(null);
-                utilisateur.setRole(utilisateurRole);
-                utilisateur.setTentativesEchouees(0);
-                utilisateur.setCompteBloque(false);
-                utilisateur.setDateCreation(LocalDateTime.now());
-                utilisateur = utilisateurRepository.save(utilisateur);
-            }
+    try {
+        // Vérifier le token Firebase
+        FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
 
-            // Vérifier si le compte est bloqué (pour Firebase aussi)
-            if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
-                throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
-            }
+        String email = decodedToken.getEmail();
 
-            // Générer JWT
-            Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
-            String token = Jwts.builder()
-                .setSubject(utilisateur.getEmail())
-                .setIssuedAt(new Date())
-                .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
-                .signWith(jwtSecret)
-                .compact();
-            
-            // Sauvegarder session
-            Session session = new Session();
-            session.setIdUtilisateur(utilisateur.getId());
-            session.setTokenJwt(token);
-            session.setExpiration(new Date(System.currentTimeMillis() + expirationMillis));
-            sessionsRepository.save(session);
-            
-            return token;
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
+        // Vérifier si l'utilisateur existe DANS LA BASE
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+        if (utilisateur == null) {
+            throw new IllegalArgumentException("Aucun compte local associé à cet email. Veuillez contacter un administrateur.");
         }
+
+        // Vérifier si le compte est bloqué
+        if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
+            throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
+        }
+
+        // Générer JWT
+        Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
+        String token = Jwts.builder()
+            .setSubject(utilisateur.getEmail())
+            .claim("role", utilisateur.getRole().getId())
+            .setIssuedAt(new Date())
+            .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+            .signWith(jwtSecret)
+            .compact();
+
+        // Sauvegarder session
+        Session session = new Session();
+        session.setIdUtilisateur(utilisateur.getId());
+        session.setTokenJwt(token);
+        session.setExpiration(new Date(System.currentTimeMillis() + expirationMillis));
+        sessionsRepository.save(session);
+
+        return token;
+    } catch (Exception e) {
+        throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
     }
+}
+
+//     public String loginFirebase(String idToken) {
+//         try {
+//             // Vérifier le token Firebase
+//             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+            
+//             String email = decodedToken.getEmail();
+//             String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
+            
+//             // Vérifier si l'utilisateur existe
+//             Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+//             if (utilisateur == null) {
+//                 // Créer l'utilisateur si inexistant
+//                 Role utilisateurRole = roleRepository.findByNom("UTILISATEUR")
+//                     .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found"));
+//                 utilisateur = new Utilisateur();
+//                 utilisateur.setEmail(email);
+//                 utilisateur.setNom(nomComplet);
+//                 utilisateur.setPrenom(nomComplet);
+//                 utilisateur.setMotDePasse(null);
+//                 utilisateur.setRole(utilisateurRole);
+//                 utilisateur.setTentativesEchouees(0);
+//                 utilisateur.setCompteBloque(false);
+//                 utilisateur.setDateCreation(LocalDateTime.now());
+//                 utilisateur = utilisateurRepository.save(utilisateur);
+//             }
+
+//             // Vérifier si le compte est bloqué (pour Firebase aussi)
+//             if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
+//                 throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
+//             }
+
+//             // Générer JWT
+//             Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
+//             String token = Jwts.builder()
+//                 .setSubject(utilisateur.getEmail())
+//                 .claim("role", utilisateur.getRole().getId()
+// ) // <-- ajoute cette ligne
+//                 .setIssuedAt(new Date())
+//                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
+//                 .signWith(jwtSecret)
+//                 .compact();
+            
+//             // Sauvegarder session
+//             Session session = new Session();
+//             session.setIdUtilisateur(utilisateur.getId());
+//             session.setTokenJwt(token);
+//             session.setExpiration(new Date(System.currentTimeMillis() + expirationMillis));
+//             sessionsRepository.save(session);
+            
+//             return token;
+//         } catch (Exception e) {
+//             throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
+//         }
+//     }
 
     public Utilisateur registerFirebase(String idToken) {
         try {
@@ -195,7 +304,9 @@ public class AuthService {
             
             String email = decodedToken.getEmail();
             String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
-            
+            // if (!hasPermission(utilisateur, "CREER_UTILISATEUR")) {
+            //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission refusée");
+            // }
             // Vérifier si l'utilisateur existe déjà
             if (utilisateurRepository.findByEmail(email).isPresent()) {
                 throw new IllegalArgumentException("User already exists");
