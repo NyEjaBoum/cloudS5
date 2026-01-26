@@ -1,5 +1,10 @@
 export async function fetchSignalementInfos() {
-  const res = await fetch("http://localhost:8080/api/signalements/infos");
+const token = localStorage.getItem("jwt");
+const res = await fetch("http://localhost:8080/api/signalements/infos", {
+  headers: {
+    "Authorization": "Bearer " + token
+  }
+});
   const data = await res.json();
   return data.data || [];
 }
@@ -13,7 +18,12 @@ export async function fetchSignalementComplet() {
 
 
 export async function fetchSignalementById(id) {
-  const res = await fetch(`http://localhost:8080/api/signalements/${id}`);
+  const token = localStorage.getItem("jwt");
+  const res = await fetch(`http://localhost:8080/api/signalements/${id}`, {
+    headers: {
+      "Authorization": "Bearer " + token
+    }
+  });
   const data = await res.json();
   return data.data;
 }
@@ -32,4 +42,20 @@ export async function updateSignalement(id, data) {
   });
   if (!res.ok) throw new Error("Erreur lors de la mise à jour");
   return (await res.json()).data;
+}
+
+
+
+export async function syncAllSignalements() {
+  const token = localStorage.getItem("jwt"); // ou récupère le token où tu le stockes
+  console.log(localStorage.getItem("jwt"));
+  const res = await fetch("http://localhost:8080/api/signalements/syncAll", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    }
+  });
+  if (!res.ok) throw new Error("Erreur lors de la synchronisation");
+  return await res.text();
 }
