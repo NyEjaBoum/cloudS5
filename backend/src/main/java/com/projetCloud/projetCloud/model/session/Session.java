@@ -9,10 +9,10 @@ public class Session {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @Column(name = "id_utilisateur", nullable = false)
-    private Long idUtilisateur;
+    private Integer idUtilisateur;
 
     @Column(name = "token_jwt", nullable = false, length = 512)
     private String tokenJwt;
@@ -26,19 +26,19 @@ public class Session {
     private Date dateCreation = new Date();
 
     // Getters and setters
-    public Long getId() {
+    public Integer getId() {
         return id;
     }
 
-    public void setId(Long id) {
+    public void setId(Integer id) {
         this.id = id;
     }
 
-    public Long getIdUtilisateur() {
+    public Integer getIdUtilisateur() {
         return idUtilisateur;
     }
 
-    public void setIdUtilisateur(Long idUtilisateur) {
+    public void setIdUtilisateur(Integer idUtilisateur) {
         this.idUtilisateur = idUtilisateur;
     }
 

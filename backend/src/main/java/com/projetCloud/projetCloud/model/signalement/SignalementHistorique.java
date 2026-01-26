@@ -9,7 +9,7 @@ import java.time.LocalDateTime;
 public class SignalementHistorique {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    private Integer id;
 
     @ManyToOne
     @JoinColumn(name = "id_signalement")
@@ -26,8 +26,8 @@ public class SignalementHistorique {
     public SignalementHistorique() {}
 
     // Getters and Setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     public Signalement getSignalement() { return signalement; }
     public void setSignalement(Signalement signalement) { this.signalement = signalement; }
     public Integer getAncienStatut() { return ancienStatut; }
