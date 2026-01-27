@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
+import { loginFirebase, loginLocal } from "../api/auth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -8,6 +10,9 @@ export default function LoginPage() {
     password: "",
     rememberMe: false
   });
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value, type, checked } = e.target;
@@ -17,10 +22,65 @@ export default function LoginPage() {
     });
   };
 
-  const handleSubmit = (e) => {
+  // Login classique : email/mot de passe
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    console.log("Login:", formData);
-    // Appel API ici
+    setLoading(true);
+    setError("");
+    try {
+      let token;
+      if (navigator.onLine) {
+        // Essaye d'abord Firebase email/mot de passe
+        try {
+          const auth = getAuth();
+          const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
+          const idToken = await userCredential.user.getIdToken();
+          token = await loginFirebase(idToken);
+        } catch (firebaseErr) {
+          setError("Utilisateur introuvable dans Firebase ou mot de passe incorrect.");
+          setLoading(false);
+          return; // <-- AJOUTE CE RETURN !
+        }
+      } else {
+        // Mode offline : login local
+        token = await loginLocal(formData.email, formData.password);
+      }
+      localStorage.setItem("jwt", token);
+      navigate("/manager");
+    } catch (err) {
+      if (err.message.includes("Aucun compte local associé")) {
+        setError("Ce compte existe sur Firebase mais n'est pas autorisé ici. Contactez un administrateur.");
+      } else if (err.message.includes("auth/user-not-found")) {
+        setError("Aucun compte Firebase trouvé pour cet email.");
+      } else if (err.message.includes("auth/wrong-password")) {
+        setError("Mot de passe incorrect pour le compte Firebase.");
+      } else {
+        setError(err.message);
+      }
+    }
+    setLoading(false);
+  };
+
+  // Login Google/Firebase
+  const handleGoogleLogin = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const auth = getAuth();
+      const provider = new GoogleAuthProvider();
+      const result = await signInWithPopup(auth, provider);
+      const idToken = await result.user.getIdToken();
+      const token = await loginFirebase(idToken);
+      localStorage.setItem("jwt", token);
+      navigate("/manager");
+    } catch (err) {
+      if (err.message.includes("Aucun compte local associé")) {
+        setError("Ce compte Google existe, mais il n'est pas autorisé sur cette application. Contactez un administrateur.");
+      } else {
+        setError(err.message);
+      }
+    }
+    setLoading(false);
   };
 
   return (
@@ -69,8 +129,10 @@ export default function LoginPage() {
           </Link>
         </div>
 
-        <button type="submit" className="btn-primary">
-          Login
+        {error && <div className="error" style={{ color: "#e53e3e", marginBottom: 16 }}>{error}</div>}
+
+        <button type="submit" className="btn-primary" disabled={loading}>
+          {loading ? "Logging in..." : "Login"}
         </button>
 
         <div className="auth-footer">
@@ -83,16 +145,21 @@ export default function LoginPage() {
         <div className="divider">or</div>
 
         <div className="social-login">
-          <button type="button" className="social-btn facebook">
+          <button type="button" className="social-btn facebook" disabled>
             <i className="fab fa-facebook-f"></i>
           </button>
-          <button type="button" className="social-btn twitter">
+          <button type="button" className="social-btn twitter" disabled>
             <i className="fab fa-twitter"></i>
           </button>
-          <button type="button" className="social-btn github">
+          <button type="button" className="social-btn github" disabled>
             <i className="fab fa-github"></i>
           </button>
-          <button type="button" className="social-btn google">
+          <button
+            type="button"
+            className="social-btn google"
+            onClick={handleGoogleLogin}
+            disabled={loading}
+          >
             <i className="fab fa-google"></i>
           </button>
         </div>

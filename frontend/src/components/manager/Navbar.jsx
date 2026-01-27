@@ -1,4 +1,6 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
+import { logout } from "../../api/auth"; // <-- Mets l'import ici, tout en haut
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -14,6 +16,13 @@ export default function Navbar() {
     document.addEventListener("mousedown", handleClickOutside);
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
+
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
 
   return (
     <nav className="navbar-manager">
@@ -51,7 +60,7 @@ export default function Navbar() {
                 <div className="dropdown-item">
                   <i className="fas fa-tasks"></i> My Tasks
                 </div>
-                <button className="dropdown-logout">Logout</button>
+                <button className="dropdown-logout" onClick={handleLogout}>Logout</button>
               </div>
             )}
           </div>

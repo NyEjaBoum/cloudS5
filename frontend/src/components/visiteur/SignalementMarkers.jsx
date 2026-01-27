@@ -15,7 +15,7 @@ export default function SignalementMarkers({ signalements }) {
   return (
     <>
       {signalements
-        .filter(s => s.latitude && s.longitude)
+        .filter(s => s.latitude && s.Integeritude)
         .map((s, idx) => {
           const statut = getStatutLabel(s.statut);
           return (
@@ -23,7 +23,7 @@ export default function SignalementMarkers({ signalements }) {
               key={s.id || idx}
               position={[
                 s.latitude?.toNumber ? s.latitude.toNumber() : Number(s.latitude),
-                s.longitude?.toNumber ? s.longitude.toNumber() : Number(s.longitude)
+                s.Integeritude?.toNumber ? s.Integeritude.toNumber() : Number(s.Integeritude)
               ]}
             >
               <Popup>

@@ -1,7 +1,7 @@
 package com.projetCloud.projetCloud.dto;
 
 public class InfosSignalementDto {
-    private Long id;
+    private Integer id;
     private String titre;
     private String description;
     private Integer statut;
@@ -10,7 +10,7 @@ public class InfosSignalementDto {
     private String entreprise;
     private String dateCreation;
 
-    public InfosSignalementDto(Long id, String titre, String description, Integer statut, Double surfaceM2, Double budget, String entreprise, String dateCreation) {
+    public InfosSignalementDto(Integer id, String titre, String description, Integer statut, Double surfaceM2, Double budget, String entreprise, String dateCreation) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -22,8 +22,8 @@ public class InfosSignalementDto {
     }
 
     // Getters et setters
-    public Long getId() { return id; }
-    public void setId(Long id) { this.id = id; }
+    public Integer getId() { return id; }
+    public void setId(Integer id) { this.id = id; }
     public String getTitre() { return titre; }
     public void setTitre(String titre) { this.titre = titre; }
     public String getDescription() { return description; }

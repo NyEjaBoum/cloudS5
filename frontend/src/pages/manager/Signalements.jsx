@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { fetchSignalementInfos } from "../../api/signalement.js";
 import { Link } from "react-router-dom";
 import "../../styles/manager.css";
+import { syncAllSignalements } from "../../api/signalement.js";
 
 export default function Signalements() {
   const [signalements, setSignalements] = useState([]);
@@ -10,10 +11,14 @@ export default function Signalements() {
     fetchSignalementInfos().then(setSignalements);
   }, []);
 
-  const handleSync = async () => {
-    // Ajoute ici la logique de synchronisation si besoin
-    alert("Synchronisation terminée !");
-  };
+const handleSync = async () => {
+  try {
+    const message = await syncAllSignalements();
+    alert(message); // Affiche "Tous les signalements ont été synchronisés avec Firebase"
+  } catch (e) {
+    alert("Erreur lors de la synchronisation : " + e.message);
+  }
+};
 
   return (
     <div className="card">
