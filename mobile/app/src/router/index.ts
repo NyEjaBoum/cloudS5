@@ -6,7 +6,7 @@ import MapPage from '../views/MapPage.vue'
 const routes: Array<RouteRecordRaw> = [
   {
     path: '/',
-    redirect: '/home'
+    redirect: '/map'
   },
   {
     path: '/home',
