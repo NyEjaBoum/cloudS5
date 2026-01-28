@@ -21,6 +21,9 @@ import java.time.LocalDateTime;
 import com.projetCloud.projetCloud.repository.role.ActionRoleRepository;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
+import com.google.firebase.auth.UserRecord;
+import java.util.Map;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class AuthService {
@@ -102,6 +105,28 @@ public class AuthService {
         return actionRoleRepository.existsByRoleAndAction(role, action);
     }
 
+    @Transactional
+    public Utilisateur register(String email, String motDePasse, String nom, String prenom) {
+        try {
+            // 1. Créer dans Firebase
+            UserRecord.CreateRequest firebaseRequest = new UserRecord.CreateRequest()
+                .setEmail(email)
+                .setPassword(motDePasse)
+                .setDisplayName(nom + " " + prenom);
+            UserRecord firebaseUser = FirebaseAuth.getInstance().createUser(firebaseRequest);
+
+            // 2. Créer dans la base locale (utilise la fonction existante)
+            Utilisateur utilisateur = registerLocal(email, motDePasse, nom, prenom);
+
+            // 3. (Optionnel) Ajouter le rôle dans les custom claims Firebase
+            FirebaseAuth.getInstance().setCustomUserClaims(firebaseUser.getUid(), Map.of("role", utilisateur.getRole().getNom()));
+
+            return utilisateur;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Erreur lors de l'inscription Firebase+local : " + e.getMessage());
+        }
+    }
+
     public Utilisateur registerLocal(String email, String motDePasse, String nom, String prenom) {
 
         // if (!hasPermission(utilisateur, "CREER_UTILISATEUR")) {
@@ -138,9 +163,9 @@ public class AuthService {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (utilisateur.getMotDePasse() == null) {
-            throw new IllegalArgumentException("This account uses Firebase authentication; cannot login with password");
-        }
+        // if (utilisateur.getMotDePasse() == null) {
+        //     throw new IllegalArgumentException("This account uses Firebase authentication; cannot login with password");
+        // }
 
         // Check if account is blocked
         if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
@@ -242,97 +267,43 @@ public class AuthService {
     }
 }
 
-//     public String loginFirebase(String idToken) {
-//         try {
-//             // Vérifier le token Firebase
-//             FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
-            
-//             String email = decodedToken.getEmail();
-//             String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
-            
-//             // Vérifier si l'utilisateur existe
-//             Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
-//             if (utilisateur == null) {
-//                 // Créer l'utilisateur si inexistant
-//                 Role utilisateurRole = roleRepository.findByNom("UTILISATEUR")
-//                     .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found"));
-//                 utilisateur = new Utilisateur();
-//                 utilisateur.setEmail(email);
-//                 utilisateur.setNom(nomComplet);
-//                 utilisateur.setPrenom(nomComplet);
-//                 utilisateur.setMotDePasse(null);
-//                 utilisateur.setRole(utilisateurRole);
-//                 utilisateur.setTentativesEchouees(0);
-//                 utilisateur.setCompteBloque(false);
-//                 utilisateur.setDateCreation(LocalDateTime.now());
-//                 utilisateur = utilisateurRepository.save(utilisateur);
-//             }
 
-//             // Vérifier si le compte est bloqué (pour Firebase aussi)
-//             if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
-//                 throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
-//             }
-
-//             // Générer JWT
-//             Integer expirationMillis = jwtExpirationHours * 60 * 60 * 1000;
-//             String token = Jwts.builder()
-//                 .setSubject(utilisateur.getEmail())
-//                 .claim("role", utilisateur.getRole().getId()
-// ) // <-- ajoute cette ligne
-//                 .setIssuedAt(new Date())
-//                 .setExpiration(new Date(System.currentTimeMillis() + expirationMillis))
-//                 .signWith(jwtSecret)
-//                 .compact();
+    // public Utilisateur registerFirebase(String idToken) {
+    //     try {
+    //         // Vérifier le token Firebase
+    //         FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
             
-//             // Sauvegarder session
-//             Session session = new Session();
-//             session.setIdUtilisateur(utilisateur.getId());
-//             session.setTokenJwt(token);
-//             session.setExpiration(new Date(System.currentTimeMillis() + expirationMillis));
-//             sessionsRepository.save(session);
+    //         String email = decodedToken.getEmail();
+    //         String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
+    //         // if (!hasPermission(utilisateur, "CREER_UTILISATEUR")) {
+    //         //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission refusée");
+    //         // }
+    //         // Vérifier si l'utilisateur existe déjà
+    //         if (utilisateurRepository.findByEmail(email).isPresent()) {
+    //             throw new IllegalArgumentException("User already exists");
+    //         }
             
-//             return token;
-//         } catch (Exception e) {
-//             throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
-//         }
-//     }
-
-    public Utilisateur registerFirebase(String idToken) {
-        try {
-            // Vérifier le token Firebase
-            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+    //         // Get UTILISATEUR role
+    //         Role utilisateurRole = roleRepository.findByNom("UTILISATEUR")
+    //             .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found"));
             
-            String email = decodedToken.getEmail();
-            String nomComplet = decodedToken.getName() != null ? decodedToken.getName() : decodedToken.getEmail();
-            // if (!hasPermission(utilisateur, "CREER_UTILISATEUR")) {
-            //     throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Permission refusée");
-            // }
-            // Vérifier si l'utilisateur existe déjà
-            if (utilisateurRepository.findByEmail(email).isPresent()) {
-                throw new IllegalArgumentException("User already exists");
-            }
+    //         // Créer l'utilisateur
+    //         Utilisateur utilisateur = new Utilisateur();
+    //         utilisateur.setEmail(email);
+    //         utilisateur.setNom(nomComplet);
+    //         utilisateur.setPrenom(nomComplet);
+    //         utilisateur.setRole(utilisateurRole);
+    //         utilisateur.setMotDePasse(null);
+    //         utilisateur.setTentativesEchouees(0);
+    //         utilisateur.setCompteBloque(false);
+    //         utilisateur.setDateCreation(LocalDateTime.now());
             
-            // Get UTILISATEUR role
-            Role utilisateurRole = roleRepository.findByNom("UTILISATEUR")
-                .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found"));
+    //         return utilisateurRepository.save(utilisateur);
             
-            // Créer l'utilisateur
-            Utilisateur utilisateur = new Utilisateur();
-            utilisateur.setEmail(email);
-            utilisateur.setNom(nomComplet);
-            utilisateur.setPrenom(nomComplet);
-            utilisateur.setRole(utilisateurRole);
-            utilisateur.setMotDePasse(null);
-            utilisateur.setTentativesEchouees(0);
-            utilisateur.setCompteBloque(false);
-            utilisateur.setDateCreation(LocalDateTime.now());
-            
-            return utilisateurRepository.save(utilisateur);
-            
-        } catch (Exception e) {
-            throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
-        }
-    }
+    //     } catch (Exception e) {
+    //         throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
+    //     }
+    // }
 
     // Nouvelle méthode pour débloquer un utilisateur
     public void unblockUser(Integer userId) {

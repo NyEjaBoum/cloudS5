@@ -22,7 +22,7 @@ import com.projetCloud.projetCloud.repository.utilisateur.UtilisateurRepository;
 import com.projetCloud.projetCloud.repository.role.RoleRepository;
 
 import java.time.LocalDateTime;
-
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/auth")
@@ -52,7 +52,7 @@ public class AuthController {
             return new ApiResponse<>("error", null, "Permission refusée");
         }
         try {
-            Utilisateur utilisateur = authService.registerLocal(
+            Utilisateur utilisateur = authService.register(
                 request.getEmail(),
                 request.getMotDePasse(),
                 request.getNom(),
@@ -68,9 +68,11 @@ public class AuthController {
     @PostMapping("/login")
     public ApiResponse<String> login(@RequestBody LoginRequest request) {
         try {
+            System.out.println("connexion local postgres");
             String token = authService.loginLocal(request.getEmail(), request.getMotDePasse());
             return new ApiResponse<>("success", token, null);
         } catch (IllegalArgumentException e) {
+            System.out.println("connexion local postgres tsy nety");
             return new ApiResponse<>("error", null, e.getMessage());
         }
     }
@@ -108,7 +110,6 @@ public ApiResponse<String> syncUserToFirebase(
     @PathVariable Integer userId,
     @RequestHeader(value = "Authorization", required = false) String authHeader
 ) {
-    // Vérification permission manager (optionnel mais recommandé)
     Utilisateur currentUser = authService.getUserFromToken(authHeader);
     if (currentUser == null || !authService.hasPermission(currentUser, "SYNC")) {
         return new ApiResponse<>("error", null, "Permission refusée");
@@ -117,23 +118,25 @@ public ApiResponse<String> syncUserToFirebase(
     try {
         Utilisateur user = utilisateurRepository.findById(userId)
             .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
-        // Vérifier si déjà dans Firebase
         try {
             UserRecord firebaseUser = FirebaseAuth.getInstance().getUserByEmail(user.getEmail());
-            return new ApiResponse<>("success", "Déjà présent dans Firebase", null);
+            // Met à jour le custom claim si besoin
+            FirebaseAuth.getInstance().setCustomUserClaims(firebaseUser.getUid(), Map.of("role", user.getRole().getNom()));
+            return new ApiResponse<>("success", "Déjà présent dans Firebase, rôle mis à jour", null);
         } catch (FirebaseAuthException e) {
             // Pas trouvé, on crée
             CreateRequest request = new CreateRequest()
                 .setEmail(user.getEmail())
-                .setPassword("MotDePasseTemporaire123!") // ou généré
+                .setPassword("user123!")
                 .setDisplayName(user.getNom() + " " + user.getPrenom());
-            FirebaseAuth.getInstance().createUser(request);
-            return new ApiResponse<>("success", "Utilisateur synchronisé dans Firebase", null);
+            UserRecord newUser = FirebaseAuth.getInstance().createUser(request);
+            // Ajoute le custom claim rôle
+            FirebaseAuth.getInstance().setCustomUserClaims(newUser.getUid(), Map.of("role", user.getRole().getNom()));
+            return new ApiResponse<>("success", "Utilisateur synchronisé dans Firebase avec rôle", null);
         }
     } catch (FirebaseAuthException e) {
         return new ApiResponse<>("error", null, "Erreur Firebase: " + e.getMessage());
     } catch (Exception e) {
-        // Pour toute autre erreur (ex: IllegalArgumentException)
         return new ApiResponse<>("error", null, e.getMessage());
     }
 }
@@ -185,7 +188,7 @@ public ApiResponse<String> exportUsersToFirebase(
                 // Pas trouvé, on crée
                 CreateRequest request = new CreateRequest()
                     .setEmail(user.getEmail())
-                    .setPassword("MotDePasseTemporaire123!") // ou généré
+                    .setPassword(user.getMotDePasse()) // ou généré
                     .setDisplayName(user.getNom() + " " + user.getPrenom());
                 FirebaseAuth.getInstance().createUser(request);
                 exported++;
