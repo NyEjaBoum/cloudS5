@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import { Link, useNavigate } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { loginFirebase, loginLocal } from "../api/auth";
+import { handleLogin, loginFirebase, loginLocal } from "../api/auth";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -22,44 +22,10 @@ export default function LoginPage() {
     });
   };
 
-  // Login classique : email/mot de passe
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-    try {
-      let token;
-      if (navigator.onLine) {
-        // Essaye d'abord Firebase email/mot de passe
-        try {
-          const auth = getAuth();
-          const userCredential = await signInWithEmailAndPassword(auth, formData.email, formData.password);
-          const idToken = await userCredential.user.getIdToken();
-          token = await loginFirebase(idToken);
-        } catch (firebaseErr) {
-          setError("Utilisateur introuvable dans Firebase ou mot de passe incorrect.");
-          setLoading(false);
-          return; // <-- AJOUTE CE RETURN !
-        }
-      } else {
-        // Mode offline : login local
-        token = await loginLocal(formData.email, formData.password);
-      }
-      localStorage.setItem("jwt", token);
-      navigate("/manager");
-    } catch (err) {
-      if (err.message.includes("Aucun compte local associé")) {
-        setError("Ce compte existe sur Firebase mais n'est pas autorisé ici. Contactez un administrateur.");
-      } else if (err.message.includes("auth/user-not-found")) {
-        setError("Aucun compte Firebase trouvé pour cet email.");
-      } else if (err.message.includes("auth/wrong-password")) {
-        setError("Mot de passe incorrect pour le compte Firebase.");
-      } else {
-        setError(err.message);
-      }
-    }
-    setLoading(false);
-  };
+const handleSubmit = (e) => {
+  e.preventDefault();
+  handleLogin(formData, navigate, setError, setLoading);
+};
 
   // Login Google/Firebase
   const handleGoogleLogin = async () => {

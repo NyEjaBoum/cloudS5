@@ -1,3 +1,66 @@
+import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
+
+export async function handleLogin({ email, password }, navigate, setError, setLoading) {
+  setLoading(true);
+  setError("");
+  let token;
+  try {
+    if (navigator.onLine) {
+      try {
+        const auth = getAuth();
+        const userCredential = await signInWithEmailAndPassword(auth, email, password);
+        const idToken = await userCredential.user.getIdToken();
+        token = await loginFirebase(idToken);
+      } catch (firebaseErr) {
+        // Gestion des erreurs Firebase
+        if (
+          firebaseErr.code === "auth/network-request-failed" ||
+          firebaseErr.message.includes("network-request-failed") ||
+          firebaseErr.message.includes("ERR_NAME_NOT_RESOLVED")
+        ) {
+          // Erreur de connexion Internet : fallback local
+          try {
+            // token = await loginLocal(email, password);
+          } catch (localErr) {
+            setError("Erreur locale : " + localErr.message);
+            setLoading(false);
+            return;
+          }
+        // } else if (firebaseErr.code === "auth/user-not-found") {
+        //   setError("Aucun compte Firebase trouvé pour cet email.");
+        //   setLoading(false);
+        //   return;
+        // } else if (firebaseErr.code === "auth/wrong-password") {
+        //   setError("Mot de passe incorrect pour le compte Firebase.");
+        //   setLoading(false);
+        //   return;
+        // } else if (firebaseErr.code === "auth/invalid-credential") {
+        //   setError("Identifiants invalides : vérifiez l'email et le mot de passe.");
+        //   setLoading(false);
+        //   return;
+        // } else if (firebaseErr.code === "auth/invalid-email") {
+        //   setError("Format d'email invalide.");
+        //   setLoading(false);
+        //   return;
+        // } else {
+         }else {
+          // setError("Erreur Firebase : " + firebaseErr.message);
+          // setLoading(false);
+          // return;
+          token = await loginLocal(email, password);
+        }
+      }
+    } else {
+      token = await loginLocal(email, password);
+    }
+    localStorage.setItem("jwt", token);
+    navigate("/manager");
+  } catch (err) {
+    setError("Erreur : " + err.message);
+  }
+  setLoading(false);
+}
+
 export function logout() {
   localStorage.removeItem("jwt");
 }
