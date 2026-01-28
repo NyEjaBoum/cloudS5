@@ -28,6 +28,8 @@ public class FirebaseAuthController {
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             return new ApiResponse<>("error", null, "Header Authorization manquant ou invalide");
         }
+
+        System.out.println("connexion login firebase");
         
         String idToken = authHeader.substring(7);
         try {
@@ -40,28 +42,29 @@ public class FirebaseAuthController {
             );
             return new ApiResponse<>("success", data, null);
         } catch (Exception e) {
+            System.out.println("connexion login firebase tsy nety");
             return new ApiResponse<>("error", null, e.getMessage());
         }
     }
 
-    @Operation(summary = "Inscription avec Firebase")
-    @PostMapping("/register")
-    public ApiResponse<Utilisateur> registerFirebase(
-        @RequestBody FirebaseRegisterRequest request,
-        @RequestHeader(value = "Authorization", required = false) String authHeader
-    ) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            return new ApiResponse<>("error", null, "Token manquant ou invalide");
-        }
-        Utilisateur currentUser = authService.getUserFromToken(authHeader);
-        if (currentUser == null || !authService.hasPermission(currentUser, "CREER_UTILISATEUR")) {
-            return new ApiResponse<>("error", null, "Permission refusée");
-        }
-        try {
-            Utilisateur utilisateur = authService.registerFirebase(request.getIdToken());
-            return new ApiResponse<>("success", utilisateur, null);
-        } catch (IllegalArgumentException e) {
-            return new ApiResponse<>("error", null, e.getMessage());
-        }
-    }
+    // @Operation(summary = "Inscription avec Firebase")
+    // @PostMapping("/register")
+    // public ApiResponse<Utilisateur> registerFirebase(
+    //     @RequestBody FirebaseRegisterRequest request,
+    //     @RequestHeader(value = "Authorization", required = false) String authHeader
+    // ) {
+    //     if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    //         return new ApiResponse<>("error", null, "Token manquant ou invalide");
+    //     }
+    //     Utilisateur currentUser = authService.getUserFromToken(authHeader);
+    //     if (currentUser == null || !authService.hasPermission(currentUser, "CREER_UTILISATEUR")) {
+    //         return new ApiResponse<>("error", null, "Permission refusée");
+    //     }
+    //     try {
+    //         Utilisateur utilisateur = authService.registerFirebase(request.getIdToken());
+    //         return new ApiResponse<>("success", utilisateur, null);
+    //     } catch (IllegalArgumentException e) {
+    //         return new ApiResponse<>("error", null, e.getMessage());
+    //     }
+    // }
 }

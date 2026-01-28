@@ -42,7 +42,7 @@ INSERT INTO entreprises (nom, adresse, contact) VALUES
 INSERT INTO utilisateurs (email, mot_de_passe, nom, prenom, role_id, tentatives_echouees, compte_bloque, date_creation)
 VALUES
   -- Manager par défaut
-  ('razanatsimbanyeja@gmail.com', '$2a$12$vDSIoLizS0srhb/COQm1tubo58o63cLcQpe5FIBUcCcgacpE/yPfW', 'Ny Eja', 'Razanatsimba', 1, 0, FALSE, NOW()),
+  ('admin@gmail.com', '$2a$12$vDSIoLizS0srhb/COQm1tubo58o63cLcQpe5FIBUcCcgacpE/yPfW', 'admin', 'test', 1, 0, FALSE, NOW()),
   -- Autres utilisateurs
   ('user1@example.com', '$2a$12$qvw9.HuDHb2vwcYVUr10HexA0.uUYQCtd7W.eZSAL/XyzI5wZsFVC', 'Un', 'Utilisateur', 2, 0, FALSE, NOW()),
   ('user2@example.com', '$2a$12$qvw9.HuDHb2vwcYVUr10HexA0.uUYQCtd7W.eZSAL/XyzI5wZsFVC', 'Deux', 'Utilisateur', 2, 2, TRUE, NOW()),
@@ -124,4 +124,4 @@ WHERE statut <> 21;
 
 INSERT INTO signalements (titre, description, statut, latitude, longitude, surface_m2, budget, id_entreprise, id_utilisateur, date_creation)
 VALUES
-  ('Lavaka', 'Trou be Manakambs', 1, -18.8792, 47.5079, 10, 50000, 1, 2, NOW());
+  ('lalitra be tsisy jiro', 'Nisotominy fofon kaly matsiro', 1, -96.8792,27.5079, 10, 1400, 1, 2, NOW());
