@@ -64,6 +64,11 @@
 
           <!-- Actions rapides -->
           <div class="quick-actions">
+            <ion-item button @click="goToMap">
+              <ion-icon :icon="mapOutline" slot="start" color="primary"></ion-icon>
+              <ion-label>View Map</ion-label>
+              <ion-icon :icon="chevronForwardOutline" slot="end"></ion-icon>
+            </ion-item>
             <ion-item button @click="goToReport">
               <ion-icon :icon="addCircleOutline" slot="start" color="primary"></ion-icon>
               <ion-label>New Report</ion-label>
@@ -345,7 +350,8 @@ import {
   cloudDownloadOutline,
   warningOutline,
   addCircleOutline,
-  listOutline
+  listOutline,
+  mapOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -402,6 +408,10 @@ const goToReport = () => {
 
 const goToReports = () => {
   router.push('/reports');
+};
+
+const goToMap = () => {
+  router.push('/map');
 };
 
 const handleLogout = async () => {

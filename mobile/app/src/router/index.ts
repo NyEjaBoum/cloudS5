@@ -15,6 +15,11 @@ const routes: Array<RouteRecordRaw> = [
     redirect: '/login'
   },
   {
+    path: '/home',
+    name: 'Home',
+    component: HomePage
+  },
+  {
     path: '/map',
     name: 'Map',
     component: MapPage

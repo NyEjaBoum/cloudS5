@@ -176,7 +176,7 @@ const showPassword = ref(false);
 const currentLanguage = ref('en');
 
 const handleLogin = () => {
-  router.push('/profil');
+  router.push('/home');
 };
 
 const handleGoogleLogin = () => {
