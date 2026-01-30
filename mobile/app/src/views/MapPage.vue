@@ -5,11 +5,11 @@
     <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button @click="toggleSidebar" v-if="!isSidebarOpen">
-            <ion-icon slot="icon-only" :icon="menuOutline"></ion-icon>
+          <ion-button @click="goBack">
+            <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
           </ion-button>
-          <ion-button @click="toggleSidebar" v-else>
-            <ion-icon slot="icon-only" :icon="closeOutline"></ion-icon>
+          <ion-button @click="toggleSidebar">
+            <ion-icon slot="icon-only" :icon="isSidebarOpen ? closeOutline : menuOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
         
@@ -155,6 +155,35 @@
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading map...</p>
       </div>
+
+      <!-- Bottom Navigation -->
+      <div class="bottom-nav">
+        <button class="nav-item" @click="goToHome">
+          <ion-icon :icon="homeOutline"></ion-icon>
+          <span>Home</span>
+        </button>
+
+        <button class="nav-item active">
+          <ion-icon :icon="mapOutline"></ion-icon>
+          <span>Map</span>
+        </button>
+
+        <button class="nav-item center-button" @click="openReportModal">
+          <div class="center-button-inner">
+            <ion-icon :icon="addOutline"></ion-icon>
+          </div>
+        </button>
+
+        <button class="nav-item" @click="goToReports">
+          <ion-icon :icon="documentTextOutline"></ion-icon>
+          <span>Reports</span>
+        </button>
+
+        <button class="nav-item" @click="goToProfile">
+          <ion-icon :icon="personOutline"></ion-icon>
+          <span>Profile</span>
+        </button>
+      </div>
     </ion-content>
 
   </ion-page>
@@ -194,7 +223,12 @@ import {
   trailSignOutline,
   flashOutline,
   carOutline,
-  helpCircleOutline
+  helpCircleOutline,
+  arrowBackOutline,
+  homeOutline,
+  mapOutline,
+  documentTextOutline,
+  personOutline
 } from 'ionicons/icons';
 
 const router = useRouter();
@@ -267,6 +301,22 @@ const toggleSidebar = () => {
 
 const openReportModal = () => {
   router.push('/report');
+};
+
+const goBack = () => {
+  router.back();
+};
+
+const goToHome = () => {
+  router.push('/home');
+};
+
+const goToReports = () => {
+  router.push('/reports');
+};
+
+const goToProfile = () => {
+  router.push('/profil');
 };
 
 const locateUser = () => {
@@ -924,6 +974,81 @@ onUnmounted(() => {
   :global(.leaflet-tile) {
     filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
   }
+
+  .bottom-nav {
+    background: #2d3748;
+    border-top-color: #4a5568;
+  }
+
+  .nav-item {
+    color: #a0aec0;
+  }
+
+  .nav-item.active {
+    color: #a3bffa;
+  }
+}
+
+/* Bottom Navigation */
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 8px 0 12px;
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #718096;
+  font-size: 11px;
+  transition: color 0.2s;
+}
+
+.nav-item ion-icon {
+  font-size: 24px;
+}
+
+.nav-item.active {
+  color: #667eea;
+}
+
+.nav-item:not(.center-button):active {
+  color: #667eea;
+}
+
+.center-button {
+  padding: 0;
+  margin-top: -30px;
+}
+
+.center-button-inner {
+  width: 56px;
+  height: 56px;
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.center-button-inner ion-icon {
+  font-size: 28px;
 }
 
 /* Responsive */
