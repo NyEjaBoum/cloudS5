@@ -3,15 +3,10 @@
   <ion-page>
     <ion-content :fullscreen="true" class="ion-padding">
       <div class="login-container">
-        <!-- En-tête Ionic -->
+        <!-- En-tête -->
         <ion-header class="ion-no-border">
           <ion-toolbar>
             <ion-title size="large">Mapeo</ion-title>
-            <ion-buttons slot="end">
-              <ion-button @click="toggleLanguage" fill="clear" size="small">
-                {{ currentLanguage === 'fr' ? 'EN' : 'FR' }}
-              </ion-button>
-            </ion-buttons>
           </ion-toolbar>
         </ion-header>
 
@@ -19,25 +14,25 @@
         <div class="illustration-section">
           <div class="gradient-bg"></div>
           <div class="illustration-content">
-            <h1 class="welcome-title">Welcome Back</h1>
-            <p class="welcome-subtitle">Sign in to continue your journey</p>
+            <h1 class="welcome-title">Bienvenue</h1>
+            <p class="welcome-subtitle">Connectez-vous pour continuer</p>
           </div>
         </div>
 
         <!-- Formulaire -->
         <div class="form-section">
           <div class="form-header">
-            <h2 class="form-title">Welcome to Mapeo</h2>
-            <p class="form-subtitle">Please sign in to your account</p>
+            <h2 class="form-title">Connexion</h2>
+            <p class="form-subtitle">Entrez vos identifiants</p>
           </div>
 
           <form @submit.prevent="handleLogin">
             <!-- Email -->
             <ion-item class="form-item" fill="outline">
-              <ion-label position="floating">Email or Username</ion-label>
+              <ion-label position="floating">Email</ion-label>
               <ion-input
                 v-model="form.email"
-                type="text"
+                type="email"
                 required
                 autocapitalize="off"
                 autocorrect="off"
@@ -47,7 +42,7 @@
 
             <!-- Password -->
             <ion-item class="form-item" fill="outline">
-              <ion-label position="floating">Password</ion-label>
+              <ion-label position="floating">Mot de passe</ion-label>
               <ion-input
                 v-model="form.password"
                 :type="showPassword ? 'text' : 'password'"
@@ -65,16 +60,6 @@
               </ion-button>
             </ion-item>
 
-            <!-- Options -->
-            <div class="form-options">
-              <ion-checkbox v-model="form.rememberMe">
-                Remember me
-              </ion-checkbox>
-              <router-link to="/forgot-password" style="color: #667eea;">
-                Forgot password?
-              </router-link>
-            </div>
-
             <!-- Error -->
             <ion-note v-if="error" color="danger" class="error-note">
               <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -89,45 +74,8 @@
               class="login-button"
             >
               <ion-spinner v-if="loading" name="crescent"></ion-spinner>
-              <span v-else>Login</span>
+              <span v-else>Se connecter</span>
             </ion-button>
-
-            <!-- Divider -->
-            <div class="divider">
-              <span class="divider-text">or</span>
-            </div>
-
-            <!-- Social buttons -->
-            <ion-button
-              expand="block"
-              fill="outline"
-              @click="handleGoogleLogin"
-              :disabled="loading"
-              class="social-button"
-            >
-              <ion-icon :icon="logoGoogle" slot="start"></ion-icon>
-              Continue with Google
-            </ion-button>
-
-            <ion-button
-              expand="block"
-              fill="outline"
-              @click="handleGithubLogin"
-              :disabled="true"
-              class="social-button"
-            >
-              <ion-icon :icon="logoGithub" slot="start"></ion-icon>
-              Continue with GitHub
-            </ion-button>
-
-            <div class="signup-section">
-              <p>
-                New on our platform?
-                <router-link to="/register" style="color: #667eea; font-weight: 600;">
-                  Create an account
-                </router-link>
-              </p>
-            </div>
           </form>
         </div>
       </div>
@@ -144,12 +92,10 @@ import {
   IonHeader,
   IonToolbar,
   IonTitle,
-  IonButtons,
   IonButton,
   IonItem,
   IonLabel,
   IonInput,
-  IonCheckbox,
   IonNote,
   IonSpinner,
   IonIcon
@@ -157,40 +103,34 @@ import {
 import {
   eyeOutline,
   eyeOffOutline,
-  alertCircleOutline,
-  logoGoogle,
-  logoGithub
+  alertCircleOutline
 } from 'ionicons/icons';
+import authService from '../services/auth.service';
 
 const router = useRouter();
 
 const form = reactive({
   email: '',
-  password: '',
-  rememberMe: false
+  password: ''
 });
 
 const loading = ref(false);
 const error = ref('');
 const showPassword = ref(false);
-const currentLanguage = ref('en');
 
-const handleLogin = () => {
-  router.push('/home');
-};
+const handleLogin = async () => {
+  loading.value = true;
+  error.value = '';
 
-const handleGoogleLogin = () => {
-  console.log('Google login');
-  // Implémenter Google OAuth
-};
+  const result = await authService.signIn(form.email, form.password);
 
-const handleGithubLogin = () => {
-  console.log('GitHub login');
-  // Implémenter GitHub OAuth
-};
+  loading.value = false;
 
-const toggleLanguage = () => {
-  currentLanguage.value = currentLanguage.value === 'en' ? 'fr' : 'en';
+  if (result.success) {
+    router.push('/home');
+  } else {
+    error.value = result.error || 'Erreur de connexion';
+  }
 };
 </script>
 
@@ -297,14 +237,6 @@ const toggleLanguage = () => {
   --border-radius: 12px;
 }
 
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin: 16px 0 24px;
-  font-size: 14px;
-}
-
 .error-note {
   display: flex;
   align-items: center;
@@ -322,60 +254,9 @@ const toggleLanguage = () => {
   font-weight: 600;
 }
 
-.divider {
-  position: relative;
-  text-align: center;
-  margin: 24px 0;
-}
-
-.divider::before {
-  content: "";
-  position: absolute;
-  top: 50%;
-  left: 0;
-  right: 0;
-  height: 1px;
-  background: #e2e8f0;
-}
-
-.divider-text {
-  background: white;
-  padding: 0 16px;
-  color: #718096;
-  font-size: 14px;
-  position: relative;
-  z-index: 1;
-}
-
-.social-button {
-  --border-radius: 12px;
-  --border-width: 2px;
-  --border-color: #e2e8f0;
-  margin-bottom: 12px;
-  height: 48px;
-}
-
-.signup-section {
-  text-align: center;
-  margin-top: 32px;
-  padding-top: 24px;
-  border-top: 1px solid #e2e8f0;
-  color: #718096;
-  font-size: 14px;
-}
-
-.signup-section a {
-  font-weight: 600;
-  margin-left: 4px;
-}
-
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-section {
-    background: #1e1e1e;
-  }
-  
-  .divider-text {
     background: #1e1e1e;
   }
 }

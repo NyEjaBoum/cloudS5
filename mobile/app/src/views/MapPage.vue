@@ -142,14 +142,7 @@
     <!-- Contenu principal : Carte -->
     <ion-content>
       <div id="map" style="height: 100vh; width: 100%;"></div>
-      
-      <!-- Bouton flottant pour nouveau signalement -->
-      <ion-fab vertical="bottom" horizontal="end" slot="fixed">
-        <ion-fab-button @click="openReportModal" color="primary">
-          <ion-icon :icon="addOutline"></ion-icon>
-        </ion-fab-button>
-      </ion-fab>
-      
+
       <!-- Overlay de chargement -->
       <div v-if="mapLoading" class="loading-overlay">
         <ion-spinner name="crescent"></ion-spinner>
@@ -201,8 +194,6 @@ import {
   IonButton,
   IonIcon,
   IonContent,
-  IonFab,
-  IonFabButton,
   IonSearchbar,
   IonChip,
   IonSegment,
