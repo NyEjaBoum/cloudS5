@@ -360,36 +360,34 @@
       </div>
 
       <!-- Bottom Navigation -->
-      <ion-tabs>
-        <ion-tab-bar slot="bottom">
-          <ion-tab-button tab="home" selected>
-            <ion-icon :icon="homeOutline"></ion-icon>
-            <ion-label>Home</ion-label>
-          </ion-tab-button>
-          
-          <ion-tab-button tab="map" @click="goToMap">
-            <ion-icon :icon="mapOutline"></ion-icon>
-            <ion-label>Map</ion-label>
-          </ion-tab-button>
-          
-          <!-- Bouton central pour nouveau signalement -->
-          <ion-tab-button class="center-button" @click="goToNewReport">
-            <div class="center-button-inner">
-              <ion-icon :icon="addOutline"></ion-icon>
-            </div>
-          </ion-tab-button>
-          
-          <ion-tab-button tab="reports" @click="goToReports">
-            <ion-icon :icon="documentTextOutline"></ion-icon>
-            <ion-label>Reports</ion-label>
-          </ion-tab-button>
-          
-          <ion-tab-button tab="profile" @click="goToProfile">
-            <ion-icon :icon="personOutline"></ion-icon>
-            <ion-label>Profile</ion-label>
-          </ion-tab-button>
-        </ion-tab-bar>
-      </ion-tabs>
+      <div class="bottom-nav">
+        <button class="nav-item active" @click="() => {}">
+          <ion-icon :icon="homeOutline"></ion-icon>
+          <span>Home</span>
+        </button>
+
+        <button class="nav-item" @click="goToMap">
+          <ion-icon :icon="mapOutline"></ion-icon>
+          <span>Map</span>
+        </button>
+
+        <!-- Bouton central pour nouveau signalement -->
+        <button class="nav-item center-button" @click="goToNewReport">
+          <div class="center-button-inner">
+            <ion-icon :icon="addOutline"></ion-icon>
+          </div>
+        </button>
+
+        <button class="nav-item" @click="goToReports">
+          <ion-icon :icon="documentTextOutline"></ion-icon>
+          <span>Reports</span>
+        </button>
+
+        <button class="nav-item" @click="goToProfile">
+          <ion-icon :icon="personOutline"></ion-icon>
+          <span>Profile</span>
+        </button>
+      </div>
     </ion-content>
   </ion-page>
 </template>
@@ -408,10 +406,7 @@ import {
   IonIcon,
   IonBadge,
   IonCard,
-  IonLabel,
-  IonTabs,
-  IonTabBar,
-  IonTabButton
+  IonLabel
 } from '@ionic/vue';
 import {
   menuOutline,
@@ -1316,16 +1311,49 @@ onMounted(() => {
 }
 
 /* Bottom Navigation */
-ion-tab-bar {
-  --background: white;
-  --border: 1px solid #e2e8f0;
-  padding: 8px 0;
-  height: 64px;
+.bottom-nav {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  display: flex;
+  justify-content: space-around;
+  align-items: center;
+  background: white;
+  border-top: 1px solid #e2e8f0;
+  padding: 8px 0 12px;
+  z-index: 1000;
+}
+
+.nav-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  background: transparent;
+  border: none;
+  padding: 8px 16px;
+  cursor: pointer;
+  color: #718096;
+  font-size: 11px;
+  transition: color 0.2s;
+}
+
+.nav-item ion-icon {
+  font-size: 24px;
+}
+
+.nav-item.active {
+  color: #667eea;
+}
+
+.nav-item:not(.center-button):active {
+  color: #667eea;
 }
 
 .center-button {
-  --background: transparent;
-  margin-top: -24px;
+  padding: 0;
+  margin-top: -30px;
 }
 
 .center-button-inner {
@@ -1338,6 +1366,10 @@ ion-tab-bar {
   justify-content: center;
   color: white;
   box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+}
+
+.center-button-inner ion-icon {
+  font-size: 28px;
 }
 
 /* Dark mode */
@@ -1393,10 +1425,18 @@ ion-tab-bar {
   .notification-icon {
     background: #4a5568;
   }
-  
-  ion-tab-bar {
-    --background: #2d3748;
-    --border: 1px solid #4a5568;
+
+  .bottom-nav {
+    background: #2d3748;
+    border-top-color: #4a5568;
+  }
+
+  .nav-item {
+    color: #a0aec0;
+  }
+
+  .nav-item.active {
+    color: #a3bffa;
   }
 }
 
