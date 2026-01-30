@@ -226,75 +226,6 @@
           </ion-card-content>
         </ion-card>
 
-        <!-- Étape 4: Détails additionnels -->
-        <ion-card class="form-section">
-          <ion-card-header>
-            <ion-card-title>
-              <div class="section-header">
-                <span class="step-number">4</span>
-                <span>Additional details</span>
-              </div>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <!-- Date du problème -->
-            <ion-item fill="outline" class="form-item">
-              <ion-label position="stacked">When did you notice this?</ion-label>
-              <ion-datetime
-                v-model="form.incidentDate"
-                presentation="date"
-                :max="today"
-              ></ion-datetime>
-            </ion-item>
-
-            <!-- Visibilité -->
-            <ion-item class="visibility-item">
-              <ion-label>
-                <h3>Visibility</h3>
-                <p>Make this report public or private</p>
-              </ion-label>
-              <ion-toggle
-                v-model="form.isPublic"
-                :checked="form.isPublic"
-              >
-                <span slot="on">Public</span>
-                <span slot="off">Private</span>
-              </ion-toggle>
-            </ion-item>
-
-            <!-- Notifications -->
-            <ion-item class="notification-item">
-              <ion-label>
-                <h3>Receive updates</h3>
-                <p>Get notified when status changes</p>
-              </ion-label>
-              <ion-toggle v-model="form.receiveUpdates" :checked="form.receiveUpdates"></ion-toggle>
-            </ion-item>
-
-            <!-- Tags -->
-            <div class="tags-section">
-              <h3 class="section-subtitle">Tags (optional)</h3>
-              <div class="tags-input">
-                <ion-chip
-                  v-for="(tag, index) in form.tags"
-                  :key="index"
-                  @click="removeTag(index)"
-                >
-                  {{ tag }}
-                  <ion-icon :icon="closeOutline"></ion-icon>
-                </ion-chip>
-                <ion-input
-                  v-model="newTag"
-                  placeholder="Add a tag"
-                  @keyup.enter="addTag"
-                  @keyup.space="addTag"
-                  class="tag-input"
-                ></ion-input>
-              </div>
-            </div>
-          </ion-card-content>
-        </ion-card>
-
         <!-- Boutons d'action -->
         <div class="action-buttons">
           <ion-button
@@ -401,8 +332,6 @@ import {
   IonInput,
   IonTextarea,
   IonChip,
-  IonToggle,
-  IonDatetime,
   IonSpinner,
   IonModal,
   alertController,
@@ -418,14 +347,11 @@ import {
   mapOutline,
   navigateOutline,
   pinOutline,
-  closeOutline,
   checkmarkCircleOutline,
   warningOutline,
   alertCircleOutline,
   medicalOutline,
   constructOutline,
-  trashOutline,
-  waterOutline,
   flashOutline,
   homeOutline,
   trailSignOutline,
@@ -447,17 +373,11 @@ const form = reactive({
   urgency: 'medium',
   photos: [] as Array<{ file: File; preview: string }>,
   location: null as { lat: number; lng: number } | null,
-  address: '',
-  incidentDate: new Date().toISOString(),
-  isPublic: true,
-  receiveUpdates: true,
-  tags: [] as string[]
+  address: ''
 });
 
-const newTag = ref('');
 const saving = ref(false);
 const mapModalOpen = ref(false);
-const today = new Date().toISOString();
 
 // Catégories de problèmes
 const mainCategories = [
@@ -678,17 +598,6 @@ const getCurrentLocation = () => {
       }
     );
   }
-};
-
-const addTag = () => {
-  if (newTag.value.trim() && !form.tags.includes(newTag.value.trim())) {
-    form.tags.push(newTag.value.trim());
-    newTag.value = '';
-  }
-};
-
-const removeTag = (index: number) => {
-  form.tags.splice(index, 1);
 };
 
 const submitReport = async () => {

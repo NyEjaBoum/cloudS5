@@ -1,3 +1,25 @@
+# Dans mobile/app : 
 npm run build
 npx cap sync android
 npx cap run android
+
+
+# Nettoyage :
+cd android
+gradlew clean
+cd ..
+
+
+# Logs :
+adb logcat
+
+# Corriger le problème d'horloge :
+# Synchroniser l'heure avec votre PC
+adb shell su -c "date $(date +%m%d%H%M%Y.%S)"
+
+# Corriger le problème DNS :
+# Dans les paramètres de l'émulateur :
+    Ouvrez Extended Controls (les 3 points ...)
+    Allez dans Settings → Proxy
+    Désactivez le proxy si activé
+
