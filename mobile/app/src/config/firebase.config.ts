@@ -1,10 +1,8 @@
 // src/config/firebase.config.ts
 import { initializeApp } from 'firebase/app';
 import { getAuth } from 'firebase/auth';
+import { getFirestore } from 'firebase/firestore';
 
-// Configuration Firebase - REMPLACEZ CES VALEURS PAR VOS PROPRES CLÉS
-// Vous pouvez les trouver dans la console Firebase:
-// Project Settings > General > Your apps > Firebase SDK snippet
 const firebaseConfig = {
   apiKey: "AIzaSyD2ZWSrx8W7SklEO2DaSgMWQVSnmD27zX8",
   authDomain: "mapeo-23bbc.firebaseapp.com",
@@ -18,6 +16,7 @@ const firebaseConfig = {
 // Initialiser Firebase
 const app = initializeApp(firebaseConfig);
 
-// Exporter l'instance Auth
+// Exporter les instances
 export const auth = getAuth(app);
+export const db = getFirestore(app);
 export default app;
