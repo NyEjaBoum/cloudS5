@@ -1,4 +1,4 @@
-# Dans mobile/app : 
+# Dans mobile/app :
 npm run build
 npx cap sync android
 npx cap run android

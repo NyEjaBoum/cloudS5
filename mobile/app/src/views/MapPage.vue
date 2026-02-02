@@ -183,7 +183,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -221,6 +221,7 @@ import {
   documentTextOutline,
   personOutline
 } from 'ionicons/icons';
+import reportsService from '../services/reports.service';
 
 const router = useRouter();
 
@@ -232,45 +233,24 @@ const urgencyFilter = ref('all');
 const activeFilters = ref([]);
 const activeReportId = ref(null);
 
-// Données de test
-const nearbyReports = reactive([
-  {
-    id: '1',
-    title: 'Broken sidewalk on Independence Avenue',
-    description: 'Large crack in the sidewalk causing accessibility issues',
-    category: 'infrastructure',
-    status: 'pending',
-    distance: 0.5,
-    timeAgo: '2 hours ago',
-    location: { lat: -18.8792, lng: 47.5079 },
-    upvotes: 12,
-    comments: 5
-  },
-  {
-    id: '2',
-    title: 'Street light not working',
-    description: 'Light pole broken at the intersection',
-    category: 'infrastructure',
-    status: 'in_progress',
-    distance: 1.2,
-    timeAgo: '1 day ago',
-    location: { lat: -18.8800, lng: 47.5100 },
-    upvotes: 8,
-    comments: 3
-  },
-  {
-    id: '3',
-    title: 'Garbage pileup near market',
-    description: 'Trash has been accumulating for days',
-    category: 'environment',
-    status: 'pending',
-    distance: 0.8,
-    timeAgo: '3 hours ago',
-    location: { lat: -18.8780, lng: 47.5050 },
-    upvotes: 15,
-    comments: 7
-  }
-]);
+// Données des signalements (temps réel depuis Firebase)
+const nearbyReports = ref([]);
+let unsubscribeReports = null;
+
+// Calculer le temps écoulé
+const getTimeAgo = (date) => {
+  if (!date) return '';
+  const now = new Date();
+  const diff = now.getTime() - date.getTime();
+  const minutes = Math.floor(diff / 60000);
+  const hours = Math.floor(minutes / 60);
+  const days = Math.floor(hours / 24);
+
+  if (days > 0) return `${days} jour${days > 1 ? 's' : ''}`;
+  if (hours > 0) return `${hours} heure${hours > 1 ? 's' : ''}`;
+  if (minutes > 0) return `${minutes} min`;
+  return 'À l\'instant';
+};
 
 const filters = [
   { id: 'infrastructure', name: 'Infrastructure', icon: constructOutline },
@@ -384,9 +364,10 @@ const filterReports = () => {
 
 const focusOnReport = (report) => {
   activeReportId.value = report.id;
-  
-  if (map) {
-    map.setView(report.location, 16);
+  const coords = getCoordinates(report);
+
+  if (map && coords) {
+    map.setView(coords, 16);
     
     // Animer le marqueur
     const marker = markersLayer?.getLayer(report.id);
@@ -438,31 +419,46 @@ const getStatusColor = (status) => {
   return colors[status] || 'medium';
 };
 
+// Extraire les coordonnées (gère les deux formats)
+const getCoordinates = (report) => {
+  // Format 1: location: { lat, lng }
+  if (report.location?.lat && report.location?.lng) {
+    return [report.location.lat, report.location.lng];
+  }
+  // Format 2: latitude, longitude (format web)
+  if (report.latitude && report.longitude) {
+    return [Number(report.latitude), Number(report.longitude)];
+  }
+  return null;
+};
+
 // Méthodes Leaflet
 const initializeMap = async () => {
   try {
     // Charger Leaflet dynamiquement
     L = await import('leaflet');
-    
+
+    // Corriger les icônes par défaut de Leaflet
+    delete L.Icon.Default.prototype._getIconUrl;
+    L.Icon.Default.mergeOptions({
+      iconRetinaUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon-2x.png',
+      iconUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-icon.png',
+      shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
+    });
+
     // Créer la carte centrée sur Antananarivo
     map = L.map('map').setView([-18.8792, 47.5079], 13);
-    
+
     // Ajouter les tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap contributors',
+      attribution: '© OpenStreetMap',
       maxZoom: 19
-    }).addTo(map);
-    
-    // Alternative: Tuiles Esri (plus jolies)
-    L.tileLayer('https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}', {
-      attribution: 'Tiles © Esri'
     }).addTo(map);
     
     // Couche pour les marqueurs
     markersLayer = L.layerGroup().addTo(map);
-    
-    // Ajouter les marqueurs des signalements
-    nearbyReports.forEach(addReportMarker);
+
+    // Les marqueurs seront ajoutés via la souscription Firebase
     
     // Gestion du clic sur la carte pour sélectionner une position
     map.on('click', (e) => {
@@ -502,9 +498,15 @@ const initializeMap = async () => {
 
 const addReportMarker = (report) => {
   if (!map || !L || !markersLayer) return;
-  
+
+  const coords = getCoordinates(report);
+  if (!coords) {
+    console.warn('Coordonnées manquantes pour:', report.id);
+    return;
+  }
+
   // Créer un marqueur personnalisé
-  const marker = L.marker(report.location, {
+  const marker = L.marker(coords, {
     icon: L.divIcon({
       className: `report-marker marker-${report.category}`,
       html: `
@@ -527,11 +529,10 @@ const addReportMarker = (report) => {
       <p>${report.description}</p>
       <div class="popup-meta">
         <span class="status-badge ${report.status}">${report.status}</span>
-        <span class="distance">${report.distance}km away</span>
+        <span class="time">${report.timeAgo || ''}</span>
       </div>
       <div class="popup-actions">
-        <button onclick="window.viewReportDetails('${report.id}')">View Details</button>
-        <button onclick="window.upvoteReport('${report.id}')">Upvote</button>
+        <button onclick="window.viewReportDetails('${report.id}')">Détails</button>
       </div>
     </div>
   `);
@@ -545,33 +546,44 @@ const addReportMarker = (report) => {
 
 const updateMapMarkers = () => {
   if (!markersLayer) return;
-  
+
   // Supprimer tous les marqueurs
   markersLayer.clearLayers();
-  
+
   // Filtrer et réajouter les marqueurs
-  const filtered = nearbyReports.filter(report => {
+  const filtered = nearbyReports.value.filter(report => {
     // Filtrer par catégorie
     if (activeFilters.value.length > 0 && !activeFilters.value.includes(report.category)) {
       return false;
     }
-    
+
     // Filtrer par urgence (simplifié)
     if (urgencyFilter.value !== 'all') {
       // Logique de filtrage par urgence
-      return true; // À implémenter
+      return true;
     }
-    
+
     return true;
   });
-  
+
   filtered.forEach(addReportMarker);
 };
 
 // Lifecycle
 onMounted(() => {
   initializeMap();
-  
+
+  // Souscrire aux signalements en temps réel depuis Firebase
+  unsubscribeReports = reportsService.subscribeToReports((reports) => {
+    console.log('📍 Signalements reçus:', reports.length);
+    nearbyReports.value = reports.map(report => ({
+      ...report,
+      timeAgo: getTimeAgo(report.createdAt),
+      distance: 0 // TODO: calculer la distance depuis la position utilisateur
+    }));
+    updateMapMarkers();
+  });
+
   // Exposer des fonctions globales pour les popups
   window.viewReportDetails = viewReportDetails;
   window.upvoteReport = (id) => {
@@ -580,6 +592,11 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
+  // Se désabonner de Firebase
+  if (unsubscribeReports) {
+    unsubscribeReports();
+  }
+
   if (map) {
     map.remove();
   }
