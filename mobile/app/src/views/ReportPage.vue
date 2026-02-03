@@ -483,6 +483,19 @@ const goBack = () => {
   router.back();
 };
 
+// Navigation
+const goToHome = () => {
+  router.push('/home');
+};
+
+const goToMap = () => {
+  router.push('/map');
+};
+
+const goToProfile = () => {
+  router.push('/profil');
+};
+
 const selectCategory = (category: any) => {
   form.categoryId = category.id;
   form.subcategoryId = '';
