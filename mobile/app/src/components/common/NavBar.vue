@@ -1,11 +1,11 @@
-<!-- src/components/BottomNavBar.vue -->
+<!-- src/components/common/NavBar.vue -->
 <template>
   <div class="bottom-nav" :class="{ 'has-padding': hasPadding }">
-    <button 
-      v-for="item in navItems" 
+    <button
+      v-for="item in navItems"
       :key="item.id"
       class="nav-item"
-      :class="{ 
+      :class="{
         active: item.active,
         'center-button': item.center,
         'nav-item-disabled': item.disabled
@@ -27,16 +27,13 @@
 <script setup lang="ts">
 import { computed } from 'vue';
 import { useRouter } from 'vue-router';
-import {
-  IonIcon
-} from '@ionic/vue';
+import { IonIcon } from '@ionic/vue';
 import {
   homeOutline,
   mapOutline,
   addOutline,
   documentTextOutline,
-  personOutline,
-  documentOutline
+  personOutline
 } from 'ionicons/icons';
 
 interface NavItem {
@@ -112,7 +109,7 @@ const navItems = computed(() => {
   if (props.customItems && props.customItems.length > 0) {
     return props.customItems;
   }
-  
+
   // Mettre à jour l'état actif pour les items par défaut
   return defaultItems.map(item => ({
     ...item,
@@ -129,7 +126,6 @@ const handleClick = (item: NavItem) => {
 </script>
 
 <style scoped>
-/* (Le CSS reste exactement le même que précédemment) */
 .bottom-nav {
   position: fixed;
   bottom: 0;
@@ -261,16 +257,16 @@ const handleClick = (item: NavItem) => {
     padding: 8px 12px;
     font-size: 10px;
   }
-  
+
   .nav-item ion-icon {
     font-size: 22px;
   }
-  
+
   .center-button-inner {
     width: 50px;
     height: 50px;
   }
-  
+
   .center-button-inner ion-icon {
     font-size: 24px;
   }

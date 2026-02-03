@@ -36,7 +36,7 @@
           </div>
 
           <!-- Stats rapides -->
-          <div class="quick-stats">
+          <div class="quick-stats-grid">
             <div class="stat-item">
               <div class="stat-value">{{ userStats.reports }}</div>
               <div class="stat-label">Signalements</div>
@@ -111,14 +111,10 @@ import {
   chevronForwardOutline,
   addCircleOutline,
   listOutline,
-  mapOutline,
-  homeOutline,
-  addOutline,
-  documentTextOutline
+  mapOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
-
-import NavBar from './components/NavBar.vue';
+import { NavBar } from '../components';
 
 const router = useRouter();
 
@@ -149,10 +145,6 @@ const goToReports = () => {
 
 const goToMap = () => {
   router.push('/map');
-};
-
-const goToHome = () => {
-  router.push('/home');
 };
 
 const handleLogout = async () => {
@@ -189,7 +181,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-container {
-  padding-bottom: 100px; /* Espace pour la navbar */
+  padding-bottom: 100px;
 }
 
 /* Header profil */
@@ -238,7 +230,7 @@ onMounted(() => {
 }
 
 /* Quick stats */
-.quick-stats {
+.quick-stats-grid {
   display: grid;
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
@@ -292,8 +284,6 @@ onMounted(() => {
   font-weight: 600;
 }
 
-/* SUPPRIMEZ TOUTE la section .bottom-nav ci-dessous car elle est dans NavBar.vue */
-
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .user-name {
@@ -304,7 +294,7 @@ onMounted(() => {
     color: #a0aec0;
   }
 
-  .quick-stats,
+  .quick-stats-grid,
   .quick-actions {
     background: #2d3748;
   }

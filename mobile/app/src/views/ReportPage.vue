@@ -32,38 +32,10 @@
             </ion-card-title>
           </ion-card-header>
           <ion-card-content>
-            <!-- Catégories principales -->
-            <div class="category-grid">
-              <button
-                v-for="category in mainCategories"
-                :key="category.id"
-                class="category-card"
-                :class="{ 'category-selected': form.categoryId === category.id }"
-                @click="selectCategory(category)"
-                type="button"
-              >
-                <div class="category-icon">
-                  <ion-icon :icon="category.icon"></ion-icon>
-                </div>
-                <span class="category-name">{{ category.name }}</span>
-              </button>
-            </div>
-
-            <!-- Sous-catégories (si catégorie sélectionnée) -->
-            <div v-if="selectedCategory" class="subcategories-section">
-              <h3 class="subcategories-title">Specific issue</h3>
-              <div class="subcategories-grid">
-                <ion-chip
-                  v-for="sub in selectedCategory.subcategories"
-                  :key="sub.id"
-                  :outline="form.subcategoryId !== sub.id"
-                  :color="form.subcategoryId === sub.id ? 'primary' : 'medium'"
-                  @click="form.subcategoryId = sub.id"
-                >
-                  {{ sub.name }}
-                </ion-chip>
-              </div>
-            </div>
+            <CategorySelector
+              v-model="form.categoryId"
+              v-model:subcategory-value="form.subcategoryId"
+            />
           </ion-card-content>
         </ion-card>
 
@@ -104,32 +76,7 @@
 
             <!-- Niveau d'urgence -->
             <div class="urgency-section">
-              <h3 class="section-subtitle">Urgency Level</h3>
-              <div class="urgency-options">
-                <button
-                  v-for="level in urgencyLevels"
-                  :key="level.id"
-                  class="urgency-card"
-                  :class="`urgency-${level.id}`"
-                  :style="{ borderColor: form.urgency === level.id ? level.color : '#e2e8f0' }"
-                  @click="form.urgency = level.id"
-                  type="button"
-                >
-                  <div class="urgency-icon" :style="{ color: level.color }">
-                    <ion-icon :icon="level.icon"></ion-icon>
-                  </div>
-                  <div class="urgency-info">
-                    <span class="urgency-name">{{ level.name }}</span>
-                    <span class="urgency-desc">{{ level.description }}</span>
-                  </div>
-                  <ion-icon 
-                    v-if="form.urgency === level.id"
-                    :icon="checkmarkCircleOutline"
-                    :style="{ color: level.color }"
-                    class="selected-icon"
-                  ></ion-icon>
-                </button>
-              </div>
+              <UrgencySelector v-model="form.urgency" />
             </div>
           </ion-card-content>
         </ion-card>
@@ -147,82 +94,19 @@
           <ion-card-content>
             <!-- Galerie de photos -->
             <div class="photos-section">
-              <div class="photos-grid">
-                <!-- Photos existantes -->
-                <div
-                  v-for="(photo, index) in form.photos"
-                  :key="index"
-                  class="photo-item"
-                >
-                  <img :src="photo.preview" class="photo-preview" />
-                  <button class="remove-photo" @click="removePhoto(index)" type="button">
-                    <ion-icon :icon="closeCircleOutline"></ion-icon>
-                  </button>
-                </div>
-
-                <!-- Bouton d'ajout -->
-                <div
-                  v-if="form.photos.length < 5"
-                  class="add-photo-card"
-                  @click="addPhoto"
-                >
-                  <div class="add-photo-content">
-                    <ion-icon :icon="cameraOutline" size="large"></ion-icon>
-                    <span class="add-photo-text">Add photo</span>
-                    <span class="photo-count">{{ form.photos.length }}/5</span>
-                  </div>
-                  <input
-                    ref="photoInput"
-                    type="file"
-                    accept="image/*"
-                    multiple
-                    @change="handlePhotoUpload"
-                    style="display: none"
-                  />
-                </div>
-              </div>
-              <p class="photos-note">Add up to 5 photos (max 5MB each)</p>
+              <PhotoUploader
+                v-model:photos="form.photos"
+                :max-photos="5"
+                :max-size-m-b="5"
+              />
             </div>
 
             <!-- Localisation -->
-            <div class="location-section">
-              <h3 class="section-subtitle">Location</h3>
-              <div class="location-options">
-                <!-- Carte mini -->
-                <div class="mini-map" @click="openMap">
-                  <div v-if="form.location" class="map-preview">
-                    <ion-icon :icon="locationOutline" class="map-icon"></ion-icon>
-                    <div class="map-coordinates">
-                      <span>{{ form.location.lat.toFixed(6) }}, {{ form.location.lng.toFixed(6) }}</span>
-                    </div>
-                  </div>
-                  <div v-else class="map-placeholder">
-                    <ion-icon :icon="mapOutline"></ion-icon>
-                    <span>Tap to select location</span>
-                  </div>
-                </div>
-
-                <!-- Adresse -->
-                <ion-item fill="outline" class="form-item">
-                  <ion-label position="floating">Address (optional)</ion-label>
-                  <ion-input
-                    v-model="form.address"
-                    placeholder="e.g., 123 Main Street"
-                  ></ion-input>
-                </ion-item>
-
-                <!-- Bouton de localisation automatique -->
-                <ion-button
-                  expand="block"
-                  fill="outline"
-                  @click="getCurrentLocation"
-                  class="location-button"
-                >
-                  <ion-icon :icon="navigateOutline" slot="start"></ion-icon>
-                  Use my current location
-                </ion-button>
-              </div>
-            </div>
+            <LocationPicker
+              v-model:location="form.location"
+              v-model:address="form.address"
+              @open-map="openMap"
+            />
           </ion-card-content>
         </ion-card>
 
@@ -266,7 +150,6 @@
         </ion-header>
         <ion-content>
           <div class="full-map">
-            <!-- Intégrer votre composant de carte ici -->
             <div class="map-placeholder-large">
               <ion-icon :icon="mapOutline" size="large"></ion-icon>
               <p>Map would be displayed here</p>
@@ -305,7 +188,6 @@ import {
   IonLabel,
   IonInput,
   IonTextarea,
-  IonChip,
   IonSpinner,
   IonModal,
   alertController,
@@ -315,28 +197,11 @@ import {
 import {
   arrowBackOutline,
   saveOutline,
-  closeCircleOutline,
-  cameraOutline,
-  locationOutline,
   mapOutline,
-  navigateOutline,
-  pinOutline,
-  checkmarkCircleOutline,
-  warningOutline,
-  alertCircleOutline,
-  medicalOutline,
-  constructOutline,
-  flashOutline,
-  homeOutline,
-  trailSignOutline,
-  carOutline,
-  helpCircleOutline,
-  addOutline,
-  documentTextOutline,
-  personOutline
+  pinOutline
 } from 'ionicons/icons';
 
-import NavBar from './components/NavBar.vue';
+import { NavBar, CategorySelector, UrgencySelector, PhotoUploader, LocationPicker } from '../components';
 
 const router = useRouter();
 
@@ -355,126 +220,11 @@ const form = reactive({
 const saving = ref(false);
 const mapModalOpen = ref(false);
 
-// Catégories de problèmes
-const mainCategories = [
-  {
-    id: 'infrastructure',
-    name: 'Infrastructure',
-    icon: constructOutline,
-    color: '#4299e1',
-    subcategories: [
-      { id: 'roads', name: 'Roads' },
-      { id: 'sidewalks', name: 'Sidewalks' },
-      { id: 'bridges', name: 'Bridges' },
-      { id: 'streetlights', name: 'Street Lights' }
-    ]
-  },
-  {
-    id: 'public_safety',
-    name: 'Public Safety',
-    icon: alertCircleOutline,
-    color: '#ed8936',
-    subcategories: [
-      { id: 'traffic', name: 'Traffic Issues' },
-      { id: 'crime', name: 'Crime' },
-      { id: 'fire_hazard', name: 'Fire Hazard' },
-      { id: 'emergency', name: 'Emergency' }
-    ]
-  },
-  {
-    id: 'environment',
-    name: 'Environment',
-    icon: trailSignOutline,
-    color: '#48bb78',
-    subcategories: [
-      { id: 'trash', name: 'Trash/Litter' },
-      { id: 'pollution', name: 'Pollution' },
-      { id: 'parks', name: 'Parks' },
-      { id: 'water', name: 'Water Issues' }
-    ]
-  },
-  {
-    id: 'utilities',
-    name: 'Utilities',
-    icon: flashOutline,
-    color: '#9f7aea',
-    subcategories: [
-      { id: 'electricity', name: 'Electricity' },
-      { id: 'water', name: 'Water Supply' },
-      { id: 'gas', name: 'Gas' },
-      { id: 'internet', name: 'Internet/Cable' }
-    ]
-  },
-  {
-    id: 'transportation',
-    name: 'Transportation',
-    icon: carOutline,
-    color: '#ed64a6',
-    subcategories: [
-      { id: 'parking', name: 'Parking' },
-      { id: 'public_transit', name: 'Public Transit' },
-      { id: 'bike_lanes', name: 'Bike Lanes' },
-      { id: 'accessibility', name: 'Accessibility' }
-    ]
-  },
-  {
-    id: 'other',
-    name: 'Other',
-    icon: helpCircleOutline,
-    color: '#a0aec0',
-    subcategories: [
-      { id: 'noise', name: 'Noise Complaint' },
-      { id: 'animals', name: 'Animals' },
-      { id: 'graffiti', name: 'Graffiti' },
-      { id: 'other', name: 'Other Issues' }
-    ]
-  }
-];
-
-const urgencyLevels = [
-  {
-    id: 'low',
-    name: 'Low',
-    description: 'Minor inconvenience',
-    color: '#48bb78',
-    icon: alertCircleOutline,
-    responseTime: '7 days'
-  },
-  {
-    id: 'medium',
-    name: 'Medium',
-    description: 'Needs attention',
-    color: '#ed8936',
-    icon: warningOutline,
-    responseTime: '3 days'
-  },
-  {
-    id: 'high',
-    name: 'High',
-    description: 'Serious issue',
-    color: '#ed8936',
-    icon: warningOutline,
-    responseTime: '24 hours'
-  },
-  {
-    id: 'critical',
-    name: 'Critical',
-    description: 'Emergency/danger',
-    color: '#f56565',
-    icon: medicalOutline,
-    responseTime: 'Immediate'
-  }
-];
-
 // Computed
-const selectedCategory = computed(() => {
-  return mainCategories.find(cat => cat.id === form.categoryId);
-});
-
 const canSubmit = computed(() => {
-  return form.categoryId && 
-         form.title && 
-         form.description && 
+  return form.categoryId &&
+         form.title &&
+         form.description &&
          form.urgency;
 });
 
@@ -483,73 +233,11 @@ const goBack = () => {
   router.back();
 };
 
-// Navigation
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToMap = () => {
-  router.push('/map');
-};
-
-const goToProfile = () => {
-  router.push('/profil');
-};
-
-const selectCategory = (category: any) => {
-  form.categoryId = category.id;
-  form.subcategoryId = '';
-};
-
-const addPhoto = () => {
-  const input = document.createElement('input');
-  input.type = 'file';
-  input.accept = 'image/*';
-  input.multiple = true;
-  input.onchange = handlePhotoUpload;
-  input.click();
-};
-
-const handlePhotoUpload = async (event: Event) => {
-  const input = event.target as HTMLInputElement;
-  if (!input.files) return;
-
-  const files = Array.from(input.files);
-  
-  for (const file of files) {
-    if (form.photos.length >= 5) break;
-    
-    if (file.size > 5 * 1024 * 1024) {
-      const toast = await toastController.create({
-        message: 'File too large (max 5MB)',
-        duration: 3000,
-        color: 'warning'
-      });
-      await toast.present();
-      continue;
-    }
-
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      form.photos.push({
-        file,
-        preview: e.target?.result as string
-      });
-    };
-    reader.readAsDataURL(file);
-  }
-};
-
-const removePhoto = (index: number) => {
-  form.photos.splice(index, 1);
-};
-
 const openMap = () => {
   mapModalOpen.value = true;
 };
 
 const simulateLocationSelect = () => {
-  // Simuler une position (en vrai, utiliser la carte)
   form.location = {
     lat: 40.7128 + (Math.random() - 0.5) * 0.01,
     lng: -74.0060 + (Math.random() - 0.5) * 0.01
@@ -557,32 +245,15 @@ const simulateLocationSelect = () => {
   mapModalOpen.value = false;
 };
 
-const getCurrentLocation = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        form.location = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-      }
-    );
-  }
-};
-
 const submitReport = async () => {
   saving.value = true;
-  
+
   try {
     const loading = await loadingController.create({
       message: 'Submitting report...'
     });
     await loading.present();
 
-    // Simuler l'envoi à l'API
     await new Promise(resolve => setTimeout(resolve, 2000));
 
     await loading.dismiss();
@@ -595,11 +266,10 @@ const submitReport = async () => {
     });
     await toast.present();
 
-    // Rediriger vers la page des signalements
     router.push('/reports');
   } catch (error) {
     console.error('Error submitting report:', error);
-    
+
     const alert = await alertController.create({
       header: 'Error',
       message: 'Failed to submit report. Please try again.',
@@ -613,9 +283,8 @@ const submitReport = async () => {
 
 const saveAsDraft = async () => {
   saving.value = true;
-  
+
   try {
-    // Sauvegarder dans le localStorage
     const drafts = JSON.parse(localStorage.getItem('report_drafts') || '[]');
     drafts.push({
       ...form,
@@ -642,7 +311,7 @@ const saveAsDraft = async () => {
 
 <style scoped>
 .report-form {
-  padding-bottom: 80px; /* Espace pour la navbar */
+  padding-bottom: 80px;
 }
 
 .form-section {
@@ -670,82 +339,6 @@ const saveAsDraft = async () => {
   font-weight: 600;
 }
 
-/* Catégories */
-.category-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 20px;
-}
-
-.category-card {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 16px 8px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  min-height: 100px;
-}
-
-.category-card:hover {
-  transform: translateY(-2px);
-  border-color: #cbd5e0;
-}
-
-.category-selected {
-  border-color: #667eea;
-  background: #f7fafc;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
-}
-
-.category-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f7fafc;
-  border-radius: 10px;
-  margin-bottom: 8px;
-  color: #667eea;
-}
-
-.category-selected .category-icon {
-  background: #e6edff;
-}
-
-.category-name {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4a5568;
-  text-align: center;
-}
-
-/* Sous-catégories */
-.subcategories-section {
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
-}
-
-.subcategories-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 12px;
-}
-
-.subcategories-grid {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-}
-
 /* Formulaire */
 .form-item {
   margin-bottom: 20px;
@@ -764,206 +357,9 @@ const saveAsDraft = async () => {
   margin-top: 24px;
 }
 
-.section-subtitle {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 12px;
-}
-
-.urgency-options {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.urgency-card {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  padding: 12px 16px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  background: white;
-  cursor: pointer;
-  transition: all 0.2s;
-  width: 100%;
-}
-
-.urgency-card:hover {
-  border-color: #cbd5e0;
-}
-
-.urgency-icon {
-  width: 40px;
-  height: 40px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f7fafc;
-  border-radius: 10px;
-  font-size: 20px;
-}
-
-.urgency-info {
-  flex: 1;
-  text-align: left;
-}
-
-.urgency-name {
-  display: block;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 2px;
-}
-
-.urgency-desc {
-  display: block;
-  font-size: 12px;
-  color: #718096;
-}
-
-.selected-icon {
-  font-size: 20px;
-}
-
 /* Photos */
 .photos-section {
   margin-bottom: 24px;
-}
-
-.photos-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.photo-item {
-  position: relative;
-  aspect-ratio: 1;
-  border-radius: 12px;
-  overflow: hidden;
-}
-
-.photo-preview {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-}
-
-.remove-photo {
-  position: absolute;
-  top: 4px;
-  right: 4px;
-  width: 24px;
-  height: 24px;
-  background: rgba(0, 0, 0, 0.6);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  border: none;
-  cursor: pointer;
-}
-
-.add-photo-card {
-  aspect-ratio: 1;
-  border: 2px dashed #cbd5e0;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-}
-
-.add-photo-card:hover {
-  border-color: #667eea;
-  background: #f7fafc;
-}
-
-.add-photo-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 8px;
-}
-
-.add-photo-text {
-  font-size: 12px;
-  color: #718096;
-}
-
-.photo-count {
-  font-size: 10px;
-  color: #a0aec0;
-}
-
-.photos-note {
-  font-size: 12px;
-  color: #718096;
-  text-align: center;
-  margin: 0;
-}
-
-/* Localisation */
-.location-section {
-  margin-top: 24px;
-}
-
-.mini-map {
-  height: 100px;
-  border: 2px solid #e2e8f0;
-  border-radius: 12px;
-  margin-bottom: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
-  transition: all 0.3s;
-  overflow: hidden;
-}
-
-.mini-map:hover {
-  border-color: #667eea;
-}
-
-.map-preview {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  width: 100%;
-  height: 100%;
-  background: #f7fafc;
-}
-
-.map-icon {
-  font-size: 32px;
-  color: #667eea;
-}
-
-.map-coordinates {
-  font-size: 12px;
-  color: #718096;
-  text-align: center;
-}
-
-.map-placeholder {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 8px;
-  color: #a0aec0;
-}
-
-.location-button {
-  --border-radius: 12px;
-  margin-top: 12px;
 }
 
 /* Boutons d'action */
@@ -1005,47 +401,5 @@ const saveAsDraft = async () => {
   align-items: center;
   gap: 16px;
   color: #718096;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .category-card,
-  .urgency-card {
-    background: #2d3748;
-    border-color: #4a5568;
-  }
-  
-  .category-name {
-    color: #cbd5e0;
-  }
-  
-  .category-icon {
-    background: #4a5568;
-  }
-  
-  .mini-map {
-    border-color: #4a5568;
-    background: #2d3748;
-  }
-  
-  .add-photo-card {
-    border-color: #4a5568;
-    background: #2d3748;
-  }
-  
-  .photos-note {
-    color: #a0aec0;
-  }
-}
-
-/* Responsive */
-@media (max-width: 360px) {
-  .category-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-  
-  .photos-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
 }
 </style>

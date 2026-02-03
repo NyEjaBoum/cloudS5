@@ -20,49 +20,40 @@
       <div class="home-content">
         <!-- Statistique rapide -->
         <div class="quick-stats">
-          <ion-card class="stat-card" button @click="goToReports">
-            <div class="stat-content">
-              <div class="stat-icon">
-                <ion-icon :icon="documentTextOutline"></ion-icon>
-              </div>
-              <div class="stat-info">
-                <div class="stat-value">{{ stats.totalReports }}</div>
-                <div class="stat-label">Mes signalements</div>
-              </div>
-            </div>
-          </ion-card>
+          <StatCard
+            :value="stats.totalReports"
+            label="Mes signalements"
+            :icon="documentTextOutline"
+            :clickable="true"
+            @click="goToReports"
+          />
         </div>
 
         <!-- Actions rapides -->
         <div class="quick-actions-section">
           <h2 class="section-title">Actions rapides</h2>
           <div class="quick-actions-grid">
-            <ion-card class="action-card" button @click="goToNewReport">
-              <div class="action-content">
-                <div class="action-icon" style="background: rgba(102, 126, 234, 0.1);">
-                  <ion-icon :icon="addCircleOutline" style="color: #667eea;"></ion-icon>
-                </div>
-                <span class="action-label">Nouveau signalement</span>
-              </div>
-            </ion-card>
-
-            <ion-card class="action-card" button @click="goToMap">
-              <div class="action-content">
-                <div class="action-icon" style="background: rgba(66, 153, 225, 0.1);">
-                  <ion-icon :icon="mapOutline" style="color: #4299e1;"></ion-icon>
-                </div>
-                <span class="action-label">Voir la carte</span>
-              </div>
-            </ion-card>
-
-            <ion-card class="action-card" button @click="goToReports">
-              <div class="action-content">
-                <div class="action-icon" style="background: rgba(72, 187, 120, 0.1);">
-                  <ion-icon :icon="listOutline" style="color: #48bb78;"></ion-icon>
-                </div>
-                <span class="action-label">Mes signalements</span>
-              </div>
-            </ion-card>
+            <QuickActionCard
+              :icon="addCircleOutline"
+              label="Nouveau signalement"
+              icon-color="#667eea"
+              icon-background="rgba(102, 126, 234, 0.1)"
+              @click="goToNewReport"
+            />
+            <QuickActionCard
+              :icon="mapOutline"
+              label="Voir la carte"
+              icon-color="#4299e1"
+              icon-background="rgba(66, 153, 225, 0.1)"
+              @click="goToMap"
+            />
+            <QuickActionCard
+              :icon="listOutline"
+              label="Mes signalements"
+              icon-color="#48bb78"
+              icon-background="rgba(72, 187, 120, 0.1)"
+              @click="goToReports"
+            />
           </div>
         </div>
 
@@ -76,50 +67,23 @@
             </ion-button>
           </div>
 
-          <div class="recent-reports">
-            <ion-card
+          <div v-if="recentReports.length > 0" class="recent-reports">
+            <ReportCard
               v-for="report in recentReports"
               :key="report.id"
-              class="report-card"
-              button
+              :report="report"
               @click="viewReport(report.id)"
-            >
-              <div class="report-header">
-                <div class="report-category">
-                  <div class="category-icon" :style="{ backgroundColor: getCategoryColor(report.category) }">
-                    <ion-icon :icon="getCategoryIcon(report.category)"></ion-icon>
-                  </div>
-                </div>
-                <div class="report-info">
-                  <h3 class="report-title">{{ report.title }}</h3>
-                  <p class="report-location">
-                    <ion-icon :icon="locationOutline" size="small"></ion-icon>
-                    {{ report.location }}
-                  </p>
-                </div>
-                <div class="report-status">
-                  <ion-badge :color="getStatusColor(report.status)">
-                    {{ formatStatus(report.status) }}
-                  </ion-badge>
-                </div>
-              </div>
-
-              <div class="report-footer">
-                <span class="report-date">{{ report.date }}</span>
-              </div>
-            </ion-card>
+            />
           </div>
 
-          <div v-if="recentReports.length === 0" class="empty-state">
-            <div class="empty-illustration">
-              <ion-icon :icon="documentOutline" size="large"></ion-icon>
-            </div>
-            <h3>Aucun signalement</h3>
-            <p>Commencez par signaler un problème</p>
-            <ion-button @click="goToNewReport" fill="solid">
-              Créer un signalement
-            </ion-button>
-          </div>
+          <EmptyState
+            v-else
+            :icon="documentOutline"
+            title="Aucun signalement"
+            description="Commencez par signaler un problème"
+            action-label="Créer un signalement"
+            @action="goToNewReport"
+          />
         </div>
       </div>
 
@@ -139,9 +103,7 @@ import {
   IonToolbar,
   IonTitle,
   IonButton,
-  IonIcon,
-  IonBadge,
-  IonCard
+  IonIcon
 } from '@ionic/vue';
 import {
   documentTextOutline,
@@ -149,20 +111,10 @@ import {
   mapOutline,
   listOutline,
   arrowForwardOutline,
-  locationOutline,
-  documentOutline,
-  homeOutline,
-  addOutline,
-  personOutline,
-  constructOutline,
-  alertCircleOutline,
-  trailSignOutline,
-  flashOutline,
-  carOutline
+  documentOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
-
-import NavBar from './components/NavBar.vue';
+import { NavBar, StatCard, QuickActionCard, ReportCard, EmptyState } from '../components';
 
 const router = useRouter();
 
@@ -178,49 +130,6 @@ const stats = reactive({
 // Signalements récents
 const recentReports = reactive([]);
 
-// Méthodes utilitaires
-const getCategoryIcon = (category) => {
-  const icons = {
-    infrastructure: constructOutline,
-    environment: trailSignOutline,
-    safety: alertCircleOutline,
-    utilities: flashOutline,
-    transport: carOutline
-  };
-  return icons[category] || constructOutline;
-};
-
-const getCategoryColor = (category) => {
-  const colors = {
-    infrastructure: '#4299e1',
-    environment: '#48bb78',
-    safety: '#ed8936',
-    utilities: '#9f7aea',
-    transport: '#ed64a6'
-  };
-  return colors[category] || '#a0aec0';
-};
-
-const getStatusColor = (status) => {
-  const colors = {
-    pending: 'warning',
-    in_progress: 'primary',
-    resolved: 'success',
-    rejected: 'danger'
-  };
-  return colors[status] || 'medium';
-};
-
-const formatStatus = (status) => {
-  const statusMap = {
-    pending: 'En attente',
-    in_progress: 'En cours',
-    resolved: 'Résolu',
-    rejected: 'Rejeté'
-  };
-  return statusMap[status] || status;
-};
-
 // Navigation
 const goToNewReport = () => {
   router.push('/report');
@@ -232,10 +141,6 @@ const goToMap = () => {
 
 const goToReports = () => {
   router.push('/reports');
-};
-
-const goToProfile = () => {
-  router.push('/profil');
 };
 
 const viewReport = (id) => {
@@ -302,53 +207,12 @@ onMounted(() => {
 .home-content {
   background: #f5f5f9;
   padding: 20px 16px;
-  padding-bottom: 100px; /* Espace pour la navbar en bas */
+  padding-bottom: 100px;
 }
 
 /* Quick stats */
 .quick-stats {
   margin-bottom: 24px;
-}
-
-.stat-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-  margin: 0;
-  padding: 16px;
-}
-
-.stat-content {
-  display: flex;
-  align-items: center;
-  gap: 16px;
-}
-
-.stat-icon {
-  width: 60px;
-  height: 60px;
-  border-radius: 16px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  color: white;
-}
-
-.stat-icon ion-icon {
-  font-size: 28px;
-}
-
-.stat-value {
-  font-size: 32px;
-  font-weight: 800;
-  color: #2d3748;
-  line-height: 1;
-}
-
-.stat-label {
-  font-size: 14px;
-  color: #718096;
-  margin-top: 4px;
 }
 
 /* Quick actions */
@@ -366,40 +230,6 @@ onMounted(() => {
   margin-bottom: 24px;
 }
 
-.action-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin: 0;
-  padding: 16px 12px;
-}
-
-.action-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 12px;
-}
-
-.action-icon {
-  width: 50px;
-  height: 50px;
-  border-radius: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.action-icon ion-icon {
-  font-size: 24px;
-}
-
-.action-label {
-  font-size: 12px;
-  font-weight: 600;
-  color: #4a5568;
-  text-align: center;
-}
-
 /* Recent reports */
 .section-header {
   display: flex;
@@ -414,123 +244,14 @@ onMounted(() => {
   gap: 12px;
 }
 
-.report-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-  margin: 0;
-  padding: 16px;
-}
-
-.report-header {
-  display: flex;
-  align-items: flex-start;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.category-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 10px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  flex-shrink: 0;
-}
-
-.report-info {
-  flex: 1;
-}
-
-.report-title {
-  font-size: 15px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 4px;
-}
-
-.report-location {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #718096;
-}
-
-.report-footer {
-  display: flex;
-  justify-content: flex-end;
-}
-
-.report-date {
-  font-size: 12px;
-  color: #a0aec0;
-}
-
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 40px 20px;
-  text-align: center;
-  background: white;
-  border-radius: 16px;
-}
-
-.empty-illustration {
-  width: 80px;
-  height: 80px;
-  border-radius: 50%;
-  background: #f7fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 16px;
-  color: #a0aec0;
-}
-
-.empty-state h3 {
-  font-size: 18px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 8px;
-}
-
-.empty-state p {
-  color: #718096;
-  margin-bottom: 20px;
-}
-
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .home-content {
     background: #1a202c;
   }
 
-  .stat-value,
-  .section-title,
-  .report-title {
+  .section-title {
     color: #e2e8f0;
   }
-
-  .stat-label,
-  .report-location {
-    color: #a0aec0;
-  }
-
-  .stat-card,
-  .action-card,
-  .report-card,
-  .empty-state {
-    background: #2d3748;
-  }
-
-  .empty-illustration {
-    background: #4a5568;
-  }
-
-  /* Supprimez les styles dark mode pour .bottom-nav car dans NavBar */
 }
 </style>

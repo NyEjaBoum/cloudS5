@@ -19,7 +19,7 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-        
+
         <!-- Filtres -->
         <ion-toolbar>
           <ion-segment v-model="filter" @ionChange="filterReports">
@@ -48,16 +48,14 @@
         </div>
 
         <!-- Empty state -->
-        <div v-else-if="filteredReports.length === 0" class="empty-state">
-          <div class="empty-illustration">
-            <ion-icon :icon="documentOutline" size="large"></ion-icon>
-          </div>
-          <h3>No reports yet</h3>
-          <p>Start by reporting an issue in your area</p>
-          <ion-button @click="goToNewReport" class="empty-action">
-            Create First Report
-          </ion-button>
-        </div>
+        <EmptyState
+          v-else-if="filteredReports.length === 0"
+          :icon="documentOutline"
+          title="No reports yet"
+          description="Start by reporting an issue in your area"
+          action-label="Create First Report"
+          @action="goToNewReport"
+        />
 
         <!-- List -->
         <div v-else class="reports-container">
@@ -72,9 +70,9 @@
             >
               <ion-avatar slot="start" class="report-avatar">
                 <div class="status-indicator" :class="`status-${report.status}`"></div>
-                <ion-icon :icon="getCategoryIcon(report.category)"></ion-icon>
+                <CategoryIcon :category="report.category" size="small" />
               </ion-avatar>
-              
+
               <ion-label>
                 <h2 class="report-title">{{ report.title }}</h2>
                 <p class="report-meta">
@@ -82,13 +80,11 @@
                   {{ report.location }}
                 </p>
                 <div class="report-footer">
-                  <ion-badge :color="getStatusColor(report.status)">
-                    {{ formatStatus(report.status) }}
-                  </ion-badge>
+                  <StatusBadge :status="report.status" />
                   <span class="report-date">{{ formatDate(report.createdAt) }}</span>
                 </div>
               </ion-label>
-              
+
               <ion-badge v-if="report.updates > 0" color="primary" class="update-badge">
                 {{ report.updates }}
               </ion-badge>
@@ -129,19 +125,10 @@ import {
   addOutline,
   documentOutline,
   locationOutline,
-  constructOutline,
-  alertCircleOutline,
-  trailSignOutline,
-  flashOutline,
-  carOutline,
-  helpCircleOutline,
-  arrowBackOutline,
-  homeOutline,
-  mapOutline,
-  personOutline
+  arrowBackOutline
 } from 'ionicons/icons';
 
-import NavBar from './components/NavBar.vue';
+import { NavBar, CategoryIcon, StatusBadge, EmptyState } from '../components';
 
 const router = useRouter();
 
@@ -200,43 +187,11 @@ const filteredReports = computed(() => {
   return reports.filter(report => report.status === filter.value);
 });
 
-const getCategoryIcon = (category: string) => {
-  const icons: Record<string, any> = {
-    infrastructure: constructOutline,
-    public_safety: alertCircleOutline,
-    environment: trailSignOutline,
-    utilities: flashOutline,
-    transportation: carOutline,
-    other: helpCircleOutline
-  };
-  return icons[category] || helpCircleOutline;
-};
-
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    pending: 'warning',
-    in_progress: 'primary',
-    resolved: 'success',
-    rejected: 'danger'
-  };
-  return colors[status] || 'medium';
-};
-
-const formatStatus = (status: string) => {
-  const statusMap: Record<string, string> = {
-    pending: 'Pending',
-    in_progress: 'In Progress',
-    resolved: 'Resolved',
-    rejected: 'Rejected'
-  };
-  return statusMap[status] || status;
-};
-
 const formatDate = (dateString: string) => {
   const date = new Date(dateString);
   const now = new Date();
   const diff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
+
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
   if (diff < 7) return `${diff} days ago`;
@@ -245,7 +200,6 @@ const formatDate = (dateString: string) => {
 
 const refreshReports = async () => {
   loading.value = true;
-  // Simuler le chargement
   await new Promise(resolve => setTimeout(resolve, 1000));
   loading.value = false;
 };
@@ -266,21 +220,7 @@ const goBack = () => {
   router.back();
 };
 
-// Navigation
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToMap = () => {
-  router.push('/map');
-};
-
-const goToProfile = () => {
-  router.push('/profil');
-};
-
 onMounted(() => {
-  // Charger les signalements depuis l'API
   refreshReports();
 });
 </script>
@@ -288,7 +228,7 @@ onMounted(() => {
 <style scoped>
 .reports-list {
   min-height: 100%;
-  padding-bottom: 80px; /* Espace pour la navbar */
+  padding-bottom: 80px;
 }
 
 /* Loading state */
@@ -304,45 +244,6 @@ onMounted(() => {
 .loading-state p {
   margin-top: 16px;
   color: #718096;
-}
-
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.empty-illustration {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #f7fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  color: #a0aec0;
-}
-
-.empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 8px;
-}
-
-.empty-state p {
-  color: #718096;
-  margin-bottom: 24px;
-}
-
-.empty-action {
-  --border-radius: 12px;
-  font-weight: 600;
 }
 
 /* Report items */
@@ -421,23 +322,14 @@ onMounted(() => {
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
-  .empty-illustration {
-    background: #2d3748;
-    color: #a0aec0;
-  }
-  
-  .empty-state h3 {
-    color: #e2e8f0;
-  }
-  
   .report-avatar {
     background: #2d3748;
   }
-  
+
   .report-title {
     color: #e2e8f0;
   }
-  
+
   .report-meta {
     color: #a0aec0;
   }
