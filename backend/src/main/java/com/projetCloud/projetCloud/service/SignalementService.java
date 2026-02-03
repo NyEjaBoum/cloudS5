@@ -186,7 +186,7 @@ public class SignalementService {
 
     // ========== EXPORT VERS FIREBASE ==========
     public Map<String, Integer> exportSignalementsToFirebase() {
-        FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
+        // FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
         
         int exported = 0;
         int updated = 0;
@@ -220,7 +220,7 @@ public class SignalementService {
 
     // ========== IMPORT DEPUIS FIREBASE ==========
     public Map<String, Integer> importSignalementsFromFirebase() {
-        FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
+        // FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
         
         int imported = 0;
         int updated = 0;

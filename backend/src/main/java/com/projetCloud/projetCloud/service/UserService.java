@@ -56,7 +56,7 @@ public class UserService {
 
     // ========== IMPORT DEPUIS FIREBASE ==========
     public Map<String, Integer> importUsersFromFirebase() {
-        FirebaseUtil.ensureInitialized();
+        // FirebaseUtil.ensureInitialized();
 
         int imported = 0;
         int updated = 0;
@@ -93,7 +93,7 @@ public class UserService {
 
     // ========== EXPORT VERS FIREBASE ==========
     public Map<String, Integer> exportUsersToFirebase() {
-        FirebaseUtil.ensureInitialized();
+        // FirebaseUtil.ensureInitialized();
 
         int exported = 0;
         int updated = 0;
@@ -106,13 +106,22 @@ public class UserService {
                 }
 
                 String decryptedPassword = authService.decryptPassword(user.getMotDePasse());
+                String localDisplayName = user.getNom() + " " + user.getPrenom();
 
                 try {
                     UserRecord firebaseUser = FirebaseAuth.getInstance().getUserByEmail(user.getEmail());
-                    UserRecord.UpdateRequest updateRequest = new UserRecord.UpdateRequest(firebaseUser.getUid())
-                        .setPassword(decryptedPassword)
-                        .setDisplayName(user.getNom() + " " + user.getPrenom());
-                    FirebaseAuth.getInstance().updateUser(updateRequest);
+                    String firebaseDisplayName = firebaseUser.getDisplayName();
+
+                    System.out.println("Comparaison nom Firebase/local : firebase='" + firebaseDisplayName + "', local='" + localDisplayName + "'");
+
+                    boolean needUpdate = !localDisplayName.equals(firebaseDisplayName);
+
+                    if (needUpdate) {
+                        UserRecord.UpdateRequest updateRequest = new UserRecord.UpdateRequest(firebaseUser.getUid())
+                            .setPassword(decryptedPassword)
+                            .setDisplayName(localDisplayName);
+                        FirebaseAuth.getInstance().updateUser(updateRequest);
+                    }
 
                     FirebaseAuth.getInstance().setCustomUserClaims(
                         firebaseUser.getUid(),
@@ -124,7 +133,7 @@ public class UserService {
                     UserRecord.CreateRequest request = new UserRecord.CreateRequest()
                         .setEmail(user.getEmail())
                         .setPassword(decryptedPassword)
-                        .setDisplayName(user.getNom() + " " + user.getPrenom());
+                        .setDisplayName(localDisplayName);
                     UserRecord newUser = FirebaseAuth.getInstance().createUser(request);
                     FirebaseAuth.getInstance().setCustomUserClaims(newUser.getUid(), Map.of("role", user.getRole().getNom()));
                     exported++;
@@ -140,12 +149,10 @@ public class UserService {
     // ========== SYNCHRONISATION COMPLÈTE ==========
     @Transactional
     public Map<String, Integer> synchronizeUsers() {
-        Map<String, Integer> importResult = importUsersFromFirebase();
+        // Map<String, Integer> importResult = importUsersFromFirebase();
         Map<String, Integer> exportResult = exportUsersToFirebase();
 
         return Map.of(
-            "imported", importResult.get("imported"),
-            "importedUpdated", importResult.get("updated"),
             "exported", exportResult.get("exported"),
             "exportedUpdated", exportResult.get("updated")
         );

@@ -1,40 +1,59 @@
 import { getAuth, signInWithEmailAndPassword } from "firebase/auth";
 
+// export async function handleLogin({ email, password }, navigate, setError, setLoading) {
+//   setLoading(true);
+//   setError("");
+//   let token;
+//   try {
+//     if (navigator.onLine) {
+//       try {
+//         const auth = getAuth();
+//         const userCredential = await signInWithEmailAndPassword(auth, email, password);
+//         const idToken = await userCredential.user.getIdToken();
+//         token = await loginFirebase(idToken);
+//       } catch (firebaseErr) {
+//         // Si Firebase échoue, on tente la connexion locale
+//         try {
+//           // token = await loginLocal(email, password);
+//         } catch (localErr) {
+//           setError(
+//             "Erreur Firebase : " +
+//               (firebaseErr.code ? firebaseErr.code + " - " : "") +
+//               (firebaseErr.message || firebaseErr.toString()) +
+//             "\nErreur locale : " +
+//               (localErr.message || localErr.toString())
+//           );
+//           setLoading(false);
+//           return;
+//         }
+//       }
+//     } else {
+//       // Si offline, on tente directement la connexion locale
+//       try {
+//         token = await loginLocal(email, password);
+//       } catch (localErr) {
+//         setError("Erreur locale : " + (localErr.message || localErr.toString()));
+//         setLoading(false);
+//         return;
+//       }
+//     }
+//     localStorage.setItem("jwt", token);
+//     navigate("/manager");
+//   } catch (err) {
+//     setError("Erreur : " + (err.message || err.toString()));
+//   }
+//   setLoading(false);
+// }
+
 export async function handleLogin({ email, password }, navigate, setError, setLoading) {
   setLoading(true);
   setError("");
-  let token;
   try {
-    if (navigator.onLine) {
-      try {
-        const auth = getAuth();
-        const userCredential = await signInWithEmailAndPassword(auth, email, password);
-        const idToken = await userCredential.user.getIdToken();
-        token = await loginFirebase(idToken);
-      } catch (firebaseErr) {
-        if (
-          firebaseErr.code === "auth/network-request-failed" ||
-          firebaseErr.message.includes("network-request-failed") ||
-          firebaseErr.message.includes("ERR_NAME_NOT_RESOLVED")
-        ) {
-          try {
-            // token = await loginLocal(email, password);
-          } catch (localErr) {
-            setError("Erreur locale : " + localErr.message);
-            setLoading(false);
-            return;
-          }
-        } else {
-          token = await loginLocal(email, password);
-        }
-      }
-    } else {
-      token = await loginLocal(email, password);
-    }
+    const token = await loginLocal(email, password);
     localStorage.setItem("jwt", token);
     navigate("/manager");
   } catch (err) {
-    setError("Erreur : " + err.message);
+    setError("Erreur : " + (err.message || err.toString()));
   }
   setLoading(false);
 }
