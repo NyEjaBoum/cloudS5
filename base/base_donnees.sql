@@ -39,15 +39,17 @@ INSERT INTO entreprises (nom, adresse, contact) VALUES
 -- =========================
 -- Utilisateurs (MANAGER et UTILISATEUR)
 -- =========================
+-- =========================
+-- Utilisateurs (MANAGER et UTILISATEUR)
+-- =========================
 INSERT INTO utilisateurs (email, mot_de_passe, nom, prenom, role_id, tentatives_echouees, compte_bloque, date_creation)
 VALUES
   -- Manager par défaut
-  ('admin@gmail.com', '$2a$12$vDSIoLizS0srhb/COQm1tubo58o63cLcQpe5FIBUcCcgacpE/yPfW', 'admin', 'test', 1, 0, FALSE, NOW()),
+  ('admin@gmail.com', 'NUKUms5zgbOo4lX1wqZ9eQ==', 'admin', 'test', 1, 0, FALSE, NOW()),
   -- Autres utilisateurs
-  ('user1@example.com', '$2a$12$qvw9.HuDHb2vwcYVUr10HexA0.uUYQCtd7W.eZSAL/XyzI5wZsFVC', 'Un', 'Utilisateur', 2, 0, FALSE, NOW()),
-  ('user2@example.com', '$2a$12$qvw9.HuDHb2vwcYVUr10HexA0.uUYQCtd7W.eZSAL/XyzI5wZsFVC', 'Deux', 'Utilisateur', 2, 2, TRUE, NOW()),
-  ('user3@example.com', '$2a$12$qvw9.HuDHb2vwcYVUr10HexA0.uUYQCtd7W.eZSAL/XyzI5wZsFVC', 'Trois', 'Utilisateur', 2, 0, FALSE, NOW());
-
+  ('user1@example.com', 'kr3At1G6G9lKnxnpZFVVkA==', 'Un', 'Utilisateur', 2, 0, FALSE, NOW()),
+  ('user2@example.com', 'kr3At1G6G9lKnxnpZFVVkA==', 'Deux', 'Utilisateur', 2, 2, TRUE, NOW()),
+  ('user3@example.com', 'kr3At1G6G9lKnxnpZFVVkA==', 'Trois', 'Utilisateur', 2, 0, FALSE, NOW());
 -- =========================
 -- Signalements
 -- Statut : 1 = Nouveau, 11 = En cours, 21 = Annulé, 99 = Terminé
