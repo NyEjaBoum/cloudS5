@@ -134,19 +134,11 @@ public class AuthService {
     @Transactional
     public Utilisateur register(String email, String motDePasse, String nom, String prenom) {
         try {
-            UserRecord.CreateRequest firebaseRequest = new UserRecord.CreateRequest()
-                .setEmail(email)
-                .setPassword(motDePasse)
-                .setDisplayName(nom + " " + prenom);
-            UserRecord firebaseUser = FirebaseAuth.getInstance().createUser(firebaseRequest);
 
             Utilisateur utilisateur = registerLocal(email, motDePasse, nom, prenom);
-
-            FirebaseAuth.getInstance().setCustomUserClaims(firebaseUser.getUid(), Map.of("role", utilisateur.getRole().getNom()));
-
             return utilisateur;
         } catch (Exception e) {
-            throw new IllegalArgumentException("Erreur lors de l'inscription Firebase+local : " + e.getMessage());
+            throw new IllegalArgumentException("Erreur lors de l'inscription local : " + e.getMessage());
         }
     }
 

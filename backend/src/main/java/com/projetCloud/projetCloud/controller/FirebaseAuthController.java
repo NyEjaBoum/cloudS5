@@ -42,7 +42,7 @@ public class FirebaseAuthController {
             );
             return new ApiResponse<>("success", data, null);
         } catch (Exception e) {
-            System.out.println("connexion login firebase tsy nety");
+            System.out.println("connexion login firebase tsy nety : " + e.getMessage());
             return new ApiResponse<>("error", null, e.getMessage());
         }
     }
