@@ -10,3 +10,4 @@ target/
 .vscode/
 .idea/
 .DS_Store
+backend/src/main/resources/serviceAccountKey.json
