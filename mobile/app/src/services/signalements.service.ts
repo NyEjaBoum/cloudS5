@@ -1,5 +1,15 @@
 // src/services/signalements.service.ts
 import api from './api';
+import { db } from '../config/firebase.config';
+import {
+  collection,
+  getDocs,
+  query,
+  orderBy,
+  onSnapshot,
+  Timestamp,
+  type Unsubscribe
+} from 'firebase/firestore';
 
 // Types pour les données PostgreSQL
 export interface SignalementPostgres {
@@ -43,6 +53,7 @@ export interface Signalement {
 }
 
 const API_URL = '/signalements';
+const FIRESTORE_COLLECTION = 'signalements';
 
 class SignalementsService {
   /**
@@ -141,6 +152,79 @@ class SignalementsService {
       signalements: [],
       error: result.error
     };
+  }
+
+  /**
+   * Récupérer tous les signalements depuis Firestore
+   */
+  async getSignalementsFromFirestore(): Promise<{ success: boolean; signalements: Signalement[]; error?: string }> {
+    try {
+      const signalementsCollection = collection(db, FIRESTORE_COLLECTION);
+      const q = query(signalementsCollection, orderBy('createdAt', 'desc'));
+      const snapshot = await getDocs(q);
+
+      const signalements: Signalement[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title || data.titre || 'Sans titre',
+          description: data.description || '',
+          category: data.category || 'infrastructure',
+          status: data.status || 'pending',
+          location: {
+            lat: data.location?.lat || data.latitude || 0,
+            lng: data.location?.lng || data.longitude || 0,
+            address: data.location?.address || data.address
+          },
+          userId: data.userId || data.id_utilisateur || '',
+          userEmail: data.userEmail || data.utilisateur_email,
+          createdAt: data.createdAt?.toDate() || new Date(data.date_creation) || new Date(),
+          upvotes: data.upvotes || 0,
+          comments: data.comments || 0
+        };
+      });
+
+      return { success: true, signalements };
+    } catch (error: any) {
+      console.error('Erreur récupération signalements Firestore:', error);
+      return { success: false, signalements: [], error: error.message || 'Erreur Firestore' };
+    }
+  }
+
+  /**
+   * Écouter les signalements en temps réel depuis Firestore
+   */
+  subscribeToSignalements(callback: (signalements: Signalement[]) => void): Unsubscribe {
+    const signalementsCollection = collection(db, FIRESTORE_COLLECTION);
+    const q = query(signalementsCollection, orderBy('createdAt', 'desc'));
+
+    return onSnapshot(q, (snapshot) => {
+      const signalements: Signalement[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          title: data.title || data.titre || 'Sans titre',
+          description: data.description || '',
+          category: data.category || 'infrastructure',
+          status: data.status || 'pending',
+          location: {
+            lat: data.location?.lat || data.latitude || 0,
+            lng: data.location?.lng || data.longitude || 0,
+            address: data.location?.address || data.address
+          },
+          userId: data.userId || data.id_utilisateur || '',
+          userEmail: data.userEmail || data.utilisateur_email,
+          createdAt: data.createdAt?.toDate() || new Date(data.date_creation) || new Date(),
+          upvotes: data.upvotes || 0,
+          comments: data.comments || 0
+        };
+      });
+
+      callback(signalements);
+    }, (error) => {
+      console.error('Erreur écoute signalements Firestore:', error);
+      callback([]);
+    });
   }
 }
 

@@ -221,6 +221,7 @@ import {
   documentTextOutline,
   personOutline
 } from 'ionicons/icons';
+import reportsService from '../services/reports.service';
 import signalementsService from '../services/signalements.service';
 
 const router = useRouter();
@@ -235,8 +236,52 @@ const activeReportId = ref(null);
 const contentRef = ref(null);
 const selectedLocation = ref(null);
 
-// Données des signalements (depuis PostgreSQL)
+// Données des signalements (temps réel depuis Firebase)
 const nearbyReports = ref([]);
+let unsubscribeReports = null;
+
+// Charger les signalements depuis Firestore
+const loadSignalementsFromFirestore = async () => {
+  try {
+    const result = await signalementsService.getSignalementsFromFirestore();
+    
+    if (result.success && result.signalements) {
+      // Ajouter les champs calculés
+      const reportsWithCalculated = result.signalements.map(report => ({
+        ...report,
+        timeAgo: getTimeAgo(report.createdAt),
+        distance: calculateDistance(report.location)
+      }));
+      
+      nearbyReports.value = reportsWithCalculated;
+      updateMapMarkers();
+      console.log('✅ Signalements chargés depuis Firestore:', nearbyReports.value.length);
+    } else {
+      console.warn('Aucun signalement trouvé ou erreur:', result.error);
+    }
+  } catch (error) {
+    console.error('Erreur chargement signalements:', error);
+  }
+};
+
+// Calculer la distance approximative (en km)
+const calculateDistance = (location) => {
+  if (!location?.lat || !location?.lng) return 0;
+  
+  // Position par défaut (Antananarivo centre)
+  const defaultLat = -18.8792;
+  const defaultLng = 47.5079;
+  
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (location.lat - defaultLat) * Math.PI / 180;
+  const dLng = (location.lng - defaultLng) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(defaultLat * Math.PI / 180) * Math.cos(location.lat * Math.PI / 180) * 
+    Math.sin(dLng/2) * Math.sin(dLng/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return Math.round(R * c * 10) / 10;
+};
 
 // Calculer le temps écoulé
 const getTimeAgo = (date) => {
@@ -426,137 +471,11 @@ const getCoordinates = (report) => {
   if (report.location?.lat && report.location?.lng) {
     return [report.location.lat, report.location.lng];
   }
-  // Format 2: latitude, longitude (format PostgreSQL)
+  // Format 2: latitude, longitude (format web)
   if (report.latitude && report.longitude) {
     return [Number(report.latitude), Number(report.longitude)];
   }
   return null;
-};
-
-// Charger les signalements depuis PostgreSQL
-const loadSignalementsFromPostgres = async () => {
-  try {
-    console.log('🔄 Chargement des signalements depuis PostgreSQL...');
-    const result = await signalementsService.getMappedSignalements();
-    
-    if (result.success) {
-      console.log('📍 Signalements PostgreSQL reçus:', result.signalements.length);
-      nearbyReports.value = result.signalements.map(report => ({
-        ...report,
-        timeAgo: getTimeAgo(report.createdAt),
-        distance: 0 // TODO: calculer la distance depuis la position utilisateur
-      }));
-      updateMapMarkers();
-    } else {
-      console.error('❌ Erreur:', result.error);
-      // Fallback: utiliser des données de démonstration si l'API n'est pas disponible
-      loadDemoData();
-    }
-  } catch (error) {
-    console.error('❌ Erreur chargement PostgreSQL:', error);
-    // Fallback: utiliser des données de démonstration
-    loadDemoData();
-  }
-};
-
-// Charger des données de démonstration si l'API n'est pas disponible
-const loadDemoData = () => {
-  console.log('📍 Chargement des données de démonstration...');
-  
-  const demoData = [
-    {
-      id: '1',
-      title: 'Nid de poule',
-      description: 'Trou sur la route principale',
-      category: 'infrastructure',
-      status: 'pending',
-      location: { lat: -18.8792, lng: 47.5079 },
-      userId: '2',
-      createdAt: new Date(),
-      upvotes: 5,
-      comments: 2
-    },
-    {
-      id: '2',
-      title: 'Route inondée',
-      description: 'Inondation après pluie',
-      category: 'environment',
-      status: 'in_progress',
-      location: { lat: -18.9100, lng: 47.5200 },
-      userId: '2',
-      createdAt: new Date(Date.now() - 86400000),
-      upvotes: 12,
-      comments: 5
-    },
-    {
-      id: '3',
-      title: 'Signalisation manquante',
-      description: 'Panneau absent',
-      category: 'safety',
-      status: 'resolved',
-      location: { lat: -18.9000, lng: 47.5300 },
-      userId: '1',
-      createdAt: new Date(Date.now() - 172800000),
-      upvotes: 8,
-      comments: 1
-    },
-    {
-      id: '4',
-      title: 'Dégradation chaussée',
-      description: 'Fissures importantes',
-      category: 'infrastructure',
-      status: 'pending',
-      location: { lat: -18.8950, lng: 47.5150 },
-      userId: '3',
-      createdAt: new Date(Date.now() - 3600000),
-      upvotes: 3,
-      comments: 0
-    },
-    {
-      id: '5',
-      title: 'Travaux terminés',
-      description: 'Réfection complète',
-      category: 'infrastructure',
-      status: 'resolved',
-      location: { lat: -18.8850, lng: 47.5250 },
-      userId: '1',
-      createdAt: new Date(Date.now() - 259200000),
-      upvotes: 15,
-      comments: 8
-    },
-    {
-      id: '6',
-      title: 'Route barrée',
-      description: 'Travaux en cours, accès interdit',
-      category: 'transport',
-      status: 'in_progress',
-      location: { lat: -18.8800, lng: 47.5100 },
-      userId: '3',
-      createdAt: new Date(Date.now() - 43200000),
-      upvotes: 7,
-      comments: 3
-    },
-    {
-      id: '7',
-      title: 'Lavaka',
-      description: 'Trou be Manakambs',
-      category: 'infrastructure',
-      status: 'pending',
-      location: { lat: -18.8792, lng: 47.5079 },
-      userId: '2',
-      createdAt: new Date(),
-      upvotes: 2,
-      comments: 1
-    }
-  ];
-  
-  nearbyReports.value = demoData.map(report => ({
-    ...report,
-    timeAgo: getTimeAgo(report.createdAt),
-    distance: 0
-  }));
-  
-  updateMapMarkers();
 };
 
 // Méthodes Leaflet
@@ -718,11 +637,28 @@ const updateMapMarkers = () => {
 };
 
 // Lifecycle
-onMounted(() => {
+onMounted(async () => {
   initializeMap();
-
-  // Charger les signalements depuis PostgreSQL
-  loadSignalementsFromPostgres();
+  
+  // Attendre que la carte soit prête
+  await nextTick();
+  setTimeout(async () => {
+    // Charger les signalements depuis Firestore
+    await loadSignalementsFromFirestore();
+    
+    // S'abonner aux mises à jour en temps réel
+    unsubscribeReports = signalementsService.subscribeToSignalements((signalements) => {
+      const reportsWithCalculated = signalements.map(report => ({
+        ...report,
+        timeAgo: getTimeAgo(report.createdAt),
+        distance: calculateDistance(report.location)
+      }));
+      
+      nearbyReports.value = reportsWithCalculated;
+      updateMapMarkers();
+      console.log('✅ Signalements mis à jour (temps réel):', nearbyReports.value.length);
+    });
+  }, 300);
 
   // Exposer des fonctions globales pour les popups
   window.viewReportDetails = viewReportDetails;
@@ -739,7 +675,10 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  // Pas de désabonnement Firebase car on utilise PostgreSQL
+  // Désabonner de Firestore
+  if (unsubscribeReports) {
+    unsubscribeReports();
+  }
   
   if (map) {
     map.remove();
