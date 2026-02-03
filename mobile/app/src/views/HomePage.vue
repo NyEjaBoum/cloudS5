@@ -124,33 +124,7 @@
       </div>
 
       <!-- Bottom Navigation -->
-      <div class="bottom-nav">
-        <button class="nav-item active" @click="() => {}">
-          <ion-icon :icon="homeOutline"></ion-icon>
-          <span>Accueil</span>
-        </button>
-
-        <button class="nav-item" @click="goToMap">
-          <ion-icon :icon="mapOutline"></ion-icon>
-          <span>Carte</span>
-        </button>
-
-        <button class="nav-item center-button" @click="goToNewReport">
-          <div class="center-button-inner">
-            <ion-icon :icon="addOutline"></ion-icon>
-          </div>
-        </button>
-
-        <button class="nav-item" @click="goToReports">
-          <ion-icon :icon="documentTextOutline"></ion-icon>
-          <span>Signalements</span>
-        </button>
-
-        <button class="nav-item" @click="goToProfile">
-          <ion-icon :icon="personOutline"></ion-icon>
-          <span>Profil</span>
-        </button>
-      </div>
+      <NavBar :current-page="'home'" />
     </ion-content>
   </ion-page>
 </template>
@@ -187,6 +161,8 @@ import {
   carOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
+
+import NavBar from './components/NavBar.vue';
 
 const router = useRouter();
 
@@ -326,7 +302,7 @@ onMounted(() => {
 .home-content {
   background: #f5f5f9;
   padding: 20px 16px;
-  padding-bottom: 100px;
+  padding-bottom: 100px; /* Espace pour la navbar en bas */
 }
 
 /* Quick stats */
@@ -527,64 +503,6 @@ onMounted(() => {
   margin-bottom: 20px;
 }
 
-/* Bottom Navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: white;
-  border-top: 1px solid #e2e8f0;
-  padding: 8px 0 12px;
-  z-index: 1000;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: #718096;
-  font-size: 11px;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item.active {
-  color: #667eea;
-}
-
-.center-button {
-  padding: 0;
-  margin-top: -30px;
-}
-
-.center-button-inner {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.center-button-inner ion-icon {
-  font-size: 28px;
-}
-
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .home-content {
@@ -613,17 +531,6 @@ onMounted(() => {
     background: #4a5568;
   }
 
-  .bottom-nav {
-    background: #2d3748;
-    border-top-color: #4a5568;
-  }
-
-  .nav-item {
-    color: #a0aec0;
-  }
-
-  .nav-item.active {
-    color: #a3bffa;
-  }
+  /* Supprimez les styles dark mode pour .bottom-nav car dans NavBar */
 }
 </style>

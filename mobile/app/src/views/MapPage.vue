@@ -140,50 +140,23 @@
     </div>
 
     <!-- Contenu principal : Carte -->
-    <ion-content>
-      <div id="map" style="height: 100vh; width: 100%;"></div>
+    <ion-content ref="contentRef" class="map-content">
+      <div id="map" class="map-container"></div>
 
       <!-- Overlay de chargement -->
       <div v-if="mapLoading" class="loading-overlay">
         <ion-spinner name="crescent"></ion-spinner>
         <p>Loading map...</p>
       </div>
-
-      <!-- Bottom Navigation -->
-      <div class="bottom-nav">
-        <button class="nav-item" @click="goToHome">
-          <ion-icon :icon="homeOutline"></ion-icon>
-          <span>Home</span>
-        </button>
-
-        <button class="nav-item active">
-          <ion-icon :icon="mapOutline"></ion-icon>
-          <span>Map</span>
-        </button>
-
-        <button class="nav-item center-button" @click="openReportModal">
-          <div class="center-button-inner">
-            <ion-icon :icon="addOutline"></ion-icon>
-          </div>
-        </button>
-
-        <button class="nav-item" @click="goToReports">
-          <ion-icon :icon="documentTextOutline"></ion-icon>
-          <span>Reports</span>
-        </button>
-
-        <button class="nav-item" @click="goToProfile">
-          <ion-icon :icon="personOutline"></ion-icon>
-          <span>Profile</span>
-        </button>
-      </div>
     </ion-content>
 
+    <!-- Bottom Navigation -->
+    <NavBar :current-page="'map'" />
   </ion-page>
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -223,6 +196,8 @@ import {
 } from 'ionicons/icons';
 import reportsService from '../services/reports.service';
 
+import NavBar from './components/NavBar.vue';
+
 const router = useRouter();
 
 // État de l'application
@@ -232,6 +207,8 @@ const searchQuery = ref('');
 const urgencyFilter = ref('all');
 const activeFilters = ref([]);
 const activeReportId = ref(null);
+const contentRef = ref(null);
+const selectedLocation = ref(null);
 
 // Données des signalements (temps réel depuis Firebase)
 const nearbyReports = ref([]);
@@ -278,6 +255,7 @@ const goBack = () => {
   router.back();
 };
 
+// Navigation
 const goToHome = () => {
   router.push('/home');
 };
@@ -446,13 +424,27 @@ const initializeMap = async () => {
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
     });
 
+    // Attendre que le DOM soit prêt
+    await nextTick();
+    
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      console.error('Map element not found');
+      mapLoading.value = false;
+      return;
+    }
+
     // Créer la carte centrée sur Antananarivo
-    map = L.map('map').setView([-18.8792, 47.5079], 13);
+    map = L.map('map', {
+      zoomControl: true,
+      attributionControl: true
+    }).setView([-18.8792, 47.5079], 13);
 
     // Ajouter les tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+      minZoom: 10
     }).addTo(map);
     
     // Couche pour les marqueurs
@@ -486,6 +478,13 @@ const initializeMap = async () => {
       }
       window.tempMarker = tempMarker;
     });
+    
+    // Forcer le redimensionnement de la carte
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize();
+      }
+    }, 100);
     
     mapLoading.value = false;
     console.log('✅ Leaflet map initialized!');
@@ -589,6 +588,13 @@ onMounted(() => {
   window.upvoteReport = (id) => {
     console.log('Upvoting report:', id);
   };
+
+  // Invalidate map size when content is ready
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize();
+    }
+  }, 500);
 });
 
 onUnmounted(() => {
@@ -738,7 +744,6 @@ onUnmounted(() => {
   color: #2d3748;
   margin-bottom: 4px;
   display: -webkit-box;
-  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -760,7 +765,6 @@ onUnmounted(() => {
   line-height: 1.4;
   margin-bottom: 12px;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
   overflow: hidden;
 }
@@ -802,6 +806,34 @@ onUnmounted(() => {
 .loading-overlay p {
   margin-top: 12px;
   color: #718096;
+}
+
+/* Map container styles */
+.map-content {
+  --background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Ensure leaflet container takes full space */
+:global(.leaflet-container) {
+  width: 100%;
+  height: 100%;
+  background: #f0f0f0;
 }
 
 /* Modal de signalement */
@@ -980,83 +1012,8 @@ onUnmounted(() => {
   }
   
   :global(.leaflet-tile) {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+    filter: brightness(0.9) invert(1) hue-rotate(180deg);
   }
-
-  .bottom-nav {
-    background: #2d3748;
-    border-top-color: #4a5568;
-  }
-
-  .nav-item {
-    color: #a0aec0;
-  }
-
-  .nav-item.active {
-    color: #a3bffa;
-  }
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: white;
-  border-top: 1px solid #e2e8f0;
-  padding: 8px 0 12px;
-  z-index: 1000;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: #718096;
-  font-size: 11px;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item.active {
-  color: #667eea;
-}
-
-.nav-item:not(.center-button):active {
-  color: #667eea;
-}
-
-.center-button {
-  padding: 0;
-  margin-top: -30px;
-}
-
-.center-button-inner {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.center-button-inner ion-icon {
-  font-size: 28px;
 }
 
 /* Responsive */

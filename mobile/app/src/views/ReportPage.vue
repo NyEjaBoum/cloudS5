@@ -280,33 +280,7 @@
       </ion-modal>
 
       <!-- Bottom Navigation -->
-      <div class="bottom-nav">
-        <button class="nav-item" @click="goToHome">
-          <ion-icon :icon="homeOutline"></ion-icon>
-          <span>Home</span>
-        </button>
-
-        <button class="nav-item" @click="goToMap">
-          <ion-icon :icon="mapOutline"></ion-icon>
-          <span>Map</span>
-        </button>
-
-        <button class="nav-item center-button active">
-          <div class="center-button-inner">
-            <ion-icon :icon="addOutline"></ion-icon>
-          </div>
-        </button>
-
-        <button class="nav-item" @click="goToReports">
-          <ion-icon :icon="documentTextOutline"></ion-icon>
-          <span>Reports</span>
-        </button>
-
-        <button class="nav-item" @click="goToProfile">
-          <ion-icon :icon="personOutline"></ion-icon>
-          <span>Profile</span>
-        </button>
-      </div>
+      <NavBar :current-page="'report'" />
     </ion-content>
   </ion-page>
 </template>
@@ -361,6 +335,8 @@ import {
   documentTextOutline,
   personOutline
 } from 'ionicons/icons';
+
+import NavBar from './components/NavBar.vue';
 
 const router = useRouter();
 
@@ -505,22 +481,6 @@ const canSubmit = computed(() => {
 // Méthodes
 const goBack = () => {
   router.back();
-};
-
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToMap = () => {
-  router.push('/map');
-};
-
-const goToReports = () => {
-  router.push('/reports');
-};
-
-const goToProfile = () => {
-  router.push('/profil');
 };
 
 const selectCategory = (category: any) => {
@@ -669,7 +629,7 @@ const saveAsDraft = async () => {
 
 <style scoped>
 .report-form {
-  padding-bottom: 40px;
+  padding-bottom: 80px; /* Espace pour la navbar */
 }
 
 .form-section {
@@ -993,23 +953,6 @@ const saveAsDraft = async () => {
   margin-top: 12px;
 }
 
-/* Tags */
-.tags-section {
-  margin-top: 24px;
-}
-
-.tags-input {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  align-items: center;
-}
-
-.tag-input {
-  flex: 1;
-  min-width: 100px;
-}
-
 /* Boutons d'action */
 .action-buttons {
   display: flex;
@@ -1080,81 +1023,6 @@ const saveAsDraft = async () => {
   .photos-note {
     color: #a0aec0;
   }
-
-  .bottom-nav {
-    background: #2d3748;
-    border-top-color: #4a5568;
-  }
-
-  .nav-item {
-    color: #a0aec0;
-  }
-
-  .nav-item.active {
-    color: #a3bffa;
-  }
-}
-
-/* Bottom Navigation */
-.bottom-nav {
-  position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
-  display: flex;
-  justify-content: space-around;
-  align-items: center;
-  background: white;
-  border-top: 1px solid #e2e8f0;
-  padding: 8px 0 12px;
-  z-index: 1000;
-}
-
-.nav-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 4px;
-  background: transparent;
-  border: none;
-  padding: 8px 16px;
-  cursor: pointer;
-  color: #718096;
-  font-size: 11px;
-  transition: color 0.2s;
-}
-
-.nav-item ion-icon {
-  font-size: 24px;
-}
-
-.nav-item.active {
-  color: #667eea;
-}
-
-.nav-item:not(.center-button):active {
-  color: #667eea;
-}
-
-.center-button {
-  padding: 0;
-  margin-top: -30px;
-}
-
-.center-button-inner {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-}
-
-.center-button-inner ion-icon {
-  font-size: 28px;
 }
 
 /* Responsive */
