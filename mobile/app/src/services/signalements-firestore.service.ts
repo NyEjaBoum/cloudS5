@@ -8,6 +8,7 @@ import {
   query,
   orderBy,
   onSnapshot,
+  addDoc,
   type Unsubscribe
 } from 'firebase/firestore';
 
@@ -40,18 +41,39 @@ class SignalementsFirestoreService {
    */
   async getSignalements(): Promise<{ success: boolean; signalements: Signalement[]; error?: string }> {
     try {
+      console.log('🔍 [DEBUG] Tentative de connexion à Firestore...');
+      console.log('🔍 [DEBUG] Collection:', FIRESTORE_COLLECTION);
+      
       const signalementsCollection = collection(db, FIRESTORE_COLLECTION);
       const q = query(signalementsCollection, orderBy('createdAt', 'desc'));
+      
+      console.log('🔍 [DEBUG] Exécution de la requête Firestore...');
       const snapshot = await getDocs(q);
+      
+      console.log('🔍 [DEBUG] Snapshot reçu. Nombre de documents:', snapshot.size);
+      console.log('🔍 [DEBUG] Documents vides?', snapshot.empty);
 
-      const signalements: Signalement[] = snapshot.docs.map(doc => {
+      if (snapshot.empty) {
+        console.warn('⚠️ [WARNING] Aucun document trouvé dans la collection signalements');
+        return { success: true, signalements: [], error: 'Collection vide' };
+      }
+
+      const signalements: Signalement[] = snapshot.docs.map((doc, index) => {
         const data = doc.data();
+        console.log(`🔍 [DEBUG] Document ${index + 1}:`, {
+          id: doc.id,
+          data: data,
+          hasLocation: !!data.location,
+          hasLatLng: data.location?.lat && data.location?.lng
+        });
         return this.docToSignalement(doc.id, data);
       });
 
+      console.log('✅ [SUCCESS] Signalements traités:', signalements.length);
       return { success: true, signalements };
     } catch (error: any) {
-      console.error('Erreur récupération signalements Firestore:', error);
+      console.error('❌ [ERROR] Erreur récupération signalements Firestore:', error);
+      console.error('❌ [ERROR] Stack:', error.stack);
       return { success: false, signalements: [], error: error.message || 'Erreur Firestore' };
     }
   }
@@ -172,6 +194,112 @@ class SignalementsFirestoreService {
            title.includes('route nationale') ||
            description.includes('nationale') ||
            title.includes('nationale');
+  }
+
+  /**
+   * Ajouter des données de test pour démonstration
+   */
+  async createTestData(): Promise<{ success: boolean; message: string }> {
+    try {
+      console.log('🧪 [TEST] Création de données de test...');
+      
+      const testSignalements = [
+        {
+          title: "Nids de poule RN1 - Secteur Analakely",
+          description: "Plusieurs nids de poule importants sur la RN1 au niveau d'Analakely causent des difficultés de circulation pour les véhicules.",
+          category: "infrastructure",
+          status: "pending",
+          location: {
+            lat: -18.8792,
+            lng: 47.5079,
+            address: "RN1 - Avenue de l'Indépendance"
+          },
+          userId: "test_user_1",
+          userEmail: "test@mapeo.mg",
+          createdAt: new Date(),
+          upvotes: 5,
+          comments: 2
+        },
+        {
+          title: "Chaussée dégradée Route Nationale 2",
+          description: "La chaussée de la RN2 direction Toamasina présente des fissures importantes et des affaissements dangereux.",
+          category: "infrastructure", 
+          status: "pending",
+          location: {
+            lat: -18.8650,
+            lng: 47.5200,
+            address: "RN2 - Route de Toamasina"
+          },
+          userId: "test_user_2",
+          userEmail: "reporter@mapeo.mg",
+          createdAt: new Date(Date.now() - 3600000), // 1h plus tôt
+          upvotes: 8,
+          comments: 3
+        },
+        {
+          title: "Signalisation défaillante RN4",
+          description: "Panneaux de signalisation endommagés sur la route nationale 4, secteur Mahajanga, visibilité réduite.",
+          category: "safety",
+          status: "in_progress", 
+          location: {
+            lat: -18.8900,
+            lng: 47.4800,
+            address: "RN4 - Route de Mahajanga"
+          },
+          userId: "test_user_3", 
+          userEmail: "security@mapeo.mg",
+          createdAt: new Date(Date.now() - 7200000), // 2h plus tôt
+          upvotes: 12,
+          comments: 5
+        },
+        {
+          title: "Route locale endommagée - Quartier 67ha",
+          description: "Route locale dans le quartier 67ha avec plusieurs trous et problèmes de drainage après les pluies.",
+          category: "infrastructure",
+          status: "pending",
+          location: {
+            lat: -18.8950,
+            lng: 47.5300,
+            address: "Quartier 67ha"
+          },
+          userId: "test_user_4",
+          userEmail: "local@mapeo.mg", 
+          createdAt: new Date(Date.now() - 1800000), // 30min plus tôt
+          upvotes: 3,
+          comments: 1
+        },
+        {
+          title: "Pont endommagé RN1 - Antsirabe", 
+          description: "Le pont sur la RN1 direction Antsirabe présente des fissures structurelles nécessitant une intervention urgente.",
+          category: "infrastructure",
+          status: "pending",
+          location: {
+            lat: -18.8400,
+            lng: 47.4700,
+            address: "RN1 - Route d'Antsirabe"
+          },
+          userId: "test_user_5",
+          userEmail: "bridge@mapeo.mg",
+          createdAt: new Date(Date.now() - 5400000), // 1h30 plus tôt
+          upvotes: 15,
+          comments: 7
+        }
+      ];
+
+      const signalementsCollection = collection(db, FIRESTORE_COLLECTION);
+      
+      for (const signalement of testSignalements) {
+        await addDoc(signalementsCollection, signalement);
+        console.log('✅ [TEST] Signalement créé:', signalement.title);
+      }
+      
+      console.log('🎉 [TEST] Toutes les données de test ont été créées');
+      return { success: true, message: `${testSignalements.length} signalements de test créés` };
+      
+    } catch (error: any) {
+      console.error('❌ [TEST] Erreur création données de test:', error);
+      return { success: false, message: error.message };
+    }
   }
 
   /**

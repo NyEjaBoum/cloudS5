@@ -19,6 +19,11 @@
         </ion-title>
         
         <ion-buttons slot="end">
+          <!-- Bouton debug (développement) -->
+          <ion-button @click="debugFirestore" color="warning" size="small">
+            <ion-icon slot="icon-only" :icon="alertCircleOutline"></ion-icon>
+          </ion-button>
+          
           <!-- Bouton nouveau signalement -->
           <ion-button @click="openReportModal" class="report-button" color="primary">
             <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
@@ -243,20 +248,34 @@ let unsubscribeReports = null;
 // Charger les signalements depuis Firestore (spécifique aux routes nationales d'Antananarivo)
 const loadSignalementsFromFirestore = async () => {
   try {
-    console.log('🔄 Chargement des signalements depuis Firestore...');
+    console.log('� [MAP] Début du chargement des signalements...');
     const result = await signalementsFirestoreService.getSignalements();
     
+    console.log('🔍 [MAP] Résultat du service:', result);
+    
     if (result.success && result.signalements) {
+      console.log(`📊 [MAP] ${result.signalements.length} signalements reçus`);
+      
       // Filtrer les signalements avec des coordonnées valides dans la zone d'Antananarivo
-      const validReports = result.signalements.filter(r => {
-        if (!r.location?.lat || !r.location?.lng) return false;
-        if (r.location.lat === 0 && r.location.lng === 0) return false;
+      const validReports = result.signalements.filter((r, index) => {
+        const hasValidCoords = r.location?.lat && r.location?.lng && 
+                              r.location.lat !== 0 && r.location.lng !== 0;
         
-        // Zone approximative d'Antananarivo et ses environs
-        // Latitude: -18.7 à -19.1, Longitude: 47.3 à 47.7
-        return r.location.lat >= -19.1 && r.location.lat <= -18.7 &&
-               r.location.lng >= 47.3 && r.location.lng <= 47.7;
+        const isInAntananarivo = hasValidCoords && 
+          r.location.lat >= -19.1 && r.location.lat <= -18.7 &&
+          r.location.lng >= 47.3 && r.location.lng <= 47.7;
+        
+        console.log(`🔍 [MAP] Signalement ${index + 1} (${r.id}):`, {
+          title: r.title,
+          hasValidCoords,
+          isInAntananarivo,
+          coords: r.location
+        });
+        
+        return isInAntananarivo;
       });
+      
+      console.log(`✅ [MAP] ${validReports.length} signalements valides pour Antananarivo`);
       
       // Ajouter les champs calculés
       const reportsWithCalculated = validReports.map(report => ({
@@ -268,14 +287,16 @@ const loadSignalementsFromFirestore = async () => {
       }));
       
       nearbyReports.value = reportsWithCalculated;
+      console.log('📍 [MAP] Signalements stockés dans nearbyReports:', nearbyReports.value.length);
+      
       updateMapMarkers();
-      console.log(`✅ ${nearbyReports.value.length} signalements chargés depuis Firestore (zone Antananarivo)`);
+      console.log(`✅ [MAP] Processus terminé: ${nearbyReports.value.length} signalements affichés`);
     } else {
-      console.warn('Aucun signalement trouvé ou erreur:', result.error);
+      console.warn('⚠️ [MAP] Aucun signalement trouvé ou erreur:', result.error);
       nearbyReports.value = [];
     }
   } catch (error) {
-    console.error('❌ Erreur chargement signalements:', error);
+    console.error('❌ [MAP] Erreur chargement signalements:', error);
     nearbyReports.value = [];
   }
 };
@@ -449,6 +470,34 @@ const focusOnReport = (report) => {
 
 const viewReportDetails = (reportId) => {
   router.push(`/report/${reportId}`);
+};
+
+// Fonction de debug pour tester Firestore
+const debugFirestore = async () => {
+  console.log('🔧 [DEBUG] Test manuel Firestore...');
+  console.log('🔧 [DEBUG] Nombre de signalements actuels:', nearbyReports.value.length);
+  
+  try {
+    // Test de connexion
+    const result = await signalementsFirestoreService.getSignalements();
+    console.log('🔧 [DEBUG] Résultat direct du service:', result);
+    
+    // Créer des données de test si nécessaire
+    if (!result.success || result.signalements.length === 0) {
+      console.log('🔧 [DEBUG] Création forcée de données de test...');
+      const testResult = await signalementsFirestoreService.createTestData();
+      console.log('🔧 [DEBUG] Résultat création test:', testResult);
+      
+      if (testResult.success) {
+        // Recharger
+        setTimeout(() => {
+          loadSignalementsFromFirestore();
+        }, 1000);
+      }
+    }
+  } catch (error) {
+    console.error('🔧 [DEBUG] Erreur test Firestore:', error);
+  }
 };
 
 const getCategoryIcon = (category) => {
@@ -649,7 +698,13 @@ const addReportMarker = (report) => {
 };
 
 const updateMapMarkers = () => {
-  if (!markersLayer) return;
+  if (!markersLayer) {
+    console.warn('⚠️ [MARKERS] markersLayer n\'est pas initialisé');
+    return;
+  }
+
+  console.log('🗺️ [MARKERS] Début mise à jour des marqueurs...');
+  console.log('📊 [MARKERS] Nombre total de signalements:', nearbyReports.value.length);
 
   // Supprimer tous les marqueurs
   markersLayer.clearLayers();
@@ -693,8 +748,20 @@ const updateMapMarkers = () => {
     return true;
   });
 
-  console.log(`🗺️ Affichage de ${filtered.length} signalements sur la carte`);
-  filtered.forEach(addReportMarker);
+  console.log(`🎯 [MARKERS] ${filtered.length} signalements après filtrage`);
+  console.log('🔍 [MARKERS] Filtres actifs:', activeFilters.value);
+  console.log('🔍 [MARKERS] Filtre urgence:', urgencyFilter.value);
+  
+  filtered.forEach((report, index) => {
+    console.log(`📌 [MARKERS] Ajout marqueur ${index + 1}:`, {
+      id: report.id,
+      title: report.title,
+      coords: getCoordinates(report)
+    });
+    addReportMarker(report);
+  });
+  
+  console.log(`✅ [MARKERS] ${filtered.length} marqueurs ajoutés sur la carte`);
 };
 
 // Lifecycle
