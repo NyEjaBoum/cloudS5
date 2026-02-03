@@ -221,7 +221,7 @@ import {
   documentTextOutline,
   personOutline
 } from 'ionicons/icons';
-import reportsService from '../services/reports.service';
+import signalementsService from '../services/signalements.service';
 
 const router = useRouter();
 
@@ -235,9 +235,8 @@ const activeReportId = ref(null);
 const contentRef = ref(null);
 const selectedLocation = ref(null);
 
-// Données des signalements (temps réel depuis Firebase)
+// Données des signalements (depuis PostgreSQL)
 const nearbyReports = ref([]);
-let unsubscribeReports = null;
 
 // Calculer le temps écoulé
 const getTimeAgo = (date) => {
@@ -427,11 +426,137 @@ const getCoordinates = (report) => {
   if (report.location?.lat && report.location?.lng) {
     return [report.location.lat, report.location.lng];
   }
-  // Format 2: latitude, longitude (format web)
+  // Format 2: latitude, longitude (format PostgreSQL)
   if (report.latitude && report.longitude) {
     return [Number(report.latitude), Number(report.longitude)];
   }
   return null;
+};
+
+// Charger les signalements depuis PostgreSQL
+const loadSignalementsFromPostgres = async () => {
+  try {
+    console.log('🔄 Chargement des signalements depuis PostgreSQL...');
+    const result = await signalementsService.getMappedSignalements();
+    
+    if (result.success) {
+      console.log('📍 Signalements PostgreSQL reçus:', result.signalements.length);
+      nearbyReports.value = result.signalements.map(report => ({
+        ...report,
+        timeAgo: getTimeAgo(report.createdAt),
+        distance: 0 // TODO: calculer la distance depuis la position utilisateur
+      }));
+      updateMapMarkers();
+    } else {
+      console.error('❌ Erreur:', result.error);
+      // Fallback: utiliser des données de démonstration si l'API n'est pas disponible
+      loadDemoData();
+    }
+  } catch (error) {
+    console.error('❌ Erreur chargement PostgreSQL:', error);
+    // Fallback: utiliser des données de démonstration
+    loadDemoData();
+  }
+};
+
+// Charger des données de démonstration si l'API n'est pas disponible
+const loadDemoData = () => {
+  console.log('📍 Chargement des données de démonstration...');
+  
+  const demoData = [
+    {
+      id: '1',
+      title: 'Nid de poule',
+      description: 'Trou sur la route principale',
+      category: 'infrastructure',
+      status: 'pending',
+      location: { lat: -18.8792, lng: 47.5079 },
+      userId: '2',
+      createdAt: new Date(),
+      upvotes: 5,
+      comments: 2
+    },
+    {
+      id: '2',
+      title: 'Route inondée',
+      description: 'Inondation après pluie',
+      category: 'environment',
+      status: 'in_progress',
+      location: { lat: -18.9100, lng: 47.5200 },
+      userId: '2',
+      createdAt: new Date(Date.now() - 86400000),
+      upvotes: 12,
+      comments: 5
+    },
+    {
+      id: '3',
+      title: 'Signalisation manquante',
+      description: 'Panneau absent',
+      category: 'safety',
+      status: 'resolved',
+      location: { lat: -18.9000, lng: 47.5300 },
+      userId: '1',
+      createdAt: new Date(Date.now() - 172800000),
+      upvotes: 8,
+      comments: 1
+    },
+    {
+      id: '4',
+      title: 'Dégradation chaussée',
+      description: 'Fissures importantes',
+      category: 'infrastructure',
+      status: 'pending',
+      location: { lat: -18.8950, lng: 47.5150 },
+      userId: '3',
+      createdAt: new Date(Date.now() - 3600000),
+      upvotes: 3,
+      comments: 0
+    },
+    {
+      id: '5',
+      title: 'Travaux terminés',
+      description: 'Réfection complète',
+      category: 'infrastructure',
+      status: 'resolved',
+      location: { lat: -18.8850, lng: 47.5250 },
+      userId: '1',
+      createdAt: new Date(Date.now() - 259200000),
+      upvotes: 15,
+      comments: 8
+    },
+    {
+      id: '6',
+      title: 'Route barrée',
+      description: 'Travaux en cours, accès interdit',
+      category: 'transport',
+      status: 'in_progress',
+      location: { lat: -18.8800, lng: 47.5100 },
+      userId: '3',
+      createdAt: new Date(Date.now() - 43200000),
+      upvotes: 7,
+      comments: 3
+    },
+    {
+      id: '7',
+      title: 'Lavaka',
+      description: 'Trou be Manakambs',
+      category: 'infrastructure',
+      status: 'pending',
+      location: { lat: -18.8792, lng: 47.5079 },
+      userId: '2',
+      createdAt: new Date(),
+      upvotes: 2,
+      comments: 1
+    }
+  ];
+  
+  nearbyReports.value = demoData.map(report => ({
+    ...report,
+    timeAgo: getTimeAgo(report.createdAt),
+    distance: 0
+  }));
+  
+  updateMapMarkers();
 };
 
 // Méthodes Leaflet
@@ -596,16 +721,8 @@ const updateMapMarkers = () => {
 onMounted(() => {
   initializeMap();
 
-  // Souscrire aux signalements en temps réel depuis Firebase
-  unsubscribeReports = reportsService.subscribeToReports((reports) => {
-    console.log('📍 Signalements reçus:', reports.length);
-    nearbyReports.value = reports.map(report => ({
-      ...report,
-      timeAgo: getTimeAgo(report.createdAt),
-      distance: 0 // TODO: calculer la distance depuis la position utilisateur
-    }));
-    updateMapMarkers();
-  });
+  // Charger les signalements depuis PostgreSQL
+  loadSignalementsFromPostgres();
 
   // Exposer des fonctions globales pour les popups
   window.viewReportDetails = viewReportDetails;
@@ -622,11 +739,8 @@ onMounted(() => {
 });
 
 onUnmounted(() => {
-  // Se désabonner de Firebase
-  if (unsubscribeReports) {
-    unsubscribeReports();
-  }
-
+  // Pas de désabonnement Firebase car on utilise PostgreSQL
+  
   if (map) {
     map.remove();
   }
