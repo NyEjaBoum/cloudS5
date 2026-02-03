@@ -103,7 +103,13 @@ SELECT
   u.nom AS utilisateur_nom,
   u.prenom AS utilisateur_prenom,
   u.email AS utilisateur_email,
-  s.date_creation
+  s.date_creation,
+  CASE
+    WHEN s.statut = 1 THEN 0
+    WHEN s.statut = 11 THEN 50
+    WHEN s.statut = 99 THEN 100
+    ELSE 0
+  END AS avancement_pourcent
 FROM signalements s
 LEFT JOIN entreprises e ON s.id_entreprise = e.id
 LEFT JOIN utilisateurs u ON s.id_utilisateur = u.id;

@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
 import { handleLogin, loginFirebase, loginLocal } from "../api/auth";
 
@@ -10,6 +10,16 @@ export default function LoginPage() {
     password: "",
     rememberMe: false
   });
+
+  const location = useLocation();
+
+    // Affiche l'erreur passée par la redirection (ex: ProtectedRoute)
+  React.useEffect(() => {
+    if (location.state?.error) {
+      setError(location.state.error);
+    }
+  }, [location.state]);
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const navigate = useNavigate();

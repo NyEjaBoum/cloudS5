@@ -4,7 +4,7 @@ import { fetchSignalementById, updateSignalement } from "../../api/signalement.j
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "../../styles/signalementDetails.css";
+import "../../styles/SignalementDetails.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -147,6 +147,9 @@ export default function SignalementDetails() {
                     {getStatutInfo(val).label}
                   </button>
                 ))}
+                <span>
+                  Avancement : {signalement.avancementPourcent}%
+                </span>
               </div>
             </div>
             <div className="info-row full">

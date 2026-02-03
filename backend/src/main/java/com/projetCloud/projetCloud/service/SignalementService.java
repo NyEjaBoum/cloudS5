@@ -152,7 +152,9 @@ public class SignalementService {
             (String) row[13],
             (String) row[14],
             (String) row[15],
-            row[16] != null ? row[16].toString() : null
+            row[16] != null ? row[16].toString() : null,
+            row[17] != null ? ((Number) row[17]).intValue() : null // <-- avancementPourcent
+
         );
     }
 
@@ -177,7 +179,9 @@ public class SignalementService {
                 (String) row[13],
                 (String) row[14],
                 (String) row[15],
-                row[16] != null ? row[16].toString() : null
+                row[16] != null ? row[16].toString() : null,
+                row[17] != null ? ((Number) row[17]).intValue() : null // <-- avancementPourcent
+
             );
             result.add(dto);
         }

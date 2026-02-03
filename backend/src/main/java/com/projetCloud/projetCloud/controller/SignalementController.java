@@ -56,15 +56,28 @@ public class SignalementController {
     }
 
     // Dans SignalementController
-    @GetMapping("/{id}")
-    public ApiResponse<Signalement> getSignalementById(
+    // @GetMapping("/{id}")
+    // public ApiResponse<Signalement> getSignalementById(
+    //     @PathVariable Integer id,
+    //     @RequestHeader(value = "Authorization", required = false) String authHeader
+    // ) {
+    //     try {
+    //         // Si besoin, vérifie le token ici
+    //         // Utilisateur currentUser = authService.getUserFromToken(authHeader);
+    //         Signalement signalement = signalementService.getById(id);
+    //         return new ApiResponse<>("success", signalement, null);
+    //     } catch (Exception e) {
+    //         return new ApiResponse<>("error", null, e.getMessage());
+    //     }
+    // }
+
+        @GetMapping("/{id}")
+    public ApiResponse<SignalementCpl> getSignalementById(
         @PathVariable Integer id,
         @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
         try {
-            // Si besoin, vérifie le token ici
-            // Utilisateur currentUser = authService.getUserFromToken(authHeader);
-            Signalement signalement = signalementService.getById(id);
+            SignalementCpl signalement = signalementService.getSignalementCplById(id);
             return new ApiResponse<>("success", signalement, null);
         } catch (Exception e) {
             return new ApiResponse<>("error", null, e.getMessage());

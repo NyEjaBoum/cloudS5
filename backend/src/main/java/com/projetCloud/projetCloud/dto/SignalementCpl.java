@@ -20,13 +20,14 @@ public class SignalementCpl {
     private String utilisateurPrenom;
     private String utilisateurEmail;
     private String dateCreation;
+    private Integer avancementPourcent; // <-- Ajouté
 
     public SignalementCpl(
         Integer id, String titre, String description, Integer statut,
         BigDecimal latitude, BigDecimal longitude, BigDecimal surfaceM2, BigDecimal budget,
         Integer idEntreprise, String entreprise, String entrepriseAdresse, String entrepriseContact,
         Integer idUtilisateur, String utilisateurNom, String utilisateurPrenom, String utilisateurEmail,
-        String dateCreation
+        String dateCreation, Integer avancementPourcent // <-- Ajouté
     ) {
         this.id = id;
         this.titre = titre;
@@ -45,6 +46,7 @@ public class SignalementCpl {
         this.utilisateurPrenom = utilisateurPrenom;
         this.utilisateurEmail = utilisateurEmail;
         this.dateCreation = dateCreation;
+        this.avancementPourcent = avancementPourcent; // <-- Ajouté
     }
 
     public Integer getId() { return id; }
@@ -97,4 +99,7 @@ public class SignalementCpl {
 
     public String getDateCreation() { return dateCreation; }
     public void setDateCreation(String dateCreation) { this.dateCreation = dateCreation; }
+
+    public Integer getAvancementPourcent() { return avancementPourcent; }
+    public void setAvancementPourcent(Integer avancementPourcent) { this.avancementPourcent = avancementPourcent; }
 }
