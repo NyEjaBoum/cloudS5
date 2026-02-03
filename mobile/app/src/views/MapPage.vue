@@ -140,8 +140,8 @@
     </div>
 
     <!-- Contenu principal : Carte -->
-    <ion-content>
-      <div id="map" style="height: 100vh; width: 100%;"></div>
+    <ion-content ref="contentRef" class="map-content">
+      <div id="map" class="map-container"></div>
 
       <!-- Overlay de chargement -->
       <div v-if="mapLoading" class="loading-overlay">
@@ -183,7 +183,7 @@
 </template>
 
 <script setup>
-import { ref, onMounted, onUnmounted } from 'vue';
+import { ref, onMounted, onUnmounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -232,6 +232,8 @@ const searchQuery = ref('');
 const urgencyFilter = ref('all');
 const activeFilters = ref([]);
 const activeReportId = ref(null);
+const contentRef = ref(null);
+const selectedLocation = ref(null);
 
 // Données des signalements (temps réel depuis Firebase)
 const nearbyReports = ref([]);
@@ -446,13 +448,27 @@ const initializeMap = async () => {
       shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/images/marker-shadow.png',
     });
 
+    // Attendre que le DOM soit prêt
+    await nextTick();
+    
+    const mapElement = document.getElementById('map');
+    if (!mapElement) {
+      console.error('Map element not found');
+      mapLoading.value = false;
+      return;
+    }
+
     // Créer la carte centrée sur Antananarivo
-    map = L.map('map').setView([-18.8792, 47.5079], 13);
+    map = L.map('map', {
+      zoomControl: true,
+      attributionControl: true
+    }).setView([-18.8792, 47.5079], 13);
 
     // Ajouter les tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '© OpenStreetMap',
-      maxZoom: 19
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+      maxZoom: 19,
+      minZoom: 10
     }).addTo(map);
     
     // Couche pour les marqueurs
@@ -486,6 +502,13 @@ const initializeMap = async () => {
       }
       window.tempMarker = tempMarker;
     });
+    
+    // Forcer le redimensionnement de la carte
+    setTimeout(() => {
+      if (map) {
+        map.invalidateSize();
+      }
+    }, 100);
     
     mapLoading.value = false;
     console.log('✅ Leaflet map initialized!');
@@ -589,6 +612,13 @@ onMounted(() => {
   window.upvoteReport = (id) => {
     console.log('Upvoting report:', id);
   };
+
+  // Invalidate map size when content is ready
+  setTimeout(() => {
+    if (map) {
+      map.invalidateSize();
+    }
+  }, 500);
 });
 
 onUnmounted(() => {
@@ -804,6 +834,34 @@ onUnmounted(() => {
   color: #718096;
 }
 
+/* Map container styles */
+.map-content {
+  --background: transparent;
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+}
+
+.map-container {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+/* Ensure leaflet container takes full space */
+:global(.leaflet-container) {
+  width: 100%;
+  height: 100%;
+  background: #f0f0f0;
+}
+
 /* Modal de signalement */
 .report-modal {
   --height: 90%;
@@ -980,7 +1038,7 @@ onUnmounted(() => {
   }
   
   :global(.leaflet-tile) {
-    filter: brightness(0.6) invert(1) contrast(3) hue-rotate(200deg) saturate(0.3) brightness(0.7);
+    filter: brightness(0.9) invert(1) hue-rotate(180deg);
   }
 
   .bottom-nav {
