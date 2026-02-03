@@ -23,3 +23,5 @@ adb shell su -c "date $(date +%m%d%H%M%Y.%S)"
     Allez dans Settings → Proxy
     Désactivez le proxy si activé
 
+    ./gradlew assembleDebug
+
