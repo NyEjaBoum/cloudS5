@@ -214,6 +214,59 @@ const selectedLocation = ref(null);
 const nearbyReports = ref([]);
 let unsubscribeReports = null;
 
+// Données factices pour test
+const mockReports = [
+  {
+    id: '1',
+    title: 'Nid de poule - Avenue Indépendance',
+    description: 'Grand trou dangereux sur la chaussée',
+    category: 'infrastructure',
+    status: 'pending',
+    latitude: -18.8792,
+    longitude: 47.5079,
+    upvotes: 12,
+    comments: 3,
+    createdAt: new Date('2024-01-15')
+  },
+  {
+    id: '2',
+    title: 'Route inondée - Ambohijatovo',
+    description: 'Inondation après fortes pluies',
+    category: 'environment',
+    status: 'in_progress',
+    latitude: -18.9100,
+    longitude: 47.5200,
+    upvotes: 25,
+    comments: 8,
+    createdAt: new Date('2024-01-14')
+  },
+  {
+    id: '3',
+    title: 'Travaux terminés - Analakely',
+    description: 'Réfection de la chaussée terminée',
+    category: 'infrastructure',
+    status: 'resolved',
+    latitude: -18.9000,
+    longitude: 47.5300,
+    upvotes: 45,
+    comments: 15,
+    createdAt: new Date('2024-01-10')
+  }
+];
+
+// Fonction pour calculer la distance entre deux points (formule de Haversine)
+const calculateDistance = (lat1, lon1, lat2, lon2) => {
+  const R = 6371; // Rayon de la Terre en km
+  const dLat = (lat2 - lat1) * Math.PI / 180;
+  const dLon = (lon2 - lon1) * Math.PI / 180;
+  const a = 
+    Math.sin(dLat/2) * Math.sin(dLat/2) +
+    Math.cos(lat1 * Math.PI / 180) * Math.cos(lat2 * Math.PI / 180) *
+    Math.sin(dLon/2) * Math.sin(dLon/2);
+  const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+  return R * c;
+};
+
 // Calculer le temps écoulé
 const getTimeAgo = (date) => {
   if (!date) return '';
@@ -496,22 +549,29 @@ const initializeMap = async () => {
 };
 
 const addReportMarker = (report) => {
-  if (!map || !L || !markersLayer) return;
-
-  const coords = getCoordinates(report);
-  if (!coords) {
-    console.warn('Coordonnées manquantes pour:', report.id);
+  console.log('➕ Ajout marqueur:', report.id, report.title);
+  
+  if (!map || !L || !markersLayer) {
+    console.error('❌ Carte non initialisée');
     return;
   }
 
-  // Créer un marqueur personnalisé
+  const coords = getCoordinates(report);
+  console.log('📍 Coordonnées:', coords);
+  
+  if (!coords) {
+    console.warn('⚠️ Coordonnées manquantes pour:', report.id);
+    return;
+  }
+
+  // Créer un marqueur personnalisé SANS ion-icon
   const marker = L.marker(coords, {
     icon: L.divIcon({
       className: `report-marker marker-${report.category}`,
       html: `
         <div class="marker-container">
           <div class="marker-icon" style="background-color: ${getCategoryColor(report.category)}">
-            <ion-icon name="${getCategoryIcon(report.category)}"></ion-icon>
+            📍
           </div>
           <div class="marker-pulse"></div>
         </div>
@@ -541,10 +601,15 @@ const addReportMarker = (report) => {
   
   // Stocker l'ID pour référence
   marker.reportId = report.id;
+  
+  console.log('✅ Marqueur ajouté avec succès');
 };
 
 const updateMapMarkers = () => {
-  if (!markersLayer) return;
+  if (!markersLayer) {
+    console.warn('⚠️ markersLayer non disponible');
+    return;
+  }
 
   // Supprimer tous les marqueurs
   markersLayer.clearLayers();
@@ -565,23 +630,53 @@ const updateMapMarkers = () => {
     return true;
   });
 
+  console.log('🗺️ Mise à jour des marqueurs:', filtered.length);
   filtered.forEach(addReportMarker);
 };
 
 // Lifecycle
-onMounted(() => {
-  initializeMap();
-
-  // Souscrire aux signalements en temps réel depuis Firebase
-  unsubscribeReports = reportsService.subscribeToReports((reports) => {
-    console.log('📍 Signalements reçus:', reports.length);
-    nearbyReports.value = reports.map(report => ({
-      ...report,
-      timeAgo: getTimeAgo(report.createdAt),
-      distance: 0 // TODO: calculer la distance depuis la position utilisateur
-    }));
+onMounted(async () => {
+  console.log('🚀 Initialisation de MapPage...');
+  
+  // Initialiser la carte d'abord
+  await initializeMap();
+  
+  // Attendre que la carte soit prête
+  await nextTick();
+  
+  // Calculer la distance et le temps pour les données factices
+  const centerLat = -18.8792;
+  const centerLng = 47.5079;
+  
+  nearbyReports.value = mockReports.map(report => ({
+    ...report,
+    distance: calculateDistance(
+      centerLat, 
+      centerLng,
+      report.latitude, 
+      report.longitude
+    ).toFixed(1),
+    timeAgo: getTimeAgo(report.createdAt)
+  }));
+  
+  console.log('📊 Signalements préparés:', nearbyReports.value);
+  
+  // Ajouter les marqueurs après un délai
+  setTimeout(() => {
+    console.log('🗺️ Ajout des marqueurs:', nearbyReports.value.length);
     updateMapMarkers();
-  });
+  }, 1000);
+
+  // ** FIREBASE (désactivé pour test) **
+  // unsubscribeReports = reportsService.subscribeToReports((reports) => {
+  //   console.log('📍 Signalements reçus:', reports.length);
+  //   nearbyReports.value = reports.map(report => ({
+  //     ...report,
+  //     timeAgo: getTimeAgo(report.createdAt),
+  //     distance: calculateDistance(centerLat, centerLng, report.latitude, report.longitude).toFixed(1)
+  //   }));
+  //   updateMapMarkers();
+  // });
 
   // Exposer des fonctions globales pour les popups
   window.viewReportDetails = viewReportDetails;
@@ -594,10 +689,12 @@ onMounted(() => {
     if (map) {
       map.invalidateSize();
     }
-  }, 500);
+  }, 1500);
 });
 
 onUnmounted(() => {
+  console.log('🔚 Démontage de MapPage...');
+  
   // Se désabonner de Firebase
   if (unsubscribeReports) {
     unsubscribeReports();
@@ -864,6 +961,7 @@ onUnmounted(() => {
   align-items: center;
   justify-content: center;
   color: white;
+  font-size: 20px;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.2);
   border: 3px solid white;
   z-index: 2;
