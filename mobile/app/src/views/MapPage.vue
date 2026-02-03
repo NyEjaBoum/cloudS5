@@ -222,7 +222,7 @@ import {
   personOutline
 } from 'ionicons/icons';
 import reportsService from '../services/reports.service';
-import signalementsService from '../services/signalements.service';
+import signalementsFirestoreService from '../services/signalements-firestore.service';
 
 const router = useRouter();
 
@@ -240,47 +240,63 @@ const selectedLocation = ref(null);
 const nearbyReports = ref([]);
 let unsubscribeReports = null;
 
-// Charger les signalements depuis Firestore
+// Charger les signalements depuis Firestore (spécifique aux routes nationales d'Antananarivo)
 const loadSignalementsFromFirestore = async () => {
   try {
-    const result = await signalementsService.getSignalementsFromFirestore();
+    console.log('🔄 Chargement des signalements depuis Firestore...');
+    const result = await signalementsFirestoreService.getSignalements();
     
     if (result.success && result.signalements) {
+      // Filtrer les signalements avec des coordonnées valides dans la zone d'Antananarivo
+      const validReports = result.signalements.filter(r => {
+        if (!r.location?.lat || !r.location?.lng) return false;
+        if (r.location.lat === 0 && r.location.lng === 0) return false;
+        
+        // Zone approximative d'Antananarivo et ses environs
+        // Latitude: -18.7 à -19.1, Longitude: 47.3 à 47.7
+        return r.location.lat >= -19.1 && r.location.lat <= -18.7 &&
+               r.location.lng >= 47.3 && r.location.lng <= 47.7;
+      });
+      
       // Ajouter les champs calculés
-      const reportsWithCalculated = result.signalements.map(report => ({
+      const reportsWithCalculated = validReports.map(report => ({
         ...report,
         timeAgo: getTimeAgo(report.createdAt),
-        distance: calculateDistance(report.location)
+        distance: calculateDistance(report.location),
+        // Ajouter info route si disponible
+        routeInfo: report.description?.includes('RN') || report.title?.includes('RN') ? 'Route Nationale' : 'Route locale'
       }));
       
       nearbyReports.value = reportsWithCalculated;
       updateMapMarkers();
-      console.log('✅ Signalements chargés depuis Firestore:', nearbyReports.value.length);
+      console.log(`✅ ${nearbyReports.value.length} signalements chargés depuis Firestore (zone Antananarivo)`);
     } else {
       console.warn('Aucun signalement trouvé ou erreur:', result.error);
+      nearbyReports.value = [];
     }
   } catch (error) {
-    console.error('Erreur chargement signalements:', error);
+    console.error('❌ Erreur chargement signalements:', error);
+    nearbyReports.value = [];
   }
 };
 
-// Calculer la distance approximative (en km)
+// Calculer la distance approximative depuis le centre d'Antananarivo (en km)
 const calculateDistance = (location) => {
   if (!location?.lat || !location?.lng) return 0;
   
-  // Position par défaut (Antananarivo centre)
-  const defaultLat = -18.8792;
-  const defaultLng = 47.5079;
+  // Centre d'Antananarivo (Place de l'Indépendance)
+  const centerLat = -18.8792;
+  const centerLng = 47.5079;
   
   const R = 6371; // Rayon de la Terre en km
-  const dLat = (location.lat - defaultLat) * Math.PI / 180;
-  const dLng = (location.lng - defaultLng) * Math.PI / 180;
+  const dLat = (location.lat - centerLat) * Math.PI / 180;
+  const dLng = (location.lng - centerLng) * Math.PI / 180;
   const a = 
     Math.sin(dLat/2) * Math.sin(dLat/2) +
-    Math.cos(defaultLat * Math.PI / 180) * Math.cos(location.lat * Math.PI / 180) * 
+    Math.cos(centerLat * Math.PI / 180) * Math.cos(location.lat * Math.PI / 180) * 
     Math.sin(dLng/2) * Math.sin(dLng/2);
   const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-  return Math.round(R * c * 10) / 10;
+  return Math.round(R * c * 100) / 100; // Précision au centième de km
 };
 
 // Calculer le temps écoulé
@@ -303,7 +319,8 @@ const filters = [
   { id: 'environment', name: 'Environment', icon: trailSignOutline },
   { id: 'safety', name: 'Safety', icon: alertCircleOutline },
   { id: 'utilities', name: 'Utilities', icon: flashOutline },
-  { id: 'transport', name: 'Transport', icon: carOutline }
+  { id: 'transport', name: 'Transport', icon: carOutline },
+  { id: 'national_road', name: 'Routes Nationales', icon: alertCircleOutline } // Nouveau filtre
 ];
 
 // Références Leaflet
@@ -502,11 +519,13 @@ const initializeMap = async () => {
       return;
     }
 
-    // Créer la carte centrée sur Antananarivo
+    // Créer la carte centrée sur Antananarivo (centre-ville)
     map = L.map('map', {
       zoomControl: true,
-      attributionControl: true
-    }).setView([-18.8792, 47.5079], 13);
+      attributionControl: true,
+      minZoom: 10,
+      maxZoom: 18
+    }).setView([-18.8792, 47.5079], 14); // Zoom plus proche pour voir les routes
 
     // Ajouter les tuiles OpenStreetMap
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
@@ -572,31 +591,49 @@ const addReportMarker = (report) => {
     return;
   }
 
+  // Détecter si c'est une route nationale
+  const isNationalRoad = report.description?.toLowerCase().includes('rn') || 
+                        report.title?.toLowerCase().includes('rn') ||
+                        report.description?.toLowerCase().includes('route nationale') ||
+                        report.title?.toLowerCase().includes('route nationale');
+  
+  // Couleur spéciale pour les routes nationales
+  const markerColor = isNationalRoad ? '#DC2626' : getCategoryColor(report.category); // Rouge pour RN
+  const markerSize = isNationalRoad ? [45, 45] : [40, 40]; // Plus grand pour RN
+
   // Créer un marqueur personnalisé
   const marker = L.marker(coords, {
     icon: L.divIcon({
-      className: `report-marker marker-${report.category}`,
+      className: `report-marker marker-${report.category} ${isNationalRoad ? 'national-road' : ''}`,
       html: `
         <div class="marker-container">
-          <div class="marker-icon" style="background-color: ${getCategoryColor(report.category)}">
-            <ion-icon name="${getCategoryIcon(report.category)}"></ion-icon>
+          <div class="marker-icon" style="background-color: ${markerColor}; ${isNationalRoad ? 'border: 3px solid #FBBF24;' : ''}">
+            <ion-icon name="${isNationalRoad ? 'warning' : getCategoryIcon(report.category)}"></ion-icon>
+            ${isNationalRoad ? '<div class="rn-badge">RN</div>' : ''}
           </div>
-          <div class="marker-pulse"></div>
+          <div class="marker-pulse" style="background-color: ${markerColor};"></div>
         </div>
       `,
-      iconSize: [40, 40],
-      iconAnchor: [20, 40]
+      iconSize: markerSize,
+      iconAnchor: [markerSize[0]/2, markerSize[1]]
     })
   });
   
-  // Ajouter le popup
+  // Ajouter le popup avec information route nationale
+  const routeInfo = isNationalRoad ? '<div class="route-badge">Route Nationale - Urgence élevée</div>' : '';
+  
   marker.bindPopup(`
     <div class="map-popup">
       <h3>${report.title}</h3>
+      ${routeInfo}
       <p>${report.description}</p>
       <div class="popup-meta">
         <span class="status-badge ${report.status}">${report.status}</span>
         <span class="time">${report.timeAgo || ''}</span>
+      </div>
+      <div class="popup-stats">
+        <span>📍 ${report.distance}km du centre</span>
+        ${isNationalRoad ? '<span class="priority-warning">⚠️ Route Nationale</span>' : ''}
       </div>
       <div class="popup-actions">
         <button onclick="window.viewReportDetails('${report.id}')">Détails</button>
@@ -619,20 +656,44 @@ const updateMapMarkers = () => {
 
   // Filtrer et réajouter les marqueurs
   const filtered = nearbyReports.value.filter(report => {
-    // Filtrer par catégorie
-    if (activeFilters.value.length > 0 && !activeFilters.value.includes(report.category)) {
-      return false;
+    // Filtrer par catégorie ou type de route
+    if (activeFilters.value.length > 0) {
+      // Vérifier si c'est une route nationale et si le filtre RN est actif
+      const isNationalRoad = report.description?.toLowerCase().includes('rn') || 
+                            report.title?.toLowerCase().includes('rn') ||
+                            report.description?.toLowerCase().includes('route nationale') ||
+                            report.title?.toLowerCase().includes('route nationale');
+      
+      if (activeFilters.value.includes('national_road') && isNationalRoad) {
+        return true;
+      }
+      
+      // Filtrage par catégorie normale
+      if (!activeFilters.value.includes(report.category) && 
+          !activeFilters.value.includes('national_road')) {
+        return false;
+      }
+      
+      // Si le filtre RN est actif mais ce n'est pas une RN, exclure
+      if (activeFilters.value.includes('national_road') && !isNationalRoad) {
+        return false;
+      }
     }
 
-    // Filtrer par urgence (simplifié)
+    // Filtrer par urgence (routes nationales toujours prioritaires)
     if (urgencyFilter.value !== 'all') {
-      // Logique de filtrage par urgence
-      return true;
+      const isNationalRoad = report.description?.toLowerCase().includes('rn') || 
+                            report.title?.toLowerCase().includes('rn');
+      
+      if (urgencyFilter.value === 'critical' && !isNationalRoad) {
+        return false;
+      }
     }
 
     return true;
   });
 
+  console.log(`🗺️ Affichage de ${filtered.length} signalements sur la carte`);
   filtered.forEach(addReportMarker);
 };
 
@@ -647,8 +708,13 @@ onMounted(async () => {
     await loadSignalementsFromFirestore();
     
     // S'abonner aux mises à jour en temps réel
-    unsubscribeReports = signalementsService.subscribeToSignalements((signalements) => {
-      const reportsWithCalculated = signalements.map(report => ({
+    unsubscribeReports = signalementsFirestoreService.subscribeToSignalements((signalements) => {
+      // Filtrer les signalements avec des coordonnées valides
+      const validSignalements = signalements.filter(r => 
+        r.location?.lat !== 0 && r.location?.lng !== 0
+      );
+      
+      const reportsWithCalculated = validSignalements.map(report => ({
         ...report,
         timeAgo: getTimeAgo(report.createdAt),
         distance: calculateDistance(report.location)
@@ -1168,6 +1234,81 @@ onUnmounted(() => {
 
 .center-button-inner ion-icon {
   font-size: 28px;
+}
+
+/* Styles spécifiques pour les routes nationales */
+:global(.marker-container .national-road) {
+  position: relative;
+}
+
+:global(.rn-badge) {
+  position: absolute;
+  top: -8px;
+  right: -8px;
+  background: #FBBF24;
+  color: #92400E;
+  font-size: 8px;
+  font-weight: bold;
+  padding: 2px 4px;
+  border-radius: 4px;
+  border: 1px solid #F59E0B;
+}
+
+:global(.route-badge) {
+  background: linear-gradient(135deg, #DC2626, #EF4444);
+  color: white;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 11px;
+  font-weight: 600;
+  margin-bottom: 8px;
+  text-align: center;
+}
+
+:global(.priority-warning) {
+  background: #FEF3C7;
+  color: #92400E;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-size: 10px;
+  font-weight: 600;
+}
+
+:global(.popup-stats) {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 8px;
+  font-size: 12px;
+  color: #6B7280;
+}
+
+:global(.popup-stats span) {
+  background: #F3F4F6;
+  padding: 2px 6px;
+  border-radius: 4px;
+}
+
+/* Animation spéciale pour les routes nationales */
+:global(.national-road .marker-pulse) {
+  animation: nationalRoadPulse 1.5s infinite;
+}
+
+@keyframes nationalRoadPulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+    background-color: #DC2626;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.3;
+    background-color: #FCA5A5;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+    background-color: #DC2626;
+  }
 }
 
 /* Responsive */
