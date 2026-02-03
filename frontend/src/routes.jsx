@@ -10,6 +10,8 @@ import SignalementsManager from "./pages/manager/Signalements.jsx";
 import SignalementDetails from "./pages/manager/SignalementDetails.jsx";
 import RegisterUserManager from "./pages/manager/RegisterUserManager.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
+import UserDetails from "./pages/manager/UserDetails.jsx";
+import DashboardHome from "./pages/manager/DashboardHome.jsx"; // Assurez-vous d'importer le composant DashboardHome
 
 const AppRoutes = () => (
   <Router>
@@ -21,14 +23,16 @@ const AppRoutes = () => (
       <Route path="/" element={<Navigate to="/login" replace />} />
       <Route path="*" element={<Navigate to="/login" replace />} />
       <Route path="/manager" element={
-        <ProtectedRoute requiredRole={1 /* ou "MANAGER" selon ton JWT */}>
+        <ProtectedRoute requiredRole={1}>
           <DashboardManager />
         </ProtectedRoute>
       }>
+        <Route index element={<DashboardHome />} />
         <Route path="users" element={<UsersManager />} />
         <Route path="register-user" element={<RegisterUserManager />} />
         <Route path="signalements" element={<SignalementsManager />} />
         <Route path="signalements/:id" element={<SignalementDetails />} />
+        <Route path="users/:id" element={<UserDetails />} />
       </Route>
     </Routes>
   </Router>

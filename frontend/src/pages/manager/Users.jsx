@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, importUsersFromFirebase, exportUsersToFirebase } from "../../api/auth";
+import { fetchAllUsers, importUsersFromFirebase, exportUsersToFirebase } from "../../api/user";
 import "../../styles/manager.css";
 
 export default function Users() {

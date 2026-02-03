@@ -29,6 +29,7 @@ export async function fetchSignalementById(id) {
 }
 
 export async function updateSignalement(id, data) {
+  const token = localStorage.getItem("jwt");
   const payload = {
     ...data,
     entreprise: typeof data.entreprise === "object"
@@ -37,7 +38,10 @@ export async function updateSignalement(id, data) {
   };
   const res = await fetch(`http://localhost:8080/api/signalements/${id}`, {
     method: "PUT",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + token
+    },
     body: JSON.stringify(payload),
   });
   if (!res.ok) throw new Error("Erreur lors de la mise à jour");
@@ -49,7 +53,7 @@ export async function updateSignalement(id, data) {
 export async function syncAllSignalements() {
   const token = localStorage.getItem("jwt"); // ou récupère le token où tu le stockes
   console.log(localStorage.getItem("jwt"));
-  const res = await fetch("http://localhost:8080/api/signalements/syncAll", {
+  const res = await fetch("http://localhost:8080/api/signalements/sync", {
     method: "POST",
     headers: {
       "Authorization": "Bearer " + token,

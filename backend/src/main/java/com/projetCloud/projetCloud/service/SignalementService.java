@@ -6,7 +6,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.projetCloud.projetCloud.dto.InfosSignalementDto;
 import java.util.List;
-import java.util.stream.Collectors;
 import com.projetCloud.projetCloud.model.signalement.Signalement;
 import com.projetCloud.projetCloud.model.signalement.SignalementHistorique;
 import com.projetCloud.projetCloud.service.SignalementHistoriqueService;
@@ -14,6 +13,14 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigDecimal;
 import com.projetCloud.projetCloud.dto.SignalementDto;
 import com.projetCloud.projetCloud.dto.SignalementCpl;
+
+// Firebase imports
+import com.google.firebase.cloud.FirestoreClient;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.QueryDocumentSnapshot;
+import java.util.concurrent.ExecutionException;
+import java.util.Map;
+import com.projetCloud.projetCloud.util.FirebaseUtil; // <-- AJOUTE CETTE LIGNE
 
 @Service
 public class SignalementService {
@@ -24,6 +31,7 @@ public class SignalementService {
     @Autowired
     private SignalementHistoriqueService signalementHistoriqueService;
 
+    // ========== RÉCAPITULATIF ==========
     public RecapSignalementDto getRecapitulatif() {
         Object[] row = signalementRepository.getRecapitulatifRaw().get(0);
         return new RecapSignalementDto(
@@ -34,6 +42,7 @@ public class SignalementService {
         );
     }
 
+    // ========== CRUD ==========
     @Transactional
     public Signalement save(Signalement signalement){
         Signalement saved = signalementRepository.save(signalement);
@@ -52,6 +61,8 @@ public class SignalementService {
     @Transactional
     public Signalement update(Integer id, Signalement updated) {
         Signalement signalement = getById(id);
+        Integer ancienStatut = signalement.getStatut();
+        
         signalement.setTitre(updated.getTitre());
         signalement.setDescription(updated.getDescription());
         signalement.setStatut(updated.getStatut());
@@ -60,14 +71,13 @@ public class SignalementService {
         signalement.setSurfaceM2(updated.getSurfaceM2());
         signalement.setBudget(updated.getBudget());
         signalement.setEntreprise(updated.getEntreprise());
-        // Ajoute d'autres champs si besoin
 
         Signalement saved = signalementRepository.save(signalement);
 
         // Historique
         SignalementHistorique historique = new SignalementHistorique();
         historique.setSignalement(saved);
-        historique.setAncienStatut(signalement.getStatut());
+        historique.setAncienStatut(ancienStatut);
         historique.setNouveauStatut(updated.getStatut());
         historique.setDateChangement(java.time.LocalDateTime.now());
         historique.setUtilisateur(signalement.getUtilisateur());
@@ -80,10 +90,9 @@ public class SignalementService {
     public Signalement annuler(Integer id) {
         Signalement signalement = getById(id);
         Integer ancienStatut = signalement.getStatut();
-        signalement.setStatut(21); // 21 = annulé/effacé
+        signalement.setStatut(21);
         Signalement saved = signalementRepository.save(signalement);
 
-        // Historique
         SignalementHistorique historique = new SignalementHistorique();
         historique.setSignalement(saved);
         historique.setAncienStatut(ancienStatut);
@@ -95,6 +104,7 @@ public class SignalementService {
         return saved;
     }
 
+    // ========== LECTURE ==========
     public List<InfosSignalementDto> getInfosSignalement() {
         List<Object[]> rows = signalementRepository.getInfosSignalementRaw();
         List<InfosSignalementDto> result = new java.util.ArrayList<>();
@@ -172,5 +182,88 @@ public class SignalementService {
             result.add(dto);
         }
         return result;
+    }
+
+    // ========== EXPORT VERS FIREBASE ==========
+    public Map<String, Integer> exportSignalementsToFirebase() {
+        FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
+        
+        int exported = 0;
+        int updated = 0;
+
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            List<Signalement> signalements = signalementRepository.findAll();
+
+            for (Signalement signalement : signalements) {
+                SignalementDto dto = new SignalementDto(signalement);
+                String docId = String.valueOf(signalement.getId());
+
+                var docRef = db.collection("signalements").document(docId);
+                var snapshot = docRef.get().get();
+
+                if (snapshot.exists()) {
+                    docRef.set(dto).get();
+                    updated++;
+                } else {
+                    docRef.set(dto).get();
+                    exported++;
+                }
+            }
+
+            return Map.of("exported", exported, "updated", updated);
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Erreur lors de l'exportation vers Firebase : " + e.getMessage());
+        }
+    }
+
+    // ========== IMPORT DEPUIS FIREBASE ==========
+    public Map<String, Integer> importSignalementsFromFirebase() {
+        FirebaseUtil.ensureInitialized(); // <-- AJOUTE CETTE LIGNE
+        
+        int imported = 0;
+        int updated = 0;
+
+        try {
+            Firestore db = FirestoreClient.getFirestore();
+            var documents = db.collection("signalements").get().get().getDocuments();
+
+            for (QueryDocumentSnapshot doc : documents) {
+                Integer firebaseId = Integer.parseInt(doc.getId());
+                Signalement localSignalement = signalementRepository.findById(firebaseId).orElse(null);
+
+                if (localSignalement == null) {
+                    imported++;
+                } else {
+                    String firebaseTitre = doc.getString("titre");
+                    if (firebaseTitre != null && !firebaseTitre.equals(localSignalement.getTitre())) {
+                        localSignalement.setTitre(firebaseTitre);
+                        localSignalement.setDescription(doc.getString("description"));
+                        signalementRepository.save(localSignalement);
+                        updated++;
+                    }
+                }
+            }
+
+            return Map.of("imported", imported, "updated", updated);
+
+        } catch (InterruptedException | ExecutionException e) {
+            throw new RuntimeException("Erreur lors de l'importation depuis Firebase : " + e.getMessage());
+        }
+    }
+
+    // ========== SYNCHRONISATION COMPLÈTE ==========
+    @Transactional
+    public Map<String, Integer> synchronizeSignalements() {
+        Map<String, Integer> exportResult = exportSignalementsToFirebase();
+        Map<String, Integer> importResult = importSignalementsFromFirebase();
+
+        return Map.of(
+            "exported", exportResult.get("exported"),
+            "exportedUpdated", exportResult.get("updated"),
+            "imported", importResult.get("imported"),
+            "importedUpdated", importResult.get("updated")
+        );
     }
 }
