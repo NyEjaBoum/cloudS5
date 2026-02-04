@@ -77,7 +77,7 @@
                 <h2 class="report-title">{{ report.title }}</h2>
                 <p class="report-meta">
                   <ion-icon :icon="locationOutline" size="small"></ion-icon>
-                  {{ report.location }}
+                  {{ getLocationDisplay(report.location) }}
                 </p>
                 <div class="report-footer">
                   <StatusBadge :status="report.status" />
@@ -100,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -129,79 +129,65 @@ import {
 } from 'ionicons/icons';
 
 import { NavBar, CategoryIcon, StatusBadge, EmptyState } from '../components';
+import reportsService from '../services/reports.service';
+import authService from '../services/auth.service';
 
 const router = useRouter();
 
 const filter = ref('all');
 const loading = ref(false);
-const reports = reactive([
-  {
-    id: '1',
-    title: 'Broken sidewalk on Main Street',
-    category: 'infrastructure',
-    status: 'pending',
-    location: 'Main Street, Downtown',
-    createdAt: '2024-03-20',
-    updates: 2
-  },
-  {
-    id: '2',
-    title: 'Street light not working',
-    category: 'infrastructure',
-    status: 'in_progress',
-    location: 'Park Avenue',
-    createdAt: '2024-03-18',
-    updates: 1
-  },
-  {
-    id: '3',
-    title: 'Garbage pileup in park',
-    category: 'environment',
-    status: 'resolved',
-    location: 'Central Park',
-    createdAt: '2024-03-15',
-    updates: 0
-  },
-  {
-    id: '4',
-    title: 'Pothole on 5th Avenue',
-    category: 'infrastructure',
-    status: 'pending',
-    location: '5th Avenue',
-    createdAt: '2024-03-12',
-    updates: 3
-  },
-  {
-    id: '5',
-    title: 'Noise complaint - construction',
-    category: 'other',
-    status: 'in_progress',
-    location: 'Residential Area',
-    createdAt: '2024-03-10',
-    updates: 1
-  }
-]);
+const reports = ref<any[]>([]);
 
 const filteredReports = computed(() => {
-  if (filter.value === 'all') return reports;
-  return reports.filter(report => report.status === filter.value);
+  if (filter.value === 'all') return reports.value;
+  return reports.value.filter(report => report.status === filter.value);
 });
 
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
+const formatDate = (date: Date | string) => {
+  const d = date instanceof Date ? date : new Date(date);
   const now = new Date();
-  const diff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
+  const diff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
 
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
   if (diff < 7) return `${diff} days ago`;
-  return date.toLocaleDateString();
+  return d.toLocaleDateString();
+};
+
+const getLocationDisplay = (location: any): string => {
+  if (typeof location === 'string') return location;
+  if (location?.address) return location.address;
+  if (location?.lat && location?.lng) return `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
+  return 'Unknown location';
 };
 
 const refreshReports = async () => {
   loading.value = true;
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  loading.value = false;
+
+  try {
+    const currentUser = authService.getCurrentUser();
+
+    if (currentUser) {
+      // Récupérer les signalements de l'utilisateur connecté
+      const result = await reportsService.getMyReports(currentUser.uid);
+      if (result.success) {
+        reports.value = result.reports;
+        console.log('Signalements chargés:', result.reports.length);
+      } else {
+        console.error('Erreur:', result.error);
+      }
+    } else {
+      // Si pas connecté, récupérer tous les signalements
+      const result = await reportsService.getAllReports();
+      if (result.success) {
+        reports.value = result.reports;
+      }
+    }
+  } catch (error) {
+    console.error('Erreur chargement signalements:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const filterReports = () => {

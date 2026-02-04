@@ -87,6 +87,7 @@ import {
 } from 'ionicons/icons';
 
 import { NavBar, FilterSidebar, LoadingOverlay } from '../components';
+import reportsService from '../services/reports.service';
 
 const router = useRouter();
 
@@ -102,45 +103,8 @@ const selectedLocation = ref(null);
 // Données des signalements
 const nearbyReports = ref([]);
 
-// Données factices pour test
-const mockReports = [
-  {
-    id: '1',
-    title: 'Nid de poule - Avenue Indépendance',
-    description: 'Grand trou dangereux sur la chaussée',
-    category: 'infrastructure',
-    status: 'pending',
-    latitude: -18.8792,
-    longitude: 47.5079,
-    upvotes: 12,
-    comments: 3,
-    createdAt: new Date('2024-01-15')
-  },
-  {
-    id: '2',
-    title: 'Route inondée - Ambohijatovo',
-    description: 'Inondation après fortes pluies',
-    category: 'environment',
-    status: 'in_progress',
-    latitude: -18.9100,
-    longitude: 47.5200,
-    upvotes: 25,
-    comments: 8,
-    createdAt: new Date('2024-01-14')
-  },
-  {
-    id: '3',
-    title: 'Travaux terminés - Analakely',
-    description: 'Réfection de la chaussée terminée',
-    category: 'infrastructure',
-    status: 'resolved',
-    latitude: -18.9000,
-    longitude: 47.5300,
-    upvotes: 45,
-    comments: 15,
-    createdAt: new Date('2024-01-10')
-  }
-];
+// Variable pour désabonner du listener Firestore
+let unsubscribeReports = null;
 
 // Fonction pour calculer la distance entre deux points
 const calculateDistance = (lat1, lon1, lat2, lon2) => {
@@ -420,20 +384,30 @@ onMounted(async () => {
   const centerLat = -18.8792;
   const centerLng = 47.5079;
 
-  nearbyReports.value = mockReports.map(report => ({
-    ...report,
-    distance: calculateDistance(
-      centerLat,
-      centerLng,
-      report.latitude,
-      report.longitude
-    ).toFixed(1),
-    timeAgo: getTimeAgo(report.createdAt)
-  }));
+  // S'abonner aux signalements en temps réel depuis Firestore
+  unsubscribeReports = reportsService.subscribeToReports((reports) => {
+    console.log('Signalements reçus de Firestore:', reports.length);
 
-  setTimeout(() => {
-    updateMapMarkers();
-  }, 1000);
+    nearbyReports.value = reports.map(report => {
+      // Extraire les coordonnées (format Firestore: location.lat/lng)
+      const lat = report.location?.lat ?? 0;
+      const lng = report.location?.lng ?? 0;
+
+      return {
+        ...report,
+        // Ajouter latitude/longitude pour compatibilité avec getCoordinates
+        latitude: lat,
+        longitude: lng,
+        distance: calculateDistance(centerLat, centerLng, lat, lng).toFixed(1),
+        timeAgo: getTimeAgo(report.createdAt)
+      };
+    });
+
+    // Mettre à jour les marqueurs après réception des données
+    setTimeout(() => {
+      updateMapMarkers();
+    }, 100);
+  });
 
   window.viewReportDetails = viewReportDetails;
 
@@ -445,6 +419,11 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
+  // Désabonner du listener Firestore
+  if (unsubscribeReports) {
+    unsubscribeReports();
+  }
+
   if (map) {
     map.remove();
   }
