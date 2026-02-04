@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import { Link, useNavigate } from "react-router-dom";
-import { Globe, MessageCircle, CodeXml, Mail } from "lucide-react";
+import { User, Mail, Lock } from "lucide-react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -28,9 +28,8 @@ export default function RegisterPage() {
     setError("");
     setLoading(true);
 
-    // Validation simple
     if (!formData.termsAccepted) {
-      setError("You must accept the terms.");
+      setError("Vous devez accepter les conditions d'utilisation.");
       setLoading(false);
       return;
     }
@@ -47,8 +46,7 @@ export default function RegisterPage() {
         })
       });
       const data = await res.json();
-      if (!res.ok) throw new Error(data || "Registration failed");
-      // Redirige vers login ou dashboard après succès
+      if (!res.ok) throw new Error(data || "Erreur lors de l'inscription");
       navigate("/login");
     } catch (err) {
       setError(err.message);
@@ -58,139 +56,120 @@ export default function RegisterPage() {
 
   return (
     <AuthLayout
-      title="Adventure starts here"
-      subtitle="Make your app management easy and fun!"
+      title="Creer un compte"
+      subtitle="Rejoignez Mapeo et commencez a gerer vos signalements"
       leftSide={false}
     >
       <form onSubmit={handleSubmit} className="space-y-4">
-        {/* Last Name */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-medium">Last Name</span>
-          </label>
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Enter your last name"
-            className="input input-bordered w-full"
-            value={formData.lastname}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* First Name */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-medium">First Name</span>
-          </label>
-          <input
-            type="text"
-            name="firstname"
-            placeholder="Enter your firstname"
-            className="input input-bordered w-full"
-            value={formData.firstname}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Email */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-medium">Email</span>
-          </label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Enter your email"
-            className="input input-bordered w-full"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Password */}
-        <div className="form-control w-full">
-          <label className="label">
-            <span className="label-text font-medium">Password</span>
-          </label>
-          <input
-            type="password"
-            name="password"
-            placeholder="············"
-            className="input input-bordered w-full"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-
-        {/* Terms */}
-        <div className="flex items-start">
-          <label className="label cursor-pointer gap-2">
+        {/* Nom / Prenom */}
+        <div className="grid grid-cols-2 gap-3">
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Nom</label>
+            <div className="relative">
+              <User size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+              <input
+                type="text"
+                name="lastname"
+                placeholder="Votre nom"
+                className="input-clean pl-10"
+                value={formData.lastname}
+                onChange={handleChange}
+                required
+              />
+            </div>
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-slate-700 mb-1.5">Prenom</label>
             <input
-              type="checkbox"
-              name="termsAccepted"
-              className="checkbox checkbox-primary checkbox-sm"
-              checked={formData.termsAccepted}
+              type="text"
+              name="firstname"
+              placeholder="Votre prenom"
+              className="input-clean"
+              value={formData.firstname}
               onChange={handleChange}
               required
             />
-            <span className="label-text">
-              I agree to{" "}
-              <Link to="/privacy" className="link link-primary">
-                privacy policy & terms
-              </Link>
-            </span>
-          </label>
+          </div>
         </div>
+
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Email</label>
+          <div className="relative">
+            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+            <input
+              type="email"
+              name="email"
+              placeholder="votre@email.com"
+              className="input-clean pl-10"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </div>
+
+        {/* Password */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">Mot de passe</label>
+          <div className="relative">
+            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+            <input
+              type="password"
+              name="password"
+              placeholder="Minimum 6 caracteres"
+              className="input-clean pl-10"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+          </div>
+        </div>
+
+        {/* Terms */}
+        <label className="flex items-start gap-2.5 cursor-pointer">
+          <input
+            type="checkbox"
+            name="termsAccepted"
+            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-sand-600 focus:ring-sand-500"
+            checked={formData.termsAccepted}
+            onChange={handleChange}
+            required
+          />
+          <span className="text-sm text-slate-500">
+            J'accepte les{" "}
+            <Link to="/privacy" className="font-medium text-sand-600 hover:text-sand-700">
+              conditions d'utilisation
+            </Link>
+          </span>
+        </label>
 
         {/* Error */}
         {error && (
-          <div className="alert alert-error text-sm">
-            <span>{error}</span>
+          <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+            {error}
           </div>
         )}
 
         {/* Submit */}
         <button
           type="submit"
-          className="btn btn-primary w-full"
+          className="btn-primary-warm w-full flex items-center justify-center gap-2"
           disabled={loading}
         >
-          {loading ? (
-            <span className="loading loading-spinner loading-sm" />
-          ) : null}
-          {loading ? "Signing up..." : "Sign Up"}
+          {loading && (
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
+          {loading ? "Inscription..." : "Creer mon compte"}
         </button>
 
         {/* Footer link */}
-        <div className="text-center text-sm mt-2">
-          <span className="text-slate-500">Already have an account? </span>
-          <Link to="/login" className="link link-primary font-medium">
-            Sign in instead
+        <div className="text-center text-sm">
+          <span className="text-slate-400">Deja un compte ? </span>
+          <Link to="/login" className="font-medium text-sand-600 hover:text-sand-700 transition-colors">
+            Se connecter
           </Link>
-        </div>
-
-        {/* Divider */}
-        <div className="divider text-sm text-slate-400">or</div>
-
-        {/* Social login */}
-        <div className="flex items-center justify-center gap-3">
-          <button type="button" className="btn btn-square btn-outline btn-sm">
-            <Globe className="w-4 h-4" />
-          </button>
-          <button type="button" className="btn btn-square btn-outline btn-sm">
-            <MessageCircle className="w-4 h-4" />
-          </button>
-          <button type="button" className="btn btn-square btn-outline btn-sm">
-            <CodeXml className="w-4 h-4" />
-          </button>
-          <button type="button" className="btn btn-square btn-outline btn-sm">
-            <Mail className="w-4 h-4" />
-          </button>
         </div>
       </form>
     </AuthLayout>

@@ -5,13 +5,13 @@ import { Outlet } from "react-router-dom";
 
 export default function Dashboard() {
   return (
-    <div className="flex h-screen bg-base-200 overflow-hidden">
+    <div className="flex h-screen bg-slate-50 overflow-hidden">
       <SidebarManager />
       <div className="flex-1 flex flex-col overflow-hidden">
         <NavbarManager />
-        <div className="flex-1 overflow-y-auto p-6">
+        <main className="flex-1 overflow-y-auto p-8">
           <Outlet />
-        </div>
+        </main>
       </div>
     </div>
   );

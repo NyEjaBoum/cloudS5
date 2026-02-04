@@ -1,13 +1,12 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { logout } from "../../api/auth";
-import { Search, Bell, Settings, User, LogOut } from "lucide-react";
+import { Search, Bell, Settings, User, LogOut, ChevronDown } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
   const dropdownRef = useRef(null);
 
-  // Fermer le menu si on clique en dehors
   useEffect(() => {
     function handleClickOutside(event) {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
@@ -26,73 +25,70 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar bg-base-100 shadow-sm border-b border-silver px-6">
-      <div className="flex-1">
-        {/* Left side - intentionally empty as in original */}
-      </div>
+    <nav className="h-16 bg-white border-b border-slate-100 px-6 flex items-center justify-between shrink-0">
+      {/* Left side */}
+      <div className="flex-1" />
 
-      <div className="flex items-center gap-2">
+      {/* Right side */}
+      <div className="flex items-center gap-1.5">
         {/* Search */}
-        <div className="relative">
+        <div className="relative mr-2">
           <Search
-            size={16}
-            className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
+            size={15}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-300"
           />
           <input
             type="text"
-            className="input input-bordered input-sm w-64 pl-9"
+            className="w-56 pl-9 pr-4 py-2 bg-slate-50 border border-slate-100 rounded-xl text-sm placeholder:text-slate-300 focus:outline-none focus:ring-2 focus:ring-sand-200 focus:border-sand-300 transition-all"
             placeholder="Rechercher..."
           />
         </div>
 
-        {/* Icon buttons */}
-        <button className="btn btn-ghost btn-circle btn-sm">
+        {/* Notifications */}
+        <button className="relative w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all">
           <Bell size={18} />
+          <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-sand-500 rounded-full" />
         </button>
-        <button className="btn btn-ghost btn-circle btn-sm">
+
+        {/* Settings */}
+        <button className="w-9 h-9 flex items-center justify-center rounded-xl text-slate-400 hover:bg-slate-50 hover:text-slate-600 transition-all">
           <Settings size={18} />
         </button>
 
+        {/* Divider */}
+        <div className="w-px h-6 bg-slate-100 mx-1.5" />
+
         {/* User dropdown */}
-        <div className="dropdown dropdown-end" ref={dropdownRef}>
-          <div
-            tabIndex={0}
-            role="button"
-            className="avatar placeholder cursor-pointer"
+        <div className="relative" ref={dropdownRef}>
+          <button
             onClick={() => setOpen((o) => !o)}
+            className="flex items-center gap-2.5 pl-1 pr-2 py-1 rounded-xl hover:bg-slate-50 transition-all"
           >
-            <div className="bg-primary text-white rounded-full w-9">
-              <span className="text-sm font-semibold">M</span>
+            <div className="w-8 h-8 bg-gradient-to-br from-sand-400 to-sand-600 rounded-lg flex items-center justify-center">
+              <span className="text-xs font-bold text-white">M</span>
             </div>
-          </div>
+            <ChevronDown size={14} className={`text-slate-400 transition-transform duration-200 ${open ? "rotate-180" : ""}`} />
+          </button>
 
           {open && (
-            <ul
-              tabIndex={0}
-              className="dropdown-content menu bg-base-100 rounded-box shadow-lg w-52 p-2 mt-2 border border-silver z-50"
-            >
-              <li>
-                <a className="flex items-center gap-2">
-                  <User size={16} />
-                  My Profile
-                </a>
-              </li>
-              <li>
-                <a className="flex items-center gap-2">
-                  <Settings size={16} />
-                  My Account
-                </a>
-              </li>
-              <li>
-                <button
-                  className="flex items-center gap-2 text-error"
-                  onClick={handleLogout}
-                >
-                  <LogOut size={16} />
-                  Logout
-                </button>
-              </li>
-            </ul>
+            <div className="absolute right-0 top-full mt-2 w-48 bg-white rounded-xl shadow-elevated border border-slate-100 py-1.5 z-50 animate-fade-in">
+              <button className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                <User size={15} />
+                Mon profil
+              </button>
+              <button className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-slate-600 hover:bg-slate-50 transition-colors">
+                <Settings size={15} />
+                Parametres
+              </button>
+              <div className="h-px bg-slate-100 my-1" />
+              <button
+                className="w-full flex items-center gap-2.5 px-3.5 py-2 text-sm text-red-500 hover:bg-red-50 transition-colors"
+                onClick={handleLogout}
+              >
+                <LogOut size={15} />
+                Deconnexion
+              </button>
+            </div>
           )}
         </div>
       </div>

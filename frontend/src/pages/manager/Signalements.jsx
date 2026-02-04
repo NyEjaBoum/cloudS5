@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchSignalementInfos } from "../../api/signalement.js";
+import { fetchSignalementInfos, syncAllSignalements } from "../../api/signalement.js";
 import { Link } from "react-router-dom";
-import { syncAllSignalements } from "../../api/signalement.js";
-import { RefreshCw, Eye } from "lucide-react";
+import { RefreshCw, Eye, MapPin } from "lucide-react";
 
 export default function Signalements() {
   const [signalements, setSignalements] = useState([]);
@@ -11,78 +10,88 @@ export default function Signalements() {
     fetchSignalementInfos().then(setSignalements);
   }, []);
 
-const handleSync = async () => {
-  try {
-    const message = await syncAllSignalements();
-    alert(message); // Affiche "Tous les signalements ont été synchronisés avec Firebase"
-  } catch (e) {
-    alert("Erreur lors de la synchronisation : " + e.message);
-  }
-};
+  const handleSync = async () => {
+    try {
+      const message = await syncAllSignalements();
+      alert(message);
+    } catch (e) {
+      alert("Erreur lors de la synchronisation : " + e.message);
+    }
+  };
 
   const getStatusBadge = (statut) => {
     switch (statut) {
-      case 1:
-        return "badge badge-info";
-      case 11:
-        return "badge badge-warning";
-      case 99:
-        return "badge badge-success";
-      default:
-        return "badge badge-ghost";
+      case 1: return { label: "Nouveau", cls: "bg-blue-50 text-blue-600" };
+      case 11: return { label: "En cours", cls: "bg-amber-50 text-amber-600" };
+      case 99: return { label: "Termine", cls: "bg-emerald-50 text-emerald-600" };
+      default: return { label: "Annule", cls: "bg-slate-100 text-slate-500" };
     }
   };
 
   return (
-    <div className="card bg-base-100 shadow-sm animate-fade-in">
-      <div className="card-body">
-        <div className="flex items-center justify-between">
-          <h2 className="card-title text-xl">Liste des signalements</h2>
-          <button className="btn btn-primary btn-sm gap-2" onClick={handleSync}>
-            <RefreshCw size={14} />
-            Synchroniser
-          </button>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Signalements</h1>
+          <p className="text-sm text-slate-400 mt-0.5">{signalements.length} signalements enregistres</p>
         </div>
+        <button className="btn-primary-warm flex items-center gap-2 text-sm" onClick={handleSync}>
+          <RefreshCw size={15} />
+          Synchroniser
+        </button>
+      </div>
 
+      {/* Table */}
+      <div className="glass-card">
         <div className="overflow-x-auto">
-          <table className="table table-zebra w-full">
+          <table className="table-clean w-full">
             <thead>
               <tr>
                 <th>ID</th>
                 <th>Titre</th>
-                <th>Description</th>
                 <th>Statut</th>
                 <th>Surface (m2)</th>
                 <th>Budget</th>
                 <th>Entreprise</th>
                 <th>Date</th>
-                <th>Actions</th>
+                <th></th>
               </tr>
             </thead>
             <tbody>
-              {signalements.map((s) => (
-                <tr key={s.id}>
-                  <td>{s.id}</td>
-                  <td>{s.titre}</td>
-                  <td>{s.description}</td>
-                  <td>
-                    <span className={getStatusBadge(s.statut)}>{s.statut}</span>
-                  </td>
-                  <td>{s.surfaceM2}</td>
-                  <td>{s.budget}</td>
-                  <td>{s.entreprise}</td>
-                  <td>{s.dateCreation}</td>
-                  <td>
-                    <Link
-                      to={`/manager/signalements/${s.id}`}
-                      className="link link-primary text-sm inline-flex items-center gap-1"
-                    >
-                      <Eye size={14} />
-                      Voir détails
-                    </Link>
-                  </td>
-                </tr>
-              ))}
+              {signalements.map((s) => {
+                const badge = getStatusBadge(s.statut);
+                return (
+                  <tr key={s.id}>
+                    <td className="text-slate-400 font-mono text-xs">#{s.id}</td>
+                    <td>
+                      <div className="flex items-center gap-2">
+                        <MapPin size={14} className="text-slate-300 shrink-0" />
+                        <span className="font-medium text-slate-700">{s.titre}</span>
+                      </div>
+                    </td>
+                    <td>
+                      <span className={`badge-status ${badge.cls}`}>
+                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-60" />
+                        {badge.label}
+                      </span>
+                    </td>
+                    <td>{s.surfaceM2 ? Number(s.surfaceM2).toLocaleString() : "-"}</td>
+                    <td>{s.budget ? Number(s.budget).toLocaleString() : "-"}</td>
+                    <td className="text-slate-500">{s.entreprise || "-"}</td>
+                    <td className="text-slate-400 text-xs">{s.dateCreation}</td>
+                    <td>
+                      <Link
+                        to={`/manager/signalements/${s.id}`}
+                        className="inline-flex items-center gap-1.5 text-sm font-medium text-sand-600 hover:text-sand-700 transition-colors"
+                      >
+                        <Eye size={14} />
+                        Details
+                      </Link>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>

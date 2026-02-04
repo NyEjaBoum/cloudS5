@@ -16,34 +16,42 @@ export default function CarteVisiteur() {
     });
   }, []);
 
-  // Fonction pour ouvrir l'overlay
   const handleOpenOverlay = (signalement) => {
     setSelectedSignalement(signalement);
   };
 
-  // Fonction pour fermer l'overlay
   const handleCloseOverlay = () => {
     setSelectedSignalement(null);
   };
 
   return (
-    <div className="min-h-screen bg-base-200">
+    <div className="min-h-screen bg-slate-50">
       <Navbar />
-      <div className="flex gap-6 p-6 animate-fade-in flex-wrap">
-        {/* Carte à gauche - Plus large */}
-        <div className="flex-[2] min-w-[500px] h-[calc(100vh-160px)] min-h-[500px] bg-base-100 rounded-2xl shadow-md overflow-hidden border border-silver">
-          <CarteOffline
-            signalements={signalements}
-            onMarkerClick={handleOpenOverlay}
-          />
+      <div className="p-6 animate-fade-in">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div>
+            <h1 className="text-2xl font-bold text-slate-800">Carte des signalements</h1>
+            <p className="text-sm text-slate-400 mt-0.5">{signalements.length} signalements sur la carte</p>
+          </div>
         </div>
-        {/* Récapitulatif à droite - Plus compact */}
-        <div className="flex-[1] max-w-md min-w-[300px]">
-          <Recapitulatif />
+
+        <div className="flex gap-6 flex-wrap">
+          {/* Map */}
+          <div className="flex-[2] min-w-[500px] h-[calc(100vh-200px)] min-h-[500px] glass-card overflow-hidden">
+            <CarteOffline
+              signalements={signalements}
+              onMarkerClick={handleOpenOverlay}
+            />
+          </div>
+          {/* Stats sidebar */}
+          <div className="flex-[1] max-w-sm min-w-[280px]">
+            <Recapitulatif />
+          </div>
         </div>
       </div>
 
-      {/* Overlay pour afficher les détails */}
+      {/* Overlay */}
       {selectedSignalement && (
         <SignalementOverlay
           signalement={selectedSignalement}

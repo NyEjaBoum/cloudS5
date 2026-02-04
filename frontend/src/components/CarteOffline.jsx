@@ -10,10 +10,10 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 function getStatutLabel(statut) {
   switch (statut) {
-    case 1: return { label: "Nouveau", color: "#6366f1" };
-    case 11: return { label: "En cours", color: "#f59e0b" };
-    case 99: return { label: "Terminé", color: "#22c55e" };
-    default: return { label: "Annulé", color: "#64748b" };
+    case 1: return { label: "Nouveau", color: "#3b82f6", bg: "#eff6ff" };
+    case 11: return { label: "En cours", color: "#f59e0b", bg: "#fffbeb" };
+    case 99: return { label: "Termine", color: "#16a34a", bg: "#f0fdf4" };
+    default: return { label: "Annule", color: "#64748b", bg: "#f8fafc" };
   }
 }
 
@@ -56,41 +56,44 @@ const CarteOffline = ({
                 }}
               >
                 <Popup>
-                  <div className="p-4 min-w-[240px] font-sans">
-                    <div className="font-bold text-base mb-1">{s.titre}</div>
-                    <div className="text-slate-500 text-sm mb-2">{s.description}</div>
-                    <div className="mb-2">
+                  <div className="p-4 min-w-[260px] font-sans">
+                    <div className="font-bold text-slate-800 text-base mb-1">{s.titre}</div>
+                    <div className="text-slate-400 text-sm mb-3 line-clamp-2">{s.description}</div>
+                    <div className="mb-3 flex items-center gap-2">
                       <span
-                        className="px-2 py-0.5 rounded-md text-xs font-semibold text-white inline-block mr-2"
-                        style={{ background: statut.color }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+                        style={{ background: statut.bg, color: statut.color }}
                       >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: statut.color, opacity: 0.6 }} />
                         {statut.label}
                       </span>
-                      <span className="text-slate-400 text-xs">
-                        {s.dateCreation && (
-                          <>• {new Date(s.dateCreation).toLocaleDateString()}</>
-                        )}
-                      </span>
+                      {s.dateCreation && (
+                        <span className="text-slate-300 text-xs">
+                          {new Date(s.dateCreation).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
-                    <div className="text-sm mb-1">
-                      <span className="font-semibold">Surface :</span> {s.surfaceM2 ? s.surfaceM2.toString() : "-"} m²
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Surface</span>
+                        <span className="font-medium text-slate-600">{s.surfaceM2 ? s.surfaceM2.toString() : "-"} m2</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Budget</span>
+                        <span className="font-medium text-slate-600">{s.budget ? Number(s.budget).toLocaleString() : "-"} Ar</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Entreprise</span>
+                        <span className="font-medium text-slate-600">{s.entreprise || "-"}</span>
+                      </div>
                     </div>
-                    <div className="text-sm mb-1">
-                      <span className="font-semibold">Budget :</span> {s.budget ? Number(s.budget).toLocaleString() : "-"} Ar
-                    </div>
-                    <div className="text-sm mb-1">
-                      <span className="font-semibold">Entreprise :</span> {s.entreprise || "-"}
-                    </div>
-                    <div className="text-xs text-slate-400">
-                      <span className="font-semibold">Utilisateur :</span> {s.utilisateurNom || ""} {s.utilisateurPrenom || ""}
-                    </div>
-                    {/* Lien vers la page de détails */}
-                    <div className="mt-3">
+                    <div className="mt-3 pt-3 border-t border-slate-100">
                       <button
                         onClick={() => onMarkerClick && onMarkerClick(s)}
-                        className="text-primary font-semibold text-sm hover:underline bg-transparent border-none cursor-pointer p-0"
+                        className="text-sm font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
+                        style={{ color: "#d4a23e" }}
                       >
-                        Voir détails →
+                        Voir les details
                       </button>
                     </div>
                   </div>

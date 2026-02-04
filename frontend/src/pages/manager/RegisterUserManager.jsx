@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerLocal } from "../../api/auth";
-import { AlertCircle, UserPlus } from "lucide-react";
+import { AlertCircle, UserPlus, User, Mail, Lock } from "lucide-react";
 
 export default function RegisterUserManager() {
   const [formData, setFormData] = useState({
@@ -43,63 +43,69 @@ export default function RegisterUserManager() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-10 animate-fade-in">
-      <div className="card bg-base-100 shadow-sm">
-        <div className="card-body">
-          <h2 className="card-title text-xl mb-4">Creer un utilisateur</h2>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            {/* Nom */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Nom</span>
-              </label>
-              <input
-                type="text"
-                name="lastname"
-                placeholder="Nom"
-                value={formData.lastname}
-                onChange={handleChange}
-                required
-                className="input input-bordered w-full"
-              />
-            </div>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div>
+        <h1 className="text-2xl font-bold text-slate-800">Creer un utilisateur</h1>
+        <p className="text-sm text-slate-400 mt-0.5">Ajouter un nouvel utilisateur au systeme</p>
+      </div>
 
-            {/* Prenom */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Prenom</span>
-              </label>
-              <input
-                type="text"
-                name="firstname"
-                placeholder="Prenom"
-                value={formData.firstname}
-                onChange={handleChange}
-                required
-                className="input input-bordered w-full"
-              />
+      <div className="max-w-lg">
+        <div className="glass-card p-6">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            {/* Nom / Prenom */}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                  <User size={13} className="text-slate-400" />
+                  Nom
+                </label>
+                <input
+                  type="text"
+                  name="lastname"
+                  placeholder="Nom de famille"
+                  value={formData.lastname}
+                  onChange={handleChange}
+                  required
+                  className="input-clean"
+                />
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-1.5">Prenom</label>
+                <input
+                  type="text"
+                  name="firstname"
+                  placeholder="Prenom"
+                  value={formData.firstname}
+                  onChange={handleChange}
+                  required
+                  className="input-clean"
+                />
+              </div>
             </div>
 
             {/* Email */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Email</span>
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                <Mail size={13} className="text-slate-400" />
+                Email
               </label>
               <input
                 type="email"
                 name="email"
-                placeholder="Adresse email"
+                placeholder="adresse@email.com"
                 value={formData.email}
                 onChange={handleChange}
                 required
-                className="input input-bordered w-full"
+                className="input-clean"
               />
             </div>
 
-            {/* Mot de passe */}
-            <div className="form-control">
-              <label className="label">
-                <span className="label-text">Mot de passe</span>
+            {/* Password */}
+            <div>
+              <label className="flex items-center gap-1.5 text-sm font-medium text-slate-700 mb-1.5">
+                <Lock size={13} className="text-slate-400" />
+                Mot de passe
               </label>
               <input
                 type="password"
@@ -108,22 +114,26 @@ export default function RegisterUserManager() {
                 value={formData.password}
                 onChange={handleChange}
                 required
-                className="input input-bordered w-full"
+                className="input-clean"
               />
             </div>
 
             {/* Error */}
             {error && (
-              <div className="alert alert-error text-sm">
-                <AlertCircle size={16} />
-                <span>{error}</span>
+              <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+                <AlertCircle size={15} />
+                {error}
               </div>
             )}
 
             {/* Submit */}
-            <button type="submit" className="btn btn-primary w-full gap-2" disabled={loading}>
-              <UserPlus size={16} />
-              {loading ? "Creation..." : "Creer"}
+            <button
+              type="submit"
+              className="btn-primary-warm w-full flex items-center justify-center gap-2 text-sm"
+              disabled={loading}
+            >
+              <UserPlus size={15} />
+              {loading ? "Creation..." : "Creer l'utilisateur"}
             </button>
           </form>
         </div>

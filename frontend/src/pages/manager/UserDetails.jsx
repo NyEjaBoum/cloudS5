@@ -22,8 +22,8 @@ export default function UserDetails() {
   }, [id]);
 
   if (!user) return (
-    <div className="flex items-center justify-center min-h-screen">
-      <span className="loading loading-spinner loading-lg text-primary"></span>
+    <div className="flex items-center justify-center h-64">
+      <div className="w-8 h-8 border-3 border-sand-200 border-t-sand-600 rounded-full animate-spin" />
     </div>
   );
 
@@ -47,117 +47,129 @@ export default function UserDetails() {
   };
 
   return (
-    <div className="min-h-screen bg-base-200 p-6 animate-fade-in">
-      {/* Back button */}
-      <button className="btn btn-ghost btn-sm gap-2 mb-4" onClick={() => navigate(-1)}>
-        <ArrowLeft size={16} />
-        Retour
-      </button>
-
-      {/* Title */}
-      <div className="flex flex-wrap items-center gap-4 mb-6">
-        <h2 className="text-2xl font-bold">Details de l'utilisateur #{user.id}</h2>
-        <button className="btn btn-outline btn-sm gap-1" onClick={() => setEdit(e => !e)}>
-          <Edit3 size={14} />
-          {edit ? "Annuler" : "Modifier"}
+    <div className="space-y-6 animate-fade-in">
+      {/* Back + Title */}
+      <div>
+        <button
+          className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mb-4"
+          onClick={() => navigate(-1)}
+        >
+          <ArrowLeft size={15} />
+          Retour
         </button>
+
+        <div className="flex flex-wrap items-center gap-3">
+          <h1 className="text-2xl font-bold text-slate-800">
+            Utilisateur #{user.id}
+          </h1>
+          <button
+            className={`ml-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
+              edit
+                ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
+                : "bg-sand-50 text-sand-700 hover:bg-sand-100"
+            }`}
+            onClick={() => setEdit(e => !e)}
+          >
+            <Edit3 size={14} />
+            {edit ? "Annuler" : "Modifier"}
+          </button>
+        </div>
       </div>
 
-      {/* Error alert */}
+      {/* Error */}
       {error && (
-        <div className="alert alert-error mb-4">
-          <span>{error}</span>
+        <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+          <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+          {error}
         </div>
       )}
 
-      {/* Info card */}
+      {/* User card */}
       <div className="max-w-2xl">
-        <div className="card bg-base-100 shadow-sm">
-          <div className="card-body">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Nom */}
-              <div className="form-control">
-                <div className="flex items-center gap-2 mb-1">
-                  <User size={14} className="text-slate-400" />
-                  <span className="text-sm text-slate-500">Nom</span>
-                </div>
-                {edit ? (
-                  <input
-                    name="nom"
-                    value={form.nom || ""}
-                    onChange={handleInput}
-                    className="input input-bordered input-sm w-full"
-                  />
-                ) : (
-                  <span className="font-semibold">{user.nom}</span>
-                )}
-              </div>
+        <div className="glass-card p-6">
+          {/* Avatar */}
+          <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sand-400 to-sand-600 flex items-center justify-center">
+              <span className="text-lg font-bold text-white">
+                {(user.nom?.[0] || "").toUpperCase()}{(user.prenom?.[0] || "").toUpperCase()}
+              </span>
+            </div>
+            <div>
+              <p className="text-lg font-semibold text-slate-800">{user.nom} {user.prenom}</p>
+              <p className="text-sm text-slate-400">{user.email}</p>
+            </div>
+          </div>
 
-              {/* Prenom */}
-              <div className="form-control">
-                <div className="flex items-center gap-2 mb-1">
-                  <User size={14} className="text-slate-400" />
-                  <span className="text-sm text-slate-500">Prenom</span>
-                </div>
-                {edit ? (
-                  <input
-                    name="prenom"
-                    value={form.prenom || ""}
-                    onChange={handleInput}
-                    className="input input-bordered input-sm w-full"
-                  />
-                ) : (
-                  <span className="font-semibold">{user.prenom}</span>
-                )}
-              </div>
-
-              {/* Email */}
-              <div className="form-control md:col-span-2">
-                <div className="flex items-center gap-2 mb-1">
-                  <Mail size={14} className="text-slate-400" />
-                  <span className="text-sm text-slate-500">Email</span>
-                </div>
-                {edit ? (
-                  <input
-                    name="email"
-                    value={form.email || ""}
-                    onChange={handleInput}
-                    className="input input-bordered input-sm w-full"
-                  />
-                ) : (
-                  <span className="font-semibold">{user.email}</span>
-                )}
-              </div>
-
-              {/* Role */}
-              <div className="form-control">
-                <div className="flex items-center gap-2 mb-1">
-                  <Shield size={14} className="text-slate-400" />
-                  <span className="text-sm text-slate-500">Role</span>
-                </div>
-                <span className="font-semibold">{user.role?.nom}</span>
-              </div>
-
-              {/* Compte bloque */}
-              <div className="form-control">
-                <div className="flex items-center gap-2 mb-1">
-                  <Lock size={14} className="text-slate-400" />
-                  <span className="text-sm text-slate-500">Compte bloque</span>
-                </div>
-                <span className="font-semibold">{user.compteBloque ? "Oui" : "Non"}</span>
-              </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Nom */}
+            <div>
+              <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                <User size={13} />
+                Nom
+              </label>
+              {edit ? (
+                <input name="nom" value={form.nom || ""} onChange={handleInput} className="input-clean" />
+              ) : (
+                <p className="text-base font-semibold text-slate-700">{user.nom}</p>
+              )}
             </div>
 
-            {/* Save button */}
-            {edit && (
-              <div className="mt-6">
-                <button className="btn btn-primary gap-2" onClick={handleSave} disabled={saving}>
-                  <Save size={16} />
-                  {saving ? "Enregistrement..." : "Enregistrer"}
-                </button>
-              </div>
-            )}
+            {/* Prenom */}
+            <div>
+              <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                <User size={13} />
+                Prenom
+              </label>
+              {edit ? (
+                <input name="prenom" value={form.prenom || ""} onChange={handleInput} className="input-clean" />
+              ) : (
+                <p className="text-base font-semibold text-slate-700">{user.prenom}</p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div className="md:col-span-2">
+              <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                <Mail size={13} />
+                Email
+              </label>
+              {edit ? (
+                <input name="email" value={form.email || ""} onChange={handleInput} className="input-clean" />
+              ) : (
+                <p className="text-base font-semibold text-slate-700">{user.email}</p>
+              )}
+            </div>
+
+            {/* Role */}
+            <div>
+              <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                <Shield size={13} />
+                Role
+              </label>
+              <span className="badge-status bg-slate-100 text-slate-600">{user.role?.nom}</span>
+            </div>
+
+            {/* Compte bloque */}
+            <div>
+              <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                <Lock size={13} />
+                Compte bloque
+              </label>
+              <span className={`badge-status ${user.compteBloque ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
+                {user.compteBloque ? "Oui" : "Non"}
+              </span>
+            </div>
           </div>
+
+          {/* Save */}
+          {edit && (
+            <div className="mt-6 pt-4 border-t border-slate-100">
+              <button className="btn-primary-warm flex items-center gap-2 text-sm" onClick={handleSave} disabled={saving}>
+                <Save size={15} />
+                {saving ? "Enregistrement..." : "Enregistrer"}
+              </button>
+            </div>
+          )}
         </div>
       </div>
     </div>
