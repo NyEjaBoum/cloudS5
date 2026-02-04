@@ -1,6 +1,7 @@
 package com.projetCloud.projetCloud.controller;
 
 import com.projetCloud.projetCloud.model.signalement.Signalement;
+import com.projetCloud.projetCloud.model.signalement.SignalementHistorique;
 import com.projetCloud.projetCloud.repository.signalement.SignalementRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
@@ -8,11 +9,14 @@ import com.projetCloud.projetCloud.dto.RecapSignalementDto;
 import com.projetCloud.projetCloud.dto.SignalementCpl;
 import com.projetCloud.projetCloud.dto.ApiResponse;
 import com.projetCloud.projetCloud.service.SignalementService;
+import com.projetCloud.projetCloud.service.SignalementHistoriqueService;
 import com.projetCloud.projetCloud.dto.InfosSignalementDto;
 import com.projetCloud.projetCloud.service.AuthService;
 import com.projetCloud.projetCloud.model.utilisateur.Utilisateur;
 import java.util.List;
 import java.util.Map;
+import com.projetCloud.projetCloud.dto.DureeSignalementDto;
+import com.projetCloud.projetCloud.dto.StatsDelaiMoyenDto;
 
 @RestController
 @RequestMapping("/api/signalements")
@@ -25,7 +29,59 @@ public class SignalementController {
     private SignalementService signalementService;
 
     @Autowired
+    private SignalementHistoriqueService signalementHistoriqueService;
+
+    @Autowired
     private AuthService authService;
+
+
+    //V3 3 
+
+    @GetMapping("/duree")
+    public ApiResponse<List<DureeSignalementDto>> getDureeSignalement(
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Utilisateur currentUser = authService.getUserFromToken(authHeader);
+        if (currentUser == null || !"MANAGER".equalsIgnoreCase(currentUser.getRole().getNom())) {
+            return new ApiResponse<>("error", null, "Accès refusé");
+        }
+        try {
+            List<DureeSignalementDto> list = signalementService.getDureeSignalement();
+            return new ApiResponse<>("success", list, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    @GetMapping("/stats-delai-moyen")
+    public ApiResponse<StatsDelaiMoyenDto> getStatsDelaiMoyen(
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Utilisateur currentUser = authService.getUserFromToken(authHeader);
+        if (currentUser == null || !"MANAGER".equalsIgnoreCase(currentUser.getRole().getNom())) {
+            return new ApiResponse<>("error", null, "Accès refusé");
+        }
+        try {
+            StatsDelaiMoyenDto stats = signalementService.getStatsDelaiMoyen();
+            return new ApiResponse<>("success", stats, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/historique")
+    public ApiResponse<List<SignalementHistorique>> getHistorique(
+        @PathVariable Integer id,
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Utilisateur currentUser = authService.getUserFromToken(authHeader);
+        if (currentUser == null || !"MANAGER".equalsIgnoreCase(currentUser.getRole().getNom())) {
+            return new ApiResponse<>("error", null, "Accès refusé");
+        }
+        List<SignalementHistorique> histo = signalementHistoriqueService.getBySignalementId(id);
+        return new ApiResponse<>("success", histo, null);
+    }
+
 
     @PutMapping("/{id}")
     public ApiResponse<Signalement> updateSignalement(
@@ -56,15 +112,28 @@ public class SignalementController {
     }
 
     // Dans SignalementController
-    @GetMapping("/{id}")
-    public ApiResponse<Signalement> getSignalementById(
+    // @GetMapping("/{id}")
+    // public ApiResponse<Signalement> getSignalementById(
+    //     @PathVariable Integer id,
+    //     @RequestHeader(value = "Authorization", required = false) String authHeader
+    // ) {
+    //     try {
+    //         // Si besoin, vérifie le token ici
+    //         // Utilisateur currentUser = authService.getUserFromToken(authHeader);
+    //         Signalement signalement = signalementService.getById(id);
+    //         return new ApiResponse<>("success", signalement, null);
+    //     } catch (Exception e) {
+    //         return new ApiResponse<>("error", null, e.getMessage());
+    //     }
+    // }
+
+        @GetMapping("/{id}")
+    public ApiResponse<SignalementCpl> getSignalementById(
         @PathVariable Integer id,
         @RequestHeader(value = "Authorization", required = false) String authHeader
     ) {
         try {
-            // Si besoin, vérifie le token ici
-            // Utilisateur currentUser = authService.getUserFromToken(authHeader);
-            Signalement signalement = signalementService.getById(id);
+            SignalementCpl signalement = signalementService.getSignalementCplById(id);
             return new ApiResponse<>("success", signalement, null);
         } catch (Exception e) {
             return new ApiResponse<>("error", null, e.getMessage());

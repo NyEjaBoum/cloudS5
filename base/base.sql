@@ -65,6 +65,12 @@ CREATE TABLE signalements (
     date_creation TIMESTAMP DEFAULT NOW()
 );
 
+CREATE TABLE signalement_photo (
+    id SERIAL PRIMARY KEY,
+    id_signalement INTEGER REFERENCES signalements(id) ON DELETE CASCADE,
+    url VARCHAR(512) NOT NULL
+);
+
 -- =========================
 -- Historique des statuts
 -- =========================

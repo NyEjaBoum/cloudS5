@@ -1,18 +1,22 @@
 import React, { useEffect, useState } from "react";
 import { fetchAllUsers, synchronizeUsers } from "../../api/user";
-import { fetchSignalementInfos, syncAllSignalements } from "../../api/signalement";
+import { fetchSignalementInfos, syncAllSignalements, fetchDureeSignalements, fetchStatsDelaiMoyen } from "../../api/signalement";
 import { Link } from "react-router-dom";
 import "../../styles/manager.css";
 
 export default function DashboardHome() {
   const [users, setUsers] = useState([]);
   const [signalements, setSignalements] = useState([]);
+  const [durees, setDurees] = useState([]);
+  const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const refreshAll = () => {
     fetchAllUsers().then(setUsers);
     fetchSignalementInfos().then(setSignalements);
+    fetchDureeSignalements().then(setDurees);
+    fetchStatsDelaiMoyen().then(setStats);
   };
 
   useEffect(() => {
@@ -105,6 +109,36 @@ export default function DashboardHome() {
             </tbody>
           </table>
         </div>
+      </div>
+      <div>
+        <h2>Statistiques des délais de traitement</h2>
+        <div style={{ marginBottom: 24 }}>
+          <b>Délai moyen :</b> {stats ? stats.delaiMoyenJours : "-"} jours
+          <br />
+          <b>Travaux terminés :</b> {stats ? stats.nbTravauxTermines : "-"}
+        </div>
+        <table style={{ width: "100%", background: "#fff", borderRadius: 8 }}>
+          <thead>
+            <tr>
+              <th>ID</th>
+              <th>Titre</th>
+              <th>Date début</th>
+              <th>Date clôture</th>
+              <th>Durée (jours)</th>
+            </tr>
+          </thead>
+          <tbody>
+            {durees.map((d) => (
+              <tr key={d.id}>
+                <td>{d.id}</td>
+                <td>{d.titre}</td>
+                <td>{d.dateCreation}</td>
+                <td>{d.dateCloture}</td>
+                <td>{d.dureeJours}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

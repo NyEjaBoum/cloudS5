@@ -9,6 +9,34 @@ const res = await fetch("http://localhost:8080/api/signalements/infos", {
   return data.data || [];
 }
 
+export async function fetchSignalementHistorique(id) {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch(`http://localhost:8080/api/signalements/${id}/historique`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  return data.data || [];
+}
+
+
+export async function fetchDureeSignalements() {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch("http://localhost:8080/api/signalements/duree", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  return data.data || [];
+}
+
+export async function fetchStatsDelaiMoyen() {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch("http://localhost:8080/api/signalements/stats-delai-moyen", {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  return data.data;
+}
+
 
 export async function fetchSignalementComplet() {
   const res = await fetch("http://localhost:8080/api/signalements/complet");

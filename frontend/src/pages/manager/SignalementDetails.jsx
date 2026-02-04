@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchSignalementById, updateSignalement } from "../../api/signalement.js";
+import { fetchSignalementById, updateSignalement, fetchSignalementHistorique } from "../../api/signalement.js";
+import { fetchEntreprises } from "../../api/entreprise.js";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "../../styles/signalementDetails.css";
+import "../../styles/SignalementDetails.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
@@ -33,19 +34,30 @@ export default function SignalementDetails() {
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [entreprises, setEntreprises] = useState([]);
+  const [historique, setHistorique] = useState([]);
 
-  useEffect(() => {
-    fetchSignalementById(id)
-      .then((data) => {
-        setSignalement(data);
-        setForm(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        console.error(err);
-        setLoading(false);
-      });
-  }, [id]);
+useEffect(() => {
+  fetchEntreprises().then(setEntreprises);
+}, []);
+
+useEffect(() => {
+  if (entreprises.length === 0) return;
+  fetchSignalementById(id)
+    .then((data) => {
+      let entrepriseObj = null;
+      if (data.entreprise && typeof data.entreprise === "string") {
+        entrepriseObj = entreprises.find(e => e.nom === data.entreprise) || null;
+      } else if (data.idEntreprise) {
+        entrepriseObj = entreprises.find(e => e.id === data.idEntreprise) || null;
+      }
+      setForm({ ...data, entreprise: entrepriseObj });
+      setSignalement(data);
+      setLoading(false);
+    })
+    .catch(() => setLoading(false));
+  fetchSignalementHistorique(id).then(setHistorique);
+}, [id, entreprises]);
 
   if (loading) return <div className="details-container"><div className="loading">Chargement...</div></div>;
   if (!signalement) return <div className="details-container"><div className="error">Signalement non trouvé</div></div>;
@@ -54,15 +66,12 @@ export default function SignalementDetails() {
 
   const handleInput = (e) => {
     const { name, value } = e.target;
-    // Pour entreprise, on modifie le nom dans l'objet entreprise
-    if (name === "entreprise") {
-      setForm(f => ({
-        ...f,
-        entreprise: { ...f.entreprise, nom: value }
-      }));
-    } else {
-      setForm(f => ({ ...f, [name]: value }));
-    }
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleEntrepriseChange = (e) => {
+    const selected = entreprises.find(ent => ent.id === Number(e.target.value));
+    setForm(f => ({ ...f, entreprise: selected }));
   };
 
   const handleStatut = (val) => setForm(f => ({ ...f, statut: val }));
@@ -76,7 +85,6 @@ export default function SignalementDetails() {
     setSaving(true);
     try {
       await updateSignalement(id, form);
-      // Recharge depuis l'API pour avoir la version à jour
       const updated = await fetchSignalementById(id);
       setSignalement(updated);
       setForm(updated);
@@ -124,13 +132,18 @@ export default function SignalementDetails() {
             <div className="info-row full">
               <label>Entreprise Responsable</label>
               {edit ? (
-                <input
-                  name="entreprise"
-                  value={form.entreprise?.nom || ""}
-                  onChange={handleInput}
-                />
+                  <select
+                    name="entreprise"
+                    value={form.entreprise?.id || signalement.idEntreprise || ""}
+                    onChange={handleEntrepriseChange}
+                  >
+                    <option value="">Sélectionner...</option>
+                    {entreprises.map(ent => (
+                      <option key={ent.id} value={ent.id}>{ent.nom}</option>
+                    ))}
+                  </select>
               ) : (
-                <span className="info-value">{signalement.entreprise?.nom || "-"}</span>
+                <span className="info-value">{signalement.entreprise || "-"}</span>
               )}
             </div>
             <div className="info-row">
@@ -147,6 +160,9 @@ export default function SignalementDetails() {
                     {getStatutInfo(val).label}
                   </button>
                 ))}
+                <span>
+                  Avancement : {signalement.avancementPourcent}%
+                </span>
               </div>
             </div>
             <div className="info-row full">
@@ -224,6 +240,29 @@ export default function SignalementDetails() {
             </div>
           </div>
         </div>
+      </div>
+      <div style={{ marginTop: 32 }}>
+        <h3>Historique des statuts</h3>
+        <table style={{ width: "100%", background: "#fff", borderRadius: 8 }}>
+          <thead>
+            <tr>
+              <th>Ancien statut</th>
+              <th>Nouveau statut</th>
+              <th>Date</th>
+              <th>Utilisateur</th>
+            </tr>
+          </thead>
+          <tbody>
+            {historique.map((h, i) => (
+              <tr key={i}>
+                <td>{h.ancienStatut}</td>
+                <td>{h.nouveauStatut}</td>
+                <td>{h.dateChangement ? new Date(h.dateChangement).toLocaleString() : ""}</td>
+                <td>{h.utilisateur ? h.utilisateur.nom : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );

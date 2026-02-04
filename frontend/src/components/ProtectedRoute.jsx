@@ -1,7 +1,6 @@
 import React from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useLocation } from "react-router-dom";
 
-// Fonction utilitaire pour décoder le JWT (simple, sans vérif signature)
 function parseJwt(token) {
   if (!token) return null;
   try {
@@ -14,13 +13,14 @@ function parseJwt(token) {
 export default function ProtectedRoute({ children, requiredRole }) {
   const token = localStorage.getItem("jwt");
   const user = parseJwt(token);
+  const location = useLocation();
 
-  // Pas connecté
-  if (!token || !user) return <Navigate to="/login" replace />;
+  if (!token || !user) {
+    return <Navigate to="/login" replace state={{ error: "Veuillez vous connecter." }} />;
+  }
 
-  // Si un rôle est requis, on vérifie
   if (requiredRole && String(user.role) !== String(requiredRole)) {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/login" replace state={{ error: "Vous n'avez pas le droit d'accéder à cette page." }} />;
   }
 
   return children;

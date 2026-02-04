@@ -17,18 +17,18 @@ export default function Users() {
     refreshUsers();
   }, []);
 
-  const handleImport = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      await importUsersFromFirebase();
-      refreshUsers();
-      alert("Import depuis Firebase terminé !");
-    } catch (e) {
-      setError(e.message);
-    }
-    setLoading(false);
-  };
+  // const handleImport = async () => {
+  //   setLoading(true);
+  //   setError("");
+  //   try {
+  //     await importUsersFromFirebase();
+  //     refreshUsers();
+  //     alert("Import depuis Firebase terminé !");
+  //   } catch (e) {
+  //     setError(e.message);
+  //   }
+  //   setLoading(false);
+  // };
 
   const handleExport = async () => {
     setLoading(true);
@@ -46,9 +46,9 @@ export default function Users() {
     <div className="card">
       <h2>Liste des utilisateurs</h2>
       <div style={{ marginBottom: 16 }}>
-        <button className="sync-btn" onClick={handleImport} disabled={loading}>
+        {/* <button className="sync-btn" onClick={handleImport} disabled={loading}>
           Importer depuis Firebase
-        </button>
+        </button> */}
         <button className="sync-btn" onClick={handleExport} disabled={loading} style={{ marginLeft: 8 }}>
           Exporter vers Firebase
         </button>

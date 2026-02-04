@@ -21,6 +21,9 @@ import com.google.cloud.firestore.QueryDocumentSnapshot;
 import java.util.concurrent.ExecutionException;
 import java.util.Map;
 import com.projetCloud.projetCloud.util.FirebaseUtil; // <-- AJOUTE CETTE LIGNE
+import com.projetCloud.projetCloud.dto.DureeSignalementDto;
+import com.projetCloud.projetCloud.dto.StatsDelaiMoyenDto;
+
 
 @Service
 public class SignalementService {
@@ -30,6 +33,23 @@ public class SignalementService {
 
     @Autowired
     private SignalementHistoriqueService signalementHistoriqueService;
+
+
+    // v3 3fevrier
+    public List<DureeSignalementDto> getDureeSignalement() {
+        List<Object[]> rows = signalementRepository.getDureeSignalementRaw();
+        List<DureeSignalementDto> result = new java.util.ArrayList<>();
+        for (Object[] row : rows) {
+            result.add(new DureeSignalementDto(row));
+        }
+        return result;
+    }
+
+    public StatsDelaiMoyenDto getStatsDelaiMoyen() {
+        List<Object[]> rows = signalementRepository.getStatsDelaiMoyenRaw();
+        if (rows.isEmpty()) return null;
+        return new StatsDelaiMoyenDto(rows.get(0));
+    }
 
     // ========== RÉCAPITULATIF ==========
     public RecapSignalementDto getRecapitulatif() {
@@ -152,7 +172,9 @@ public class SignalementService {
             (String) row[13],
             (String) row[14],
             (String) row[15],
-            row[16] != null ? row[16].toString() : null
+            row[16] != null ? row[16].toString() : null,
+            row[17] != null ? ((Number) row[17]).intValue() : null // <-- avancementPourcent
+
         );
     }
 
@@ -177,7 +199,9 @@ public class SignalementService {
                 (String) row[13],
                 (String) row[14],
                 (String) row[15],
-                row[16] != null ? row[16].toString() : null
+                row[16] != null ? row[16].toString() : null,
+                row[17] != null ? ((Number) row[17]).intValue() : null // <-- avancementPourcent
+
             );
             result.add(dto);
         }
