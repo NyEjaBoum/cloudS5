@@ -5,13 +5,13 @@ import { getFirestore } from 'firebase/firestore';
 import { getStorage } from 'firebase/storage';
 
 const firebaseConfig = {
-  apiKey: "AIzaSyD2ZWSrx8W7SklEO2DaSgMWQVSnmD27zX8",
-  authDomain: "mapeo-23bbc.firebaseapp.com",
-  projectId: "mapeo-23bbc",
-  storageBucket: "mapeo-23bbc.firebasestorage.app",
-  messagingSenderId: "422703868234",
-  appId: "1:422703868234:web:2f00c78a273c29df3df9b3",
-  measurementId: "G-5FJGQTJ6V5"
+  apiKey: "AIzaSyBO-_s6-WnI4gJK_liORAJGK9VWmsJU5-k",
+  authDomain: "clouds5-210ea.firebaseapp.com",
+  projectId: "clouds5-210ea",
+  storageBucket: "clouds5-210ea.firebasestorage.app",
+  messagingSenderId: "232686176523",
+  appId: "1:232686176523:web:f455c94a62cac710043a0e",
+  measurementId: "G-38XFRC7366"
 };
 
 // Initialiser Firebase

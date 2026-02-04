@@ -49,10 +49,29 @@ export interface ReportInput {
   photos?: string[];
 }
 
-const COLLECTION_NAME = 'reports';
+const COLLECTION_NAME = 'signalements'; // Changé de 'reports' à 'signalements'
 
 class ReportsService {
   private reportsCollection = collection(db, COLLECTION_NAME);
+
+  async getAllSignalements(): Promise<{ success: boolean; signalements: any[]; error?: string }> {
+    try {
+      const q = query(this.reportsCollection, orderBy('dateCreation', 'desc'));
+      const snapshot = await getDocs(q);
+
+      const signalements = snapshot.docs.map(doc => ({
+        id: doc.id,
+        ...doc.data(),
+        // Convertir les timestamps si nécessaire
+        dateCreation: doc.data().dateCreation || null
+      }));
+
+      return { success: true, signalements };
+    } catch (error) {
+      console.error('Erreur récupération signalements:', error);
+      return { success: false, signalements: [], error: 'Erreur lors de la récupération' };
+    }
+  }
 
   // Créer un signalement
   async createReport(reportData: ReportInput, userId: string, userEmail?: string): Promise<{ success: boolean; report?: Report; error?: string }> {

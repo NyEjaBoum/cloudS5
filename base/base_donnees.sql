@@ -83,6 +83,12 @@ VALUES
 -- Vues pour les signalements
 -- =========================
 
+DROP VIEW IF EXISTS vue_stats_delai_moyen;
+DROP VIEW IF EXISTS vue_duree_signalement;
+DROP VIEW IF EXISTS vue_recapitulatif_signalement;
+DROP VIEW IF EXISTS vue_infos_signalement;
+
+
 DROP VIEW IF EXISTS vue_infos_signalement;
 CREATE OR REPLACE VIEW vue_infos_signalement AS
 SELECT

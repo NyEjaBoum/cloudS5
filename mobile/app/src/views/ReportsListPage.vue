@@ -9,7 +9,7 @@
               <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
             </ion-button>
           </ion-buttons>
-          <ion-title>My Reports</ion-title>
+          <ion-title>Signalements</ion-title>
           <ion-buttons slot="end">
             <ion-button @click="refreshReports">
               <ion-icon slot="icon-only" :icon="refreshOutline"></ion-icon>
@@ -19,24 +19,6 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-
-        <!-- Filtres -->
-        <ion-toolbar>
-          <ion-segment v-model="filter" @ionChange="filterReports">
-            <ion-segment-button value="all">
-              <ion-label>All</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="pending">
-              <ion-label>Pending</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="in_progress">
-              <ion-label>In Progress</ion-label>
-            </ion-segment-button>
-            <ion-segment-button value="resolved">
-              <ion-label>Resolved</ion-label>
-            </ion-segment-button>
-          </ion-segment>
-        </ion-toolbar>
       </ion-header>
 
       <!-- Liste des signalements -->
@@ -44,52 +26,50 @@
         <!-- Loading state -->
         <div v-if="loading" class="loading-state">
           <ion-spinner name="crescent"></ion-spinner>
-          <p>Loading reports...</p>
+          <p>Chargement des signalements...</p>
         </div>
 
         <!-- Empty state -->
         <EmptyState
-          v-else-if="filteredReports.length === 0"
+          v-else-if="signalements.length === 0"
           :icon="documentOutline"
-          title="No reports yet"
-          description="Start by reporting an issue in your area"
-          action-label="Create First Report"
+          title="Aucun signalement"
+          description="Commencez par signaler un problème"
+          action-label="Créer un signalement"
           @action="goToNewReport"
         />
 
-        <!-- List -->
+        <!-- Tableau des signalements -->
         <div v-else class="reports-container">
-          <ion-list>
-            <ion-item
-              v-for="report in filteredReports"
-              :key="report.id"
-              @click="viewReport(report.id)"
-              button
-              detail
-              class="report-item"
-            >
-              <ion-avatar slot="start" class="report-avatar">
-                <div class="status-indicator" :class="`status-${report.status}`"></div>
-                <CategoryIcon :category="report.category" size="small" />
-              </ion-avatar>
-
-              <ion-label>
-                <h2 class="report-title">{{ report.title }}</h2>
-                <p class="report-meta">
-                  <ion-icon :icon="locationOutline" size="small"></ion-icon>
-                  {{ getLocationDisplay(report.location) }}
-                </p>
-                <div class="report-footer">
-                  <StatusBadge :status="report.status" />
-                  <span class="report-date">{{ formatDate(report.createdAt) }}</span>
-                </div>
-              </ion-label>
-
-              <ion-badge v-if="report.updates > 0" color="primary" class="update-badge">
-                {{ report.updates }}
-              </ion-badge>
-            </ion-item>
-          </ion-list>
+          <table style="width:100%; border-collapse:collapse;">
+            <thead>
+              <tr style="background:#f7fafc;">
+                <th style="padding:8px;">Titre</th>
+                <th style="padding:8px;">Description</th>
+                <th style="padding:8px;">Statut</th>
+                <th style="padding:8px;">Budget</th>
+                <th style="padding:8px;">Surface</th>
+                <th style="padding:8px;">Entreprise</th>
+                <th style="padding:8px;">Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr v-for="s in signalements" :key="s.id" style="border-bottom:1px solid #e2e8f0;">
+                <td style="padding:8px;">{{ s.titre }}</td>
+                <td style="padding:8px;">{{ s.description }}</td>
+                <td style="padding:8px;">
+                  <span v-if="s.statut == 1">Nouveau</span>
+                  <span v-else-if="s.statut == 11">En cours</span>
+                  <span v-else-if="s.statut == 99">Terminé</span>
+                  <span v-else>Annulé</span>
+                </td>
+                <td style="padding:8px;">{{ s.budget }} Ar</td>
+                <td style="padding:8px;">{{ s.surfaceM2 }} m²</td>
+                <td style="padding:8px;">{{ s.entreprise?.nom || '-' }}</td>
+                <td style="padding:8px;">{{ formatDate(s.dateCreation) }}</td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </div>
 
@@ -100,7 +80,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -111,95 +91,49 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonSegment,
-  IonSegmentButton,
-  IonLabel,
-  IonList,
-  IonItem,
-  IonAvatar,
-  IonBadge,
   IonSpinner
 } from '@ionic/vue';
 import {
   refreshOutline,
   addOutline,
   documentOutline,
-  locationOutline,
   arrowBackOutline
 } from 'ionicons/icons';
 
-import { NavBar, CategoryIcon, StatusBadge, EmptyState } from '../components';
+import { NavBar, EmptyState } from '../components';
 import reportsService from '../services/reports.service';
-import authService from '../services/auth.service';
 
 const router = useRouter();
 
-const filter = ref('all');
 const loading = ref(false);
-const reports = ref<any[]>([]);
+const signalements = ref<any[]>([]);
 
-const filteredReports = computed(() => {
-  if (filter.value === 'all') return reports.value;
-  return reports.value.filter(report => report.status === filter.value);
-});
-
-const formatDate = (date: Date | string) => {
-  const d = date instanceof Date ? date : new Date(date);
-  const now = new Date();
-  const diff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
-
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  if (diff < 7) return `${diff} days ago`;
+const formatDate = (date: string) => {
+  if (!date) return '-';
+  // Format ISO string "2026-02-01T00:00" → "01/02/2026"
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
   return d.toLocaleDateString();
-};
-
-const getLocationDisplay = (location: any): string => {
-  if (typeof location === 'string') return location;
-  if (location?.address) return location.address;
-  if (location?.lat && location?.lng) return `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
-  return 'Unknown location';
 };
 
 const refreshReports = async () => {
   loading.value = true;
-
   try {
-    const currentUser = authService.getCurrentUser();
-
-    if (currentUser) {
-      // Récupérer les signalements de l'utilisateur connecté
-      const result = await reportsService.getMyReports(currentUser.uid);
-      if (result.success) {
-        reports.value = result.reports;
-        console.log('Signalements chargés:', result.reports.length);
-      } else {
-        console.error('Erreur:', result.error);
-      }
+    const result = await reportsService.getAllSignalements();
+    if (result.success) {
+      signalements.value = result.signalements;
     } else {
-      // Si pas connecté, récupérer tous les signalements
-      const result = await reportsService.getAllReports();
-      if (result.success) {
-        reports.value = result.reports;
-      }
+      signalements.value = [];
     }
   } catch (error) {
-    console.error('Erreur chargement signalements:', error);
+    signalements.value = [];
   } finally {
     loading.value = false;
   }
 };
 
-const filterReports = () => {
-  console.log('Filter changed to:', filter.value);
-};
-
 const goToNewReport = () => {
   router.push('/report');
-};
-
-const viewReport = (id: string) => {
-  router.push(`/report/${id}`);
 };
 
 const goBack = () => {
@@ -216,8 +150,6 @@ onMounted(() => {
   min-height: 100%;
   padding-bottom: 80px;
 }
-
-/* Loading state */
 .loading-state {
   display: flex;
   flex-direction: column;
@@ -226,98 +158,8 @@ onMounted(() => {
   padding: 80px 20px;
   text-align: center;
 }
-
 .loading-state p {
   margin-top: 16px;
   color: #718096;
-}
-
-/* Report items */
-.report-item {
-  --padding-start: 16px;
-  --padding-end: 16px;
-  --inner-padding-end: 8px;
-  --min-height: 80px;
-}
-
-.report-avatar {
-  position: relative;
-  width: 50px;
-  height: 50px;
-  background: #f7fafc;
-  border-radius: 12px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.status-indicator {
-  position: absolute;
-  top: -4px;
-  right: -4px;
-  width: 12px;
-  height: 12px;
-  border-radius: 50%;
-  border: 2px solid white;
-}
-
-.status-pending { background: #ed8936; }
-.status-in_progress { background: #667eea; }
-.status-resolved { background: #48bb78; }
-.status-rejected { background: #f56565; }
-
-.report-title {
-  font-size: 16px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 4px;
-  display: -webkit-box;
-  -webkit-line-clamp: 1;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-.report-meta {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  font-size: 13px;
-  color: #718096;
-  margin-bottom: 8px;
-}
-
-.report-footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.report-date {
-  font-size: 12px;
-  color: #a0aec0;
-}
-
-.update-badge {
-  font-size: 12px;
-  min-width: 20px;
-  height: 20px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .report-avatar {
-    background: #2d3748;
-  }
-
-  .report-title {
-    color: #e2e8f0;
-  }
-
-  .report-meta {
-    color: #a0aec0;
-  }
 }
 </style>

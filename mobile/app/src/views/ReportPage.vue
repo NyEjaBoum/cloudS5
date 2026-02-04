@@ -134,6 +134,21 @@
         </div>
       </form>
 
+      <!-- Carte des signalements existants -->
+      <ion-card class="form-section">
+        <ion-card-header>
+          <ion-card-title>
+            <div class="section-header">
+              <span class="step-number">4</span>
+              <span>Signalements existants</span>
+            </div>
+          </ion-card-title>
+        </ion-card-header>
+        <ion-card-content>
+          <div id="reports-map" class="full-map"></div>
+        </ion-card-content>
+      </ion-card>
+
       <!-- Modal pour la carte -->
       <ion-modal
         :is-open="mapModalOpen"
@@ -168,7 +183,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed } from 'vue';
+import { ref, reactive, computed, onMounted, nextTick } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -222,6 +237,72 @@ const form = reactive({
 const saving = ref(false);
 const mapModalOpen = ref(false);
 
+// Pour la carte des signalements
+const reports = ref<any[]>([]);
+let reportsMap: any = null;
+let leafletLib: any = null;
+let markersLayer: any = null;
+
+// Chargement des signalements et affichage sur la carte
+onMounted(async () => {
+  // Charger les signalements existants
+  const result = await reportsService.getAllSignalements();
+  if (result.success) {
+    reports.value = result.signalements;
+  }
+
+  // Charger Leaflet et afficher la carte
+  leafletLib = await import('leaflet');
+  await nextTick();
+
+  const mapEl = document.getElementById('reports-map');
+  if (!mapEl) return;
+
+  reportsMap = leafletLib.map('reports-map').setView([-18.8792, 47.5079], 13);
+
+  leafletLib.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+    attribution: '&copy; OpenStreetMap contributors',
+    maxZoom: 19
+  }).addTo(reportsMap);
+
+  markersLayer = leafletLib.layerGroup().addTo(reportsMap);
+
+  // Ajouter les marqueurs pour chaque signalement
+  reports.value.forEach(report => {
+    // Les coordonnées sont des strings, il faut les convertir en nombre
+    if (report.latitude && report.longitude) {
+      const lat = Number(report.latitude);
+      const lng = Number(report.longitude);
+
+      leafletLib.marker([lat, lng])
+        .addTo(markersLayer)
+        .bindPopup(`
+          <b>${report.titre}</b><br>
+          ${report.description}<br>
+          <b>Statut:</b> ${
+            report.statut == 1 ? 'Nouveau' :
+            report.statut == 11 ? 'En cours' :
+            report.statut == 99 ? 'Terminé' : 'Annulé'
+          }<br>
+          <b>Budget:</b> ${report.budget} Ar<br>
+          <b>Surface:</b> ${report.surfaceM2} m²<br>
+          <b>Entreprise:</b> ${report.entreprise?.nom || '-'}<br>
+          <b>Date:</b> ${formatDate(report.dateCreation)}
+        `);
+    }
+  });
+
+  setTimeout(() => reportsMap.invalidateSize(), 200);
+});
+
+// Formatage date
+const formatDate = (date: string) => {
+  if (!date) return '-';
+  const d = new Date(date);
+  if (isNaN(d.getTime())) return date;
+  return d.toLocaleDateString();
+};
+
 // Computed
 const canSubmit = computed(() => {
   return form.categoryId &&
@@ -242,7 +323,6 @@ const openMap = () => {
 // Variables pour la carte modale
 let modalMap: any = null;
 let modalMarker: any = null;
-let leafletLib: any = null;
 const tempLocation = ref<{ lat: number; lng: number } | null>(null);
 
 const initModalMap = async () => {
