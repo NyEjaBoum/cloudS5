@@ -37,19 +37,27 @@ export default function SignalementDetails() {
   const [entreprises, setEntreprises] = useState([]);
   const [historique, setHistorique] = useState([]);
 
-  useEffect(() => {
-    fetchSignalementById(id)
-      .then((data) => {
-        setSignalement(data);
-        setForm(data);
-        setLoading(false);
-      })
-      .catch((err) => {
-        setLoading(false);
-      });
-    fetchEntreprises().then(setEntreprises);
-    fetchSignalementHistorique(id).then(setHistorique);
-  }, [id]);
+useEffect(() => {
+  fetchEntreprises().then(setEntreprises);
+}, []);
+
+useEffect(() => {
+  if (entreprises.length === 0) return;
+  fetchSignalementById(id)
+    .then((data) => {
+      let entrepriseObj = null;
+      if (data.entreprise && typeof data.entreprise === "string") {
+        entrepriseObj = entreprises.find(e => e.nom === data.entreprise) || null;
+      } else if (data.idEntreprise) {
+        entrepriseObj = entreprises.find(e => e.id === data.idEntreprise) || null;
+      }
+      setForm({ ...data, entreprise: entrepriseObj });
+      setSignalement(data);
+      setLoading(false);
+    })
+    .catch(() => setLoading(false));
+  fetchSignalementHistorique(id).then(setHistorique);
+}, [id, entreprises]);
 
   if (loading) return <div className="details-container"><div className="loading">Chargement...</div></div>;
   if (!signalement) return <div className="details-container"><div className="error">Signalement non trouvé</div></div>;
@@ -124,16 +132,16 @@ export default function SignalementDetails() {
             <div className="info-row full">
               <label>Entreprise Responsable</label>
               {edit ? (
-                <select
-                  name="entreprise"
-                  value={form.entreprise?.id || ""}
-                  onChange={handleEntrepriseChange}
-                >
-                  <option value="">Sélectionner...</option>
-                  {entreprises.map(ent => (
-                    <option key={ent.id} value={ent.id}>{ent.nom}</option>
-                  ))}
-                </select>
+                  <select
+                    name="entreprise"
+                    value={form.entreprise?.id || signalement.idEntreprise || ""}
+                    onChange={handleEntrepriseChange}
+                  >
+                    <option value="">Sélectionner...</option>
+                    {entreprises.map(ent => (
+                      <option key={ent.id} value={ent.id}>{ent.nom}</option>
+                    ))}
+                  </select>
               ) : (
                 <span className="info-value">{signalement.entreprise || "-"}</span>
               )}
