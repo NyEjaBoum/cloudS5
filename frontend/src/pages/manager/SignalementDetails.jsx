@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchSignalementById, updateSignalement } from "../../api/signalement.js";
+import { fetchSignalementById, updateSignalement, fetchSignalementHistorique } from "../../api/signalement.js";
+import { fetchEntreprises } from "../../api/entreprise.js";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import L from "leaflet";
 import "leaflet/dist/leaflet.css";
@@ -33,6 +34,8 @@ export default function SignalementDetails() {
   const [edit, setEdit] = useState(false);
   const [form, setForm] = useState(null);
   const [saving, setSaving] = useState(false);
+  const [entreprises, setEntreprises] = useState([]);
+  const [historique, setHistorique] = useState([]);
 
   useEffect(() => {
     fetchSignalementById(id)
@@ -42,9 +45,10 @@ export default function SignalementDetails() {
         setLoading(false);
       })
       .catch((err) => {
-        console.error(err);
         setLoading(false);
       });
+    fetchEntreprises().then(setEntreprises);
+    fetchSignalementHistorique(id).then(setHistorique);
   }, [id]);
 
   if (loading) return <div className="details-container"><div className="loading">Chargement...</div></div>;
@@ -54,15 +58,12 @@ export default function SignalementDetails() {
 
   const handleInput = (e) => {
     const { name, value } = e.target;
-    // Pour entreprise, on modifie le nom dans l'objet entreprise
-    if (name === "entreprise") {
-      setForm(f => ({
-        ...f,
-        entreprise: { ...f.entreprise, nom: value }
-      }));
-    } else {
-      setForm(f => ({ ...f, [name]: value }));
-    }
+    setForm(f => ({ ...f, [name]: value }));
+  };
+
+  const handleEntrepriseChange = (e) => {
+    const selected = entreprises.find(ent => ent.id === Number(e.target.value));
+    setForm(f => ({ ...f, entreprise: selected }));
   };
 
   const handleStatut = (val) => setForm(f => ({ ...f, statut: val }));
@@ -76,7 +77,6 @@ export default function SignalementDetails() {
     setSaving(true);
     try {
       await updateSignalement(id, form);
-      // Recharge depuis l'API pour avoir la version à jour
       const updated = await fetchSignalementById(id);
       setSignalement(updated);
       setForm(updated);
@@ -124,13 +124,18 @@ export default function SignalementDetails() {
             <div className="info-row full">
               <label>Entreprise Responsable</label>
               {edit ? (
-                <input
+                <select
                   name="entreprise"
-                  value={form.entreprise?.nom || ""}
-                  onChange={handleInput}
-                />
+                  value={form.entreprise?.id || ""}
+                  onChange={handleEntrepriseChange}
+                >
+                  <option value="">Sélectionner...</option>
+                  {entreprises.map(ent => (
+                    <option key={ent.id} value={ent.id}>{ent.nom}</option>
+                  ))}
+                </select>
               ) : (
-                <span className="info-value">{signalement.entreprise?.nom || "-"}</span>
+                <span className="info-value">{signalement.entreprise || "-"}</span>
               )}
             </div>
             <div className="info-row">
@@ -227,6 +232,29 @@ export default function SignalementDetails() {
             </div>
           </div>
         </div>
+      </div>
+      <div style={{ marginTop: 32 }}>
+        <h3>Historique des statuts</h3>
+        <table style={{ width: "100%", background: "#fff", borderRadius: 8 }}>
+          <thead>
+            <tr>
+              <th>Ancien statut</th>
+              <th>Nouveau statut</th>
+              <th>Date</th>
+              <th>Utilisateur</th>
+            </tr>
+          </thead>
+          <tbody>
+            {historique.map((h, i) => (
+              <tr key={i}>
+                <td>{h.ancienStatut}</td>
+                <td>{h.nouveauStatut}</td>
+                <td>{h.dateChangement ? new Date(h.dateChangement).toLocaleString() : ""}</td>
+                <td>{h.utilisateur ? h.utilisateur.nom : ""}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </div>
   );
