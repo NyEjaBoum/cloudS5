@@ -48,28 +48,28 @@ VALUES
 -- =========================
 -- Signalements (tous statut = 1)
 -- =========================
-INSERT INTO signalements (titre, description, statut, latitude, longitude, surface_m2, budget, id_entreprise, id_utilisateur, date_creation)
-VALUES
-  ('Nid de poule', 'Trou sur la route principale', 1, -18.8792, 47.5079, 10, 50000, 1, 2, '2026-02-01'),
-  ('Route inondée', 'Inondation après pluie', 1, -18.9100, 47.5200, 50, 200000, 2, 2, '2026-02-02'),
-  ('Signalisation manquante', 'Panneau absent', 1, -18.9000, 47.5300, 5, 10000, 3, 1, '2026-02-03'),
-  ('Dégradation chaussée', 'Fissures importantes', 1, -18.8950, 47.5150, 20, 80000, 1, 3, '2026-02-04'),
-  ('Travaux récents', 'Nouveau chantier', 1, -18.8850, 47.5250, 100, 500000, 2, 1, '2026-02-05'),
-  ('Route barrée', 'Travaux en cours, accès interdit', 1, -18.8800, 47.5100, 30, 120000, 3, 3, '2026-02-06'),
-  ('lalitra be tsisy jiro', 'Nisotominy fofon kaly matsiro', 1, -96.8792, 27.5079, 10, 1400, 1, 2, '2026-02-07');
+-- INSERT INTO signalements (titre, description, statut, latitude, longitude, surface_m2, budget, id_entreprise, id_utilisateur, date_creation)
+-- VALUES
+--   ('Nid de poule', 'Trou sur la route principale', 1, -18.8792, 47.5079, 10, 50000, 1, 2, '2026-02-01'),
+--   ('Route inondée', 'Inondation après pluie', 1, -18.9100, 47.5200, 50, 200000, 2, 2, '2026-02-02'),
+--   ('Signalisation manquante', 'Panneau absent', 1, -18.9000, 47.5300, 5, 10000, 3, 1, '2026-02-03'),
+--   ('Dégradation chaussée', 'Fissures importantes', 1, -18.8950, 47.5150, 20, 80000, 1, 3, '2026-02-04'),
+--   ('Travaux récents', 'Nouveau chantier', 1, -18.8850, 47.5250, 100, 500000, 2, 1, '2026-02-05'),
+--   ('Route barrée', 'Travaux en cours, accès interdit', 1, -18.8800, 47.5100, 30, 120000, 3, 3, '2026-02-06'),
+--   ('lalitra be tsisy jiro', 'Nisotominy fofon kaly matsiro', 1, -96.8792, 27.5079, 10, 1400, 1, 2, '2026-02-07');
 
--- =========================
--- Historique des statuts de signalement (tous statut 1)
--- =========================
-INSERT INTO signalement_historique (id_signalement, ancien_statut, nouveau_statut, date_changement, id_utilisateur)
-VALUES
-  (1, 1, 1, '2026-02-01 08:00:00', 2),
-  (2, 1, 1, '2026-02-02 09:00:00', 2),
-  (3, 1, 1, '2026-02-03 10:00:00', 1),
-  (4, 1, 1, '2026-02-04 11:00:00', 3),
-  (5, 1, 1, '2026-02-05 12:00:00', 1),
-  (6, 1, 1, '2026-02-06 13:00:00', 3),
-  (7, 1, 1, '2026-02-07 14:00:00', 2);
+-- -- =========================
+-- -- Historique des statuts de signalement (tous statut 1)
+-- -- =========================
+-- INSERT INTO signalement_historique (id_signalement, ancien_statut, nouveau_statut, date_changement, id_utilisateur)
+-- VALUES
+--   (1, 1, 1, '2026-02-01 08:00:00', 2),
+--   (2, 1, 1, '2026-02-02 09:00:00', 2),
+--   (3, 1, 1, '2026-02-03 10:00:00', 1),
+--   (4, 1, 1, '2026-02-04 11:00:00', 3),
+--   (5, 1, 1, '2026-02-05 12:00:00', 1),
+--   (6, 1, 1, '2026-02-06 13:00:00', 3),
+--   (7, 1, 1, '2026-02-07 14:00:00', 2);
 
 -- =========================
 -- Sessions
