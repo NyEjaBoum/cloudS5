@@ -16,7 +16,6 @@ cd android
 gradlew clean
 cd ..
 
-
 # Logs :
 adb logcat
 
