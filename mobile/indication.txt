@@ -26,3 +26,9 @@ adb shell su -c "date $(date +%m%d%H%M%Y.%S)"
     Allez dans Settings → Proxy
     Désactivez le proxy si activé
 
+# Icon :
+npm install @capacitor/assets --save-dev
+npx @capacitor/assets generate --android
+
+
+nyvoaryraherimandimby@gmail.com

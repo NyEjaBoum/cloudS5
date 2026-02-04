@@ -19,7 +19,7 @@
             </ion-button>
           </ion-buttons>
         </ion-toolbar>
-        
+
         <!-- Filtres -->
         <ion-toolbar>
           <ion-segment v-model="filter" @ionChange="filterReports">
@@ -48,16 +48,14 @@
         </div>
 
         <!-- Empty state -->
-        <div v-else-if="filteredReports.length === 0" class="empty-state">
-          <div class="empty-illustration">
-            <ion-icon :icon="documentOutline" size="large"></ion-icon>
-          </div>
-          <h3>No reports yet</h3>
-          <p>Start by reporting an issue in your area</p>
-          <ion-button @click="goToNewReport" class="empty-action">
-            Create First Report
-          </ion-button>
-        </div>
+        <EmptyState
+          v-else-if="filteredReports.length === 0"
+          :icon="documentOutline"
+          title="No reports yet"
+          description="Start by reporting an issue in your area"
+          action-label="Create First Report"
+          @action="goToNewReport"
+        />
 
         <!-- List -->
         <div v-else class="reports-container">
@@ -72,23 +70,21 @@
             >
               <ion-avatar slot="start" class="report-avatar">
                 <div class="status-indicator" :class="`status-${report.status}`"></div>
-                <ion-icon :icon="getCategoryIcon(report.category)"></ion-icon>
+                <CategoryIcon :category="report.category" size="small" />
               </ion-avatar>
-              
+
               <ion-label>
                 <h2 class="report-title">{{ report.title }}</h2>
                 <p class="report-meta">
                   <ion-icon :icon="locationOutline" size="small"></ion-icon>
-                  {{ report.location }}
+                  {{ getLocationDisplay(report.location) }}
                 </p>
                 <div class="report-footer">
-                  <ion-badge :color="getStatusColor(report.status)">
-                    {{ formatStatus(report.status) }}
-                  </ion-badge>
+                  <StatusBadge :status="report.status" />
                   <span class="report-date">{{ formatDate(report.createdAt) }}</span>
                 </div>
               </ion-label>
-              
+
               <ion-badge v-if="report.updates > 0" color="primary" class="update-badge">
                 {{ report.updates }}
               </ion-badge>
@@ -104,7 +100,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, computed, onMounted } from 'vue';
+import { ref, computed, onMounted } from 'vue';
 import { useRouter } from 'vue-router';
 import {
   IonPage,
@@ -129,125 +125,69 @@ import {
   addOutline,
   documentOutline,
   locationOutline,
-  constructOutline,
-  alertCircleOutline,
-  trailSignOutline,
-  flashOutline,
-  carOutline,
-  helpCircleOutline,
-  arrowBackOutline,
-  homeOutline,
-  mapOutline,
-  personOutline
+  arrowBackOutline
 } from 'ionicons/icons';
 
-import NavBar from './components/NavBar.vue';
+import { NavBar, CategoryIcon, StatusBadge, EmptyState } from '../components';
+import reportsService from '../services/reports.service';
+import authService from '../services/auth.service';
 
 const router = useRouter();
 
 const filter = ref('all');
 const loading = ref(false);
-const reports = reactive([
-  {
-    id: '1',
-    title: 'Broken sidewalk on Main Street',
-    category: 'infrastructure',
-    status: 'pending',
-    location: 'Main Street, Downtown',
-    createdAt: '2024-03-20',
-    updates: 2
-  },
-  {
-    id: '2',
-    title: 'Street light not working',
-    category: 'infrastructure',
-    status: 'in_progress',
-    location: 'Park Avenue',
-    createdAt: '2024-03-18',
-    updates: 1
-  },
-  {
-    id: '3',
-    title: 'Garbage pileup in park',
-    category: 'environment',
-    status: 'resolved',
-    location: 'Central Park',
-    createdAt: '2024-03-15',
-    updates: 0
-  },
-  {
-    id: '4',
-    title: 'Pothole on 5th Avenue',
-    category: 'infrastructure',
-    status: 'pending',
-    location: '5th Avenue',
-    createdAt: '2024-03-12',
-    updates: 3
-  },
-  {
-    id: '5',
-    title: 'Noise complaint - construction',
-    category: 'other',
-    status: 'in_progress',
-    location: 'Residential Area',
-    createdAt: '2024-03-10',
-    updates: 1
-  }
-]);
+const reports = ref<any[]>([]);
 
 const filteredReports = computed(() => {
-  if (filter.value === 'all') return reports;
-  return reports.filter(report => report.status === filter.value);
+  if (filter.value === 'all') return reports.value;
+  return reports.value.filter(report => report.status === filter.value);
 });
 
-const getCategoryIcon = (category: string) => {
-  const icons: Record<string, any> = {
-    infrastructure: constructOutline,
-    public_safety: alertCircleOutline,
-    environment: trailSignOutline,
-    utilities: flashOutline,
-    transportation: carOutline,
-    other: helpCircleOutline
-  };
-  return icons[category] || helpCircleOutline;
-};
-
-const getStatusColor = (status: string) => {
-  const colors: Record<string, string> = {
-    pending: 'warning',
-    in_progress: 'primary',
-    resolved: 'success',
-    rejected: 'danger'
-  };
-  return colors[status] || 'medium';
-};
-
-const formatStatus = (status: string) => {
-  const statusMap: Record<string, string> = {
-    pending: 'Pending',
-    in_progress: 'In Progress',
-    resolved: 'Resolved',
-    rejected: 'Rejected'
-  };
-  return statusMap[status] || status;
-};
-
-const formatDate = (dateString: string) => {
-  const date = new Date(dateString);
+const formatDate = (date: Date | string) => {
+  const d = date instanceof Date ? date : new Date(date);
   const now = new Date();
-  const diff = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60 * 24));
-  
+  const diff = Math.floor((now.getTime() - d.getTime()) / (1000 * 60 * 60 * 24));
+
   if (diff === 0) return 'Today';
   if (diff === 1) return 'Yesterday';
   if (diff < 7) return `${diff} days ago`;
-  return date.toLocaleDateString();
+  return d.toLocaleDateString();
+};
+
+const getLocationDisplay = (location: any): string => {
+  if (typeof location === 'string') return location;
+  if (location?.address) return location.address;
+  if (location?.lat && location?.lng) return `${location.lat.toFixed(4)}, ${location.lng.toFixed(4)}`;
+  return 'Unknown location';
 };
 
 const refreshReports = async () => {
   loading.value = true;
-  // Simuler le chargement
-  await new Promise(resolve => setTimeout(resolve, 1000));
-  loading.value = false;
+
+  try {
+    const currentUser = authService.getCurrentUser();
+
+    if (currentUser) {
+      // Récupérer les signalements de l'utilisateur connecté
+      const result = await reportsService.getMyReports(currentUser.uid);
+      if (result.success) {
+        reports.value = result.reports;
+        console.log('Signalements chargés:', result.reports.length);
+      } else {
+        console.error('Erreur:', result.error);
+      }
+    } else {
+      // Si pas connecté, récupérer tous les signalements
+      const result = await reportsService.getAllReports();
+      if (result.success) {
+        reports.value = result.reports;
+      }
+    }
+  } catch (error) {
+    console.error('Erreur chargement signalements:', error);
+  } finally {
+    loading.value = false;
+  }
 };
 
 const filterReports = () => {
@@ -266,21 +206,7 @@ const goBack = () => {
   router.back();
 };
 
-// Navigation
-const goToHome = () => {
-  router.push('/home');
-};
-
-const goToMap = () => {
-  router.push('/map');
-};
-
-const goToProfile = () => {
-  router.push('/profil');
-};
-
 onMounted(() => {
-  // Charger les signalements depuis l'API
   refreshReports();
 });
 </script>
@@ -288,7 +214,7 @@ onMounted(() => {
 <style scoped>
 .reports-list {
   min-height: 100%;
-  padding-bottom: 80px; /* Espace pour la navbar */
+  padding-bottom: 80px;
 }
 
 /* Loading state */
@@ -304,45 +230,6 @@ onMounted(() => {
 .loading-state p {
   margin-top: 16px;
   color: #718096;
-}
-
-/* Empty state */
-.empty-state {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  padding: 80px 20px;
-  text-align: center;
-}
-
-.empty-illustration {
-  width: 100px;
-  height: 100px;
-  border-radius: 50%;
-  background: #f7fafc;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  margin-bottom: 24px;
-  color: #a0aec0;
-}
-
-.empty-state h3 {
-  font-size: 20px;
-  font-weight: 600;
-  color: #2d3748;
-  margin-bottom: 8px;
-}
-
-.empty-state p {
-  color: #718096;
-  margin-bottom: 24px;
-}
-
-.empty-action {
-  --border-radius: 12px;
-  font-weight: 600;
 }
 
 /* Report items */
@@ -421,23 +308,14 @@ onMounted(() => {
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
-  .empty-illustration {
-    background: #2d3748;
-    color: #a0aec0;
-  }
-  
-  .empty-state h3 {
-    color: #e2e8f0;
-  }
-  
   .report-avatar {
     background: #2d3748;
   }
-  
+
   .report-title {
     color: #e2e8f0;
   }
-  
+
   .report-meta {
     color: #a0aec0;
   }
