@@ -137,27 +137,26 @@
       <!-- Modal pour la carte -->
       <ion-modal
         :is-open="mapModalOpen"
-        @didDismiss="mapModalOpen = false"
+        @didDismiss="handleMapDismiss"
+        @didPresent="initModalMap"
         class="map-modal"
       >
         <ion-header>
           <ion-toolbar>
-            <ion-title>Select Location</ion-title>
+            <ion-title>Sélectionner un emplacement</ion-title>
             <ion-buttons slot="end">
-              <ion-button @click="mapModalOpen = false">Done</ion-button>
+              <ion-button @click="confirmModalLocation">Confirmer</ion-button>
             </ion-buttons>
           </ion-toolbar>
         </ion-header>
         <ion-content>
-          <div class="full-map">
-            <div class="map-placeholder-large">
-              <ion-icon :icon="mapOutline" size="large"></ion-icon>
-              <p>Map would be displayed here</p>
-              <ion-button @click="simulateLocationSelect">
-                <ion-icon :icon="pinOutline" slot="start"></ion-icon>
-                Select This Location
-              </ion-button>
-            </div>
+          <div id="modal-map" class="full-map"></div>
+          <div v-if="tempLocation" class="modal-location-info">
+            <ion-icon :icon="pinOutline"></ion-icon>
+            <span>{{ tempLocation.lat.toFixed(6) }}, {{ tempLocation.lng.toFixed(6) }}</span>
+          </div>
+          <div v-else class="modal-location-hint">
+            Appuyez sur la carte pour sélectionner un emplacement
           </div>
         </ion-content>
       </ion-modal>
@@ -202,6 +201,9 @@ import {
 } from 'ionicons/icons';
 
 import { NavBar, CategorySelector, UrgencySelector, PhotoUploader, LocationPicker } from '../components';
+import reportsService from '../services/reports.service';
+import storageService from '../services/storage.service';
+import authService from '../services/auth.service';
 
 const router = useRouter();
 
@@ -237,29 +239,149 @@ const openMap = () => {
   mapModalOpen.value = true;
 };
 
-const simulateLocationSelect = () => {
-  form.location = {
-    lat: 40.7128 + (Math.random() - 0.5) * 0.01,
-    lng: -74.0060 + (Math.random() - 0.5) * 0.01
-  };
+// Variables pour la carte modale
+let modalMap: any = null;
+let modalMarker: any = null;
+let leafletLib: any = null;
+const tempLocation = ref<{ lat: number; lng: number } | null>(null);
+
+const initModalMap = async () => {
+  try {
+    leafletLib = await import('leaflet');
+
+    await new Promise(resolve => setTimeout(resolve, 100));
+
+    const mapEl = document.getElementById('modal-map');
+    if (!mapEl) return;
+
+    // Centre initial : localisation existante ou Antananarivo
+    const center = form.location
+      ? [form.location.lat, form.location.lng]
+      : [-18.8792, 47.5079];
+
+    modalMap = leafletLib.map('modal-map').setView(center as [number, number], 15);
+
+    leafletLib.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; OpenStreetMap contributors',
+      maxZoom: 19
+    }).addTo(modalMap);
+
+    // Si une localisation existe déjà, placer un marqueur
+    if (form.location) {
+      tempLocation.value = { ...form.location };
+      modalMarker = leafletLib.marker([form.location.lat, form.location.lng]).addTo(modalMap);
+    }
+
+    // Clic sur la carte pour sélectionner un emplacement
+    modalMap.on('click', (e: any) => {
+      const { lat, lng } = e.latlng;
+      tempLocation.value = { lat, lng };
+
+      if (modalMarker) {
+        modalMarker.setLatLng([lat, lng]);
+      } else {
+        modalMarker = leafletLib.marker([lat, lng]).addTo(modalMap);
+      }
+    });
+
+    setTimeout(() => modalMap?.invalidateSize(), 200);
+  } catch (error) {
+    console.error('Erreur initialisation carte modale:', error);
+  }
+};
+
+const confirmModalLocation = () => {
+  if (tempLocation.value) {
+    form.location = { ...tempLocation.value };
+  }
+  cleanupModalMap();
   mapModalOpen.value = false;
 };
 
+const handleMapDismiss = () => {
+  cleanupModalMap();
+  mapModalOpen.value = false;
+};
+
+const cleanupModalMap = () => {
+  if (modalMap) {
+    modalMap.remove();
+    modalMap = null;
+    modalMarker = null;
+  }
+  tempLocation.value = null;
+};
+
 const submitReport = async () => {
+  const currentUser = authService.getCurrentUser();
+
+  if (!currentUser) {
+    const alert = await alertController.create({
+      header: 'Non connecté',
+      message: 'Vous devez être connecté pour soumettre un signalement.',
+      buttons: ['OK']
+    });
+    await alert.present();
+    return;
+  }
+
   saving.value = true;
 
+  const loading = await loadingController.create({
+    message: 'Envoi du signalement...'
+  });
+  await loading.present();
+
   try {
-    const loading = await loadingController.create({
-      message: 'Submitting report...'
-    });
-    await loading.present();
+    // 1. Créer le signalement dans Firestore (sans photos d'abord)
+    const reportData = {
+      title: form.title,
+      description: form.description,
+      category: form.categoryId,
+      location: {
+        lat: form.location?.lat ?? 0,
+        lng: form.location?.lng ?? 0,
+        address: form.address || undefined
+      }
+    };
 
-    await new Promise(resolve => setTimeout(resolve, 2000));
+    const result = await reportsService.createReport(
+      reportData,
+      currentUser.uid,
+      currentUser.email ?? undefined
+    );
 
-    await loading.dismiss();
+    if (!result.success || !result.report) {
+      throw new Error(result.error || 'Erreur lors de la création');
+    }
+
+    // 2. Upload des photos si présentes
+    if (form.photos.length > 0) {
+      await loading.dismiss();
+      const uploadLoading = await loadingController.create({
+        message: `Upload des photos (0/${form.photos.length})...`
+      });
+      await uploadLoading.present();
+
+      const photoUrls = await storageService.uploadReportPhotos(
+        form.photos,
+        result.report.id
+      );
+
+      // 3. Mettre à jour le signalement avec les URLs des photos
+      if (photoUrls.length > 0) {
+        await reportsService.updateReport(result.report.id, {
+          photos: photoUrls
+        });
+      }
+
+      await uploadLoading.dismiss();
+    } else {
+      await loading.dismiss();
+    }
 
     const toast = await toastController.create({
-      message: 'Report submitted successfully!',
+      message: 'Signalement envoyé avec succès !',
       duration: 3000,
       color: 'success',
       position: 'bottom'
@@ -268,11 +390,12 @@ const submitReport = async () => {
 
     router.push('/reports');
   } catch (error) {
-    console.error('Error submitting report:', error);
+    console.error('Erreur soumission signalement:', error);
+    await loading.dismiss();
 
     const alert = await alertController.create({
-      header: 'Error',
-      message: 'Failed to submit report. Please try again.',
+      header: 'Erreur',
+      message: 'Échec de l\'envoi du signalement. Veuillez réessayer.',
       buttons: ['OK']
     });
     await alert.present();
@@ -387,19 +510,40 @@ const saveAsDraft = async () => {
 
 /* Modal carte */
 .full-map {
-  height: 100%;
+  width: 100%;
+  height: calc(100% - 50px);
   min-height: 400px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background: #f7fafc;
 }
 
-.map-placeholder-large {
+.modal-location-info {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
   display: flex;
-  flex-direction: column;
   align-items: center;
-  gap: 16px;
+  gap: 8px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
+  color: #2d3748;
+  z-index: 1000;
+}
+
+.modal-location-hint {
+  position: absolute;
+  bottom: 16px;
+  left: 16px;
+  right: 16px;
+  padding: 12px 16px;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 12px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.15);
+  font-size: 14px;
   color: #718096;
+  text-align: center;
+  z-index: 1000;
 }
 </style>

@@ -4,7 +4,8 @@
       "Bash(dir:*)",
       "Bash(git rm:*)",
       "Bash(npm run build:*)",
-      "Bash(./mvnw compile:*)"
+      "Bash(./mvnw compile:*)",
+      "Bash(npm install:*)"
     ]
   }
 }
