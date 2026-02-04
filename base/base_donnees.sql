@@ -56,7 +56,7 @@ VALUES
   ('Dégradation chaussée', 'Fissures importantes', 1, -18.8950, 47.5150, 20, 80000, 1, 3, '2026-02-04'),
   ('Travaux récents', 'Nouveau chantier', 1, -18.8850, 47.5250, 100, 500000, 2, 1, '2026-02-05'),
   ('Route barrée', 'Travaux en cours, accès interdit', 1, -18.8800, 47.5100, 30, 120000, 3, 3, '2026-02-06'),
-  ('lalitra be tsisy jiro', 'Nisotominy fofon kaly matsiro', 1, -96.8792, 27.5079, 10, 1400, 1, 2, '2026-02-07');
+  ('Lalitra be tsisy jiro', 'Nosontominy fofon kaly matsiro', 1, -96.8792, 27.5079, 10, 1400, 1, 2, '2026-02-07');
 
 -- =========================
 -- Historique des statuts de signalement (tous statut 1)

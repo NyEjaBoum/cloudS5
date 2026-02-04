@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { fetchUserById, updateUser } from "../../api/user";
+import { ArrowLeft, Save, Edit3, User, Mail, Shield, Lock } from "lucide-react";
 
 export default function UserDetails() {
   const { id } = useParams();
@@ -17,10 +18,14 @@ export default function UserDetails() {
         setUser(data.data);
         setForm(data.data);
       })
-      .catch(() => setError("Utilisateur non trouvé"));
+      .catch(() => setError("Utilisateur non trouve"));
   }, [id]);
 
-  if (!user) return <div className="details-container"><div className="loading">Chargement...</div></div>;
+  if (!user) return (
+    <div className="flex items-center justify-center min-h-screen">
+      <span className="loading loading-spinner loading-lg text-primary"></span>
+    </div>
+  );
 
   const handleInput = (e) => {
     const { name, value } = e.target;
@@ -34,7 +39,7 @@ export default function UserDetails() {
       await updateUser(id, form);
       setUser(form);
       setEdit(false);
-      alert("Utilisateur modifié !");
+      alert("Utilisateur modifie !");
     } catch (e) {
       setError("Erreur lors de la sauvegarde");
     }
@@ -42,49 +47,118 @@ export default function UserDetails() {
   };
 
   return (
-    <div className="details-container">
-      <button className="back-btn" onClick={() => navigate(-1)}>← Retour</button>
-      <h2>Détails de l'utilisateur #{user.id}</h2>
-      {error && <div className="error">{error}</div>}
-      <div className="info-card">
-        <div className="info-row">
-          <label>Nom</label>
-          {edit ? (
-            <input name="nom" value={form.nom || ""} onChange={handleInput} />
-          ) : (
-            <span className="info-value">{user.nom}</span>
-          )}
+    <div className="min-h-screen bg-base-200 p-6 animate-fade-in">
+      {/* Back button */}
+      <button className="btn btn-ghost btn-sm gap-2 mb-4" onClick={() => navigate(-1)}>
+        <ArrowLeft size={16} />
+        Retour
+      </button>
+
+      {/* Title */}
+      <div className="flex flex-wrap items-center gap-4 mb-6">
+        <h2 className="text-2xl font-bold">Details de l'utilisateur #{user.id}</h2>
+        <button className="btn btn-outline btn-sm gap-1" onClick={() => setEdit(e => !e)}>
+          <Edit3 size={14} />
+          {edit ? "Annuler" : "Modifier"}
+        </button>
+      </div>
+
+      {/* Error alert */}
+      {error && (
+        <div className="alert alert-error mb-4">
+          <span>{error}</span>
         </div>
-        <div className="info-row">
-          <label>Prénom</label>
-          {edit ? (
-            <input name="prenom" value={form.prenom || ""} onChange={handleInput} />
-          ) : (
-            <span className="info-value">{user.prenom}</span>
-          )}
+      )}
+
+      {/* Info card */}
+      <div className="max-w-2xl">
+        <div className="card bg-base-100 shadow-sm">
+          <div className="card-body">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Nom */}
+              <div className="form-control">
+                <div className="flex items-center gap-2 mb-1">
+                  <User size={14} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">Nom</span>
+                </div>
+                {edit ? (
+                  <input
+                    name="nom"
+                    value={form.nom || ""}
+                    onChange={handleInput}
+                    className="input input-bordered input-sm w-full"
+                  />
+                ) : (
+                  <span className="font-semibold">{user.nom}</span>
+                )}
+              </div>
+
+              {/* Prenom */}
+              <div className="form-control">
+                <div className="flex items-center gap-2 mb-1">
+                  <User size={14} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">Prenom</span>
+                </div>
+                {edit ? (
+                  <input
+                    name="prenom"
+                    value={form.prenom || ""}
+                    onChange={handleInput}
+                    className="input input-bordered input-sm w-full"
+                  />
+                ) : (
+                  <span className="font-semibold">{user.prenom}</span>
+                )}
+              </div>
+
+              {/* Email */}
+              <div className="form-control md:col-span-2">
+                <div className="flex items-center gap-2 mb-1">
+                  <Mail size={14} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">Email</span>
+                </div>
+                {edit ? (
+                  <input
+                    name="email"
+                    value={form.email || ""}
+                    onChange={handleInput}
+                    className="input input-bordered input-sm w-full"
+                  />
+                ) : (
+                  <span className="font-semibold">{user.email}</span>
+                )}
+              </div>
+
+              {/* Role */}
+              <div className="form-control">
+                <div className="flex items-center gap-2 mb-1">
+                  <Shield size={14} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">Role</span>
+                </div>
+                <span className="font-semibold">{user.role?.nom}</span>
+              </div>
+
+              {/* Compte bloque */}
+              <div className="form-control">
+                <div className="flex items-center gap-2 mb-1">
+                  <Lock size={14} className="text-slate-400" />
+                  <span className="text-sm text-slate-500">Compte bloque</span>
+                </div>
+                <span className="font-semibold">{user.compteBloque ? "Oui" : "Non"}</span>
+              </div>
+            </div>
+
+            {/* Save button */}
+            {edit && (
+              <div className="mt-6">
+                <button className="btn btn-primary gap-2" onClick={handleSave} disabled={saving}>
+                  <Save size={16} />
+                  {saving ? "Enregistrement..." : "Enregistrer"}
+                </button>
+              </div>
+            )}
+          </div>
         </div>
-        <div className="info-row">
-          <label>Email</label>
-          {edit ? (
-            <input name="email" value={form.email || ""} onChange={handleInput} />
-          ) : (
-            <span className="info-value">{user.email}</span>
-          )}
-        </div>
-        <div className="info-row">
-          <label>Rôle</label>
-          <span className="info-value">{user.role?.nom}</span>
-        </div>
-        <div className="info-row">
-          <label>Compte bloqué</label>
-          <span className="info-value">{user.compteBloque ? "Oui" : "Non"}</span>
-        </div>
-        {edit && (
-          <button className="save-btn" onClick={handleSave} disabled={saving}>
-            {saving ? "Enregistrement..." : "Enregistrer"}
-          </button>
-        )}
-        <button className="edit-btn" onClick={() => setEdit(e => !e)}>{edit ? "Annuler" : "Modifier"}</button>
       </div>
     </div>
   );

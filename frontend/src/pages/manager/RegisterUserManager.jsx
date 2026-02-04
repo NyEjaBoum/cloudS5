@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { registerLocal } from "../../api/auth";
-import "../../styles/manager.css";
+import { AlertCircle, UserPlus } from "lucide-react";
 
 export default function RegisterUserManager() {
   const [formData, setFormData] = useState({
@@ -43,58 +43,91 @@ export default function RegisterUserManager() {
   };
 
   return (
-    <div className="card" style={{ maxWidth: 400, margin: "40px auto" }}>
-      <h2>Créer un utilisateur</h2>
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label>Nom</label>
-          <input
-            type="text"
-            name="lastname"
-            placeholder="Nom"
-            value={formData.lastname}
-            onChange={handleChange}
-            required
-          />
+    <div className="max-w-md mx-auto mt-10 animate-fade-in">
+      <div className="card bg-base-100 shadow-sm">
+        <div className="card-body">
+          <h2 className="card-title text-xl mb-4">Creer un utilisateur</h2>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            {/* Nom */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Nom</span>
+              </label>
+              <input
+                type="text"
+                name="lastname"
+                placeholder="Nom"
+                value={formData.lastname}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            {/* Prenom */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Prenom</span>
+              </label>
+              <input
+                type="text"
+                name="firstname"
+                placeholder="Prenom"
+                value={formData.firstname}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            {/* Email */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Email</span>
+              </label>
+              <input
+                type="email"
+                name="email"
+                placeholder="Adresse email"
+                value={formData.email}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            {/* Mot de passe */}
+            <div className="form-control">
+              <label className="label">
+                <span className="label-text">Mot de passe</span>
+              </label>
+              <input
+                type="password"
+                name="password"
+                placeholder="Mot de passe"
+                value={formData.password}
+                onChange={handleChange}
+                required
+                className="input input-bordered w-full"
+              />
+            </div>
+
+            {/* Error */}
+            {error && (
+              <div className="alert alert-error text-sm">
+                <AlertCircle size={16} />
+                <span>{error}</span>
+              </div>
+            )}
+
+            {/* Submit */}
+            <button type="submit" className="btn btn-primary w-full gap-2" disabled={loading}>
+              <UserPlus size={16} />
+              {loading ? "Creation..." : "Creer"}
+            </button>
+          </form>
         </div>
-        <div className="form-group">
-          <label>Prénom</label>
-          <input
-            type="text"
-            name="firstname"
-            placeholder="Prénom"
-            value={formData.firstname}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Email</label>
-          <input
-            type="email"
-            name="email"
-            placeholder="Adresse email"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        <div className="form-group">
-          <label>Mot de passe</label>
-          <input
-            type="password"
-            name="password"
-            placeholder="Mot de passe"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
-        </div>
-        {error && <div className="error" style={{ color: "#e53e3e", marginBottom: 16 }}>{error}</div>}
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? "Création..." : "Créer"}
-        </button>
-      </form>
+      </div>
     </div>
   );
 }

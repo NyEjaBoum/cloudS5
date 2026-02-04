@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { logout } from "../../api/auth"; // <-- Mets l'import ici, tout en haut
+import { logout } from "../../api/auth";
+import { Search, Bell, Settings, User, LogOut } from "lucide-react";
 
 export default function Navbar() {
   const [open, setOpen] = useState(false);
@@ -25,45 +26,74 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="navbar-manager">
-      <div className="navbar-left">
-        {/* <h1 className="navbar-title">Dashboard</h1> */}
+    <nav className="navbar bg-base-100 shadow-sm border-b border-silver px-6">
+      <div className="flex-1">
+        {/* Left side - intentionally empty as in original */}
       </div>
-      <div className="navbar-right">
-        <input
-          type="text"
-          className="search-box"
-          placeholder="Rechercher..."
-        />
-        <div className="navbar-icons">
-          <button className="nav-icon">
-            <i className="fas fa-bell"></i>
-          </button>
-          <button className="nav-icon">
-            <i className="fas fa-cog"></i>
-          </button>
+
+      <div className="flex items-center gap-2">
+        {/* Search */}
+        <div className="relative">
+          <Search
+            size={16}
+            className="absolute left-3 top-1/2 -translate-y-1/2 text-base-content/40"
+          />
+          <input
+            type="text"
+            className="input input-bordered input-sm w-64 pl-9"
+            placeholder="Rechercher..."
+          />
+        </div>
+
+        {/* Icon buttons */}
+        <button className="btn btn-ghost btn-circle btn-sm">
+          <Bell size={18} />
+        </button>
+        <button className="btn btn-ghost btn-circle btn-sm">
+          <Settings size={18} />
+        </button>
+
+        {/* User dropdown */}
+        <div className="dropdown dropdown-end" ref={dropdownRef}>
           <div
-            className="user-icon"
+            tabIndex={0}
+            role="button"
+            className="avatar placeholder cursor-pointer"
             onClick={() => setOpen((o) => !o)}
-            style={{ position: "relative", cursor: "pointer" }}
-            ref={dropdownRef}
           >
-            <i className="fas fa-user"></i>
-            {open && (
-              <div className="user-dropdown">
-                <div className="dropdown-item">
-                  <i className="fas fa-user"></i> My Profile
-                </div>
-                <div className="dropdown-item">
-                  <i className="fas fa-envelope"></i> My Account
-                </div>
-                <div className="dropdown-item">
-                  <i className="fas fa-tasks"></i> My Tasks
-                </div>
-                <button className="dropdown-logout" onClick={handleLogout}>Logout</button>
-              </div>
-            )}
+            <div className="bg-primary text-white rounded-full w-9">
+              <span className="text-sm font-semibold">M</span>
+            </div>
           </div>
+
+          {open && (
+            <ul
+              tabIndex={0}
+              className="dropdown-content menu bg-base-100 rounded-box shadow-lg w-52 p-2 mt-2 border border-silver z-50"
+            >
+              <li>
+                <a className="flex items-center gap-2">
+                  <User size={16} />
+                  My Profile
+                </a>
+              </li>
+              <li>
+                <a className="flex items-center gap-2">
+                  <Settings size={16} />
+                  My Account
+                </a>
+              </li>
+              <li>
+                <button
+                  className="flex items-center gap-2 text-error"
+                  onClick={handleLogout}
+                >
+                  <LogOut size={16} />
+                  Logout
+                </button>
+              </li>
+            </ul>
+          )}
         </div>
       </div>
     </nav>

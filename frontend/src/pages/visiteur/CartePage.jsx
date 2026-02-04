@@ -4,7 +4,6 @@ import Navbar from "../../components/manager/Navbar.jsx";
 import Recapitulatif from "../../components/visiteur/RecapTab";
 import SignalementOverlay from "../../components/visiteur/SignalementOverlay";
 import { fetchSignalementComplet } from "../../api/signalement.js";
-import "../../styles/board.css";
 
 export default function CarteVisiteur() {
   const [signalements, setSignalements] = useState([]);
@@ -28,46 +27,18 @@ export default function CarteVisiteur() {
   };
 
   return (
-    <div style={{ background: "#f8f9fc", minHeight: "100vh", width: "100vw" }}>
+    <div className="min-h-screen bg-base-200">
       <Navbar />
-      <div
-        style={{
-          display: "flex",
-          alignItems: "flex-start",
-          gap: "24px",
-          width: "100%",
-          maxWidth: "none",
-          margin: "32px 0 0 0",
-          padding: "0 24px 32px 24px",
-        }}
-      >
+      <div className="flex gap-6 p-6 animate-fade-in flex-wrap">
         {/* Carte à gauche - Plus large */}
-        <div
-          style={{
-            flex: "1 1 65%",
-            minWidth: "600px",
-            height: "calc(100vh - 180px)",
-            minHeight: "600px",
-            background: "#fff",
-            borderRadius: "16px",
-            boxShadow: "0 4px 20px rgba(102,126,234,0.1)",
-            overflow: "hidden",
-            border: "1px solid #e5e7eb",
-          }}
-        >
-          <CarteOffline 
-            signalements={signalements} 
+        <div className="flex-[2] min-w-[500px] h-[calc(100vh-160px)] min-h-[500px] bg-base-100 rounded-2xl shadow-md overflow-hidden border border-silver">
+          <CarteOffline
+            signalements={signalements}
             onMarkerClick={handleOpenOverlay}
           />
         </div>
         {/* Récapitulatif à droite - Plus compact */}
-        <div
-          style={{
-            flex: "0 1 35%",
-            maxWidth: "450px",
-            minWidth: "320px",
-          }}
-        >
+        <div className="flex-[1] max-w-md min-w-[300px]">
           <Recapitulatif />
         </div>
       </div>

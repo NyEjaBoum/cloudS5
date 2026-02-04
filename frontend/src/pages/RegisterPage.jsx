@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import { Link, useNavigate } from "react-router-dom";
+import { Globe, MessageCircle, CodeXml, Mail } from "lucide-react";
 
 export default function RegisterPage() {
   const [formData, setFormData] = useState({
@@ -61,95 +62,134 @@ export default function RegisterPage() {
       subtitle="Make your app management easy and fun!"
       leftSide={false}
     >
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label>Last Name</label>
+      <form onSubmit={handleSubmit} className="space-y-4">
+        {/* Last Name */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-medium">Last Name</span>
+          </label>
           <input
             type="text"
             name="lastname"
             placeholder="Enter your last name"
+            className="input input-bordered w-full"
             value={formData.lastname}
             onChange={handleChange}
             required
           />
         </div>
-        <div className="form-group">
-          <label>First Name</label>
+
+        {/* First Name */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-medium">First Name</span>
+          </label>
           <input
             type="text"
             name="firstname"
             placeholder="Enter your firstname"
+            className="input input-bordered w-full"
             value={formData.firstname}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div className="form-group">
-          <label>Email</label>
+        {/* Email */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-medium">Email</span>
+          </label>
           <input
             type="email"
             name="email"
             placeholder="Enter your email"
+            className="input input-bordered w-full"
             value={formData.email}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div className="form-group">
-          <label>Password</label>
+        {/* Password */}
+        <div className="form-control w-full">
+          <label className="label">
+            <span className="label-text font-medium">Password</span>
+          </label>
           <input
             type="password"
             name="password"
             placeholder="············"
+            className="input input-bordered w-full"
             value={formData.password}
             onChange={handleChange}
             required
           />
         </div>
 
-        <div className="form-options">
-          <label className="checkbox-label">
+        {/* Terms */}
+        <div className="flex items-start">
+          <label className="label cursor-pointer gap-2">
             <input
               type="checkbox"
               name="termsAccepted"
+              className="checkbox checkbox-primary checkbox-sm"
               checked={formData.termsAccepted}
               onChange={handleChange}
               required
             />
-            I agree to{" "}
-            <Link to="/privacy" className="link">
-              privacy policy & terms
-            </Link>
+            <span className="label-text">
+              I agree to{" "}
+              <Link to="/privacy" className="link link-primary">
+                privacy policy & terms
+              </Link>
+            </span>
           </label>
         </div>
-        {error && <div className="error" style={{ color: "#e53e3e", marginBottom: 16 }}>{error}</div>}
-        <button type="submit" className="btn-primary" disabled={loading}>
+
+        {/* Error */}
+        {error && (
+          <div className="alert alert-error text-sm">
+            <span>{error}</span>
+          </div>
+        )}
+
+        {/* Submit */}
+        <button
+          type="submit"
+          className="btn btn-primary w-full"
+          disabled={loading}
+        >
+          {loading ? (
+            <span className="loading loading-spinner loading-sm" />
+          ) : null}
           {loading ? "Signing up..." : "Sign Up"}
         </button>
 
-        <div className="auth-footer">
-          <span>Already have an account? </span>
-          <Link to="/login" className="link">
+        {/* Footer link */}
+        <div className="text-center text-sm mt-2">
+          <span className="text-slate-500">Already have an account? </span>
+          <Link to="/login" className="link link-primary font-medium">
             Sign in instead
           </Link>
         </div>
 
-        <div className="divider">or</div>
+        {/* Divider */}
+        <div className="divider text-sm text-slate-400">or</div>
 
-        <div className="social-login">
-          <button type="button" className="social-btn facebook">
-            <i className="fab fa-facebook-f"></i>
+        {/* Social login */}
+        <div className="flex items-center justify-center gap-3">
+          <button type="button" className="btn btn-square btn-outline btn-sm">
+            <Globe className="w-4 h-4" />
           </button>
-          <button type="button" className="social-btn twitter">
-            <i className="fab fa-twitter"></i>
+          <button type="button" className="btn btn-square btn-outline btn-sm">
+            <MessageCircle className="w-4 h-4" />
           </button>
-          <button type="button" className="social-btn github">
-            <i className="fab fa-github"></i>
+          <button type="button" className="btn btn-square btn-outline btn-sm">
+            <CodeXml className="w-4 h-4" />
           </button>
-          <button type="button" className="social-btn google">
-            <i className="fab fa-google"></i>
+          <button type="button" className="btn btn-square btn-outline btn-sm">
+            <Mail className="w-4 h-4" />
           </button>
         </div>
       </form>

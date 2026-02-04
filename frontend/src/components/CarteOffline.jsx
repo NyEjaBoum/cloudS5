@@ -10,10 +10,10 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 function getStatutLabel(statut) {
   switch (statut) {
-    case 1: return { label: "Nouveau", color: "#e53e3e" };
-    case 11: return { label: "En cours", color: "#ed8936" };
-    case 99: return { label: "Terminé", color: "#38a169" };
-    default: return { label: "Annulé", color: "#718096" };
+    case 1: return { label: "Nouveau", color: "#6366f1" };
+    case 11: return { label: "En cours", color: "#f59e0b" };
+    case 99: return { label: "Terminé", color: "#22c55e" };
+    default: return { label: "Annulé", color: "#64748b" };
   }
 }
 
@@ -56,55 +56,39 @@ const CarteOffline = ({
                 }}
               >
                 <Popup>
-                  <div style={{ minWidth: 220, fontFamily: "inherit" }}>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{s.titre}</div>
-                    <div style={{ marginBottom: 8, color: "#4a5568" }}>{s.description}</div>
-                    <div style={{ marginBottom: 8 }}>
+                  <div className="p-4 min-w-[240px] font-sans">
+                    <div className="font-bold text-base mb-1">{s.titre}</div>
+                    <div className="text-slate-500 text-sm mb-2">{s.description}</div>
+                    <div className="mb-2">
                       <span
-                        style={{
-                          background: statut.color,
-                          color: "#fff",
-                          borderRadius: 8,
-                          padding: "2px 10px",
-                          fontWeight: 600,
-                          fontSize: 13,
-                          marginRight: 8
-                        }}
+                        className="px-2 py-0.5 rounded-md text-xs font-semibold text-white inline-block mr-2"
+                        style={{ background: statut.color }}
                       >
                         {statut.label}
                       </span>
-                      <span style={{ color: "#718096", fontSize: 13 }}>
+                      <span className="text-slate-400 text-xs">
                         {s.dateCreation && (
                           <>• {new Date(s.dateCreation).toLocaleDateString()}</>
                         )}
                       </span>
                     </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Surface :</b> {s.surfaceM2 ? s.surfaceM2.toString() : "-"} m²
+                    <div className="text-sm mb-1">
+                      <span className="font-semibold">Surface :</span> {s.surfaceM2 ? s.surfaceM2.toString() : "-"} m²
                     </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Budget :</b> {s.budget ? Number(s.budget).toLocaleString() : "-"} Ar
+                    <div className="text-sm mb-1">
+                      <span className="font-semibold">Budget :</span> {s.budget ? Number(s.budget).toLocaleString() : "-"} Ar
                     </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Entreprise :</b> {s.entreprise || "-"}
+                    <div className="text-sm mb-1">
+                      <span className="font-semibold">Entreprise :</span> {s.entreprise || "-"}
                     </div>
-                    <div style={{ fontSize: 13, color: "#718096" }}>
-                      <b>Utilisateur :</b> {s.utilisateurNom || ""} {s.utilisateurPrenom || ""}
+                    <div className="text-xs text-slate-400">
+                      <span className="font-semibold">Utilisateur :</span> {s.utilisateurNom || ""} {s.utilisateurPrenom || ""}
                     </div>
                     {/* Lien vers la page de détails */}
-                    <div style={{ marginTop: 10 }}>
+                    <div className="mt-3">
                       <button
                         onClick={() => onMarkerClick && onMarkerClick(s)}
-                        style={{
-                          color: "#667eea",
-                          textDecoration: "underline",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 0
-                        }}
+                        className="text-primary font-semibold text-sm hover:underline bg-transparent border-none cursor-pointer p-0"
                       >
                         Voir détails →
                       </button>

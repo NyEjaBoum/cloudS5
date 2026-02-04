@@ -8,7 +8,10 @@
       "Bash(npm install:*)",
       "Bash(npx cap add android:*)",
       "Bash(ls:*)",
-      "Bash(npx @capacitor/assets:*)"
+      "Bash(npx @capacitor/assets:*)",
+      "Bash(tree:*)",
+      "Bash(npx vite build)",
+      "Bash(npx tailwindcss init -p)"
     ]
   }
 }

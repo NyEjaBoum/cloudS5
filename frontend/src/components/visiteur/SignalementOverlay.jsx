@@ -2,6 +2,7 @@ import React from "react";
 import { MapContainer, TileLayer, Marker } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import { X, Ruler, DollarSign, Building2, Calendar, FileText, MapPin } from "lucide-react";
 
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
@@ -17,10 +18,10 @@ L.Icon.Default.mergeOptions({
 
 function getStatusColor(statut) {
   switch (statut) {
-    case 1: return "#3b82f6"; // Nouveau
-    case 11: return "#f59e0b"; // En cours
-    case 99: return "#10b981"; // Terminé
-    default: return "#6b7280"; // Annulé ou autre
+    case 1: return "#6366f1"; // Nouveau (primary)
+    case 11: return "#f59e0b"; // En cours (warning)
+    case 99: return "#22c55e"; // Terminé (success)
+    default: return "#64748b"; // Annulé ou autre
   }
 }
 
@@ -33,13 +34,13 @@ function getStatusLabel(statut) {
   }
 }
 
-function getStatusBadge(statut) {
-  const color = getStatusColor(statut);
-  return {
-    background: `${color}15`,
-    color: color,
-    border: `1px solid ${color}40`,
-  };
+function getStatusBadgeClass(statut) {
+  switch (statut) {
+    case 1: return "badge-primary";
+    case 11: return "badge-warning";
+    case 99: return "badge-success";
+    default: return "badge-ghost";
+  }
 }
 
 export default function SignalementOverlay({ signalement, onClose }) {
@@ -47,159 +48,63 @@ export default function SignalementOverlay({ signalement, onClose }) {
 
   return (
     <div
-      style={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        right: 0,
-        bottom: 0,
-        background: "rgba(0, 0, 0, 0.6)",
-        backdropFilter: "blur(4px)",
-        zIndex: 9999,
-        display: "flex",
-        alignItems: "center",
-        justifyContent: "center",
-        padding: "20px",
-        animation: "fadeIn 0.3s ease",
-      }}
+      className="modal modal-open"
       onClick={onClose}
     >
-      <style>
-        {`
-          @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-          }
-          @keyframes slideUp {
-            from { 
-              opacity: 0;
-              transform: translateY(20px) scale(0.95);
-            }
-            to { 
-              opacity: 1;
-              transform: translateY(0) scale(1);
-            }
-          }
-        `}
-      </style>
-
       <div
-        style={{
-          background: "#fff",
-          borderRadius: "20px",
-          maxWidth: "1000px",
-          width: "100%",
-          maxHeight: "90vh",
-          overflow: "hidden",
-          boxShadow: "0 25px 50px -12px rgba(0, 0, 0, 0.25)",
-          animation: "slideUp 0.3s ease",
-          display: "flex",
-          flexDirection: "column",
-        }}
+        className="modal-box max-w-5xl p-0 animate-slide-up"
         onClick={(e) => e.stopPropagation()}
       >
         {/* Header */}
-        <div
-          style={{
-            background: "linear-gradient(135deg, #4f8cff 0%, #5ca9fb 100%)", // <-- BLEU CLAIR
-            padding: "28px 32px",
-            color: "white",
-            display: "flex",
-            justifyContent: "space-between",
-            alignItems: "center",
-          }}
-        >
+        <div className="bg-neutral text-neutral-content p-6 rounded-t-2xl flex justify-between items-center">
           <div>
-            <h2 style={{ margin: 0, fontSize: "1.75rem", fontWeight: "700" }}>
+            <h2 className="text-2xl font-bold">
               {signalement.nom || signalement.titre || "Signalement"}
             </h2>
-            <p style={{ margin: "8px 0 0 0", opacity: 0.9, fontSize: "0.95rem" }}>
+            <p className="mt-2 opacity-90 text-sm">
               Détails du signalement #{signalement.id}
             </p>
           </div>
           <button
             onClick={onClose}
-            style={{
-              background: "rgba(255, 255, 255, 0.2)",
-              border: "none",
-              borderRadius: "50%",
-              width: "40px",
-              height: "40px",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              cursor: "pointer",
-              fontSize: "1.5rem",
-              color: "white",
-              transition: "all 0.2s",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.background = "rgba(255, 255, 255, 0.3)";
-              e.target.style.transform = "rotate(90deg)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.background = "rgba(255, 255, 255, 0.2)";
-              e.target.style.transform = "rotate(0deg)";
-            }}
+            className="btn btn-ghost btn-circle text-white hover:bg-white/20"
           >
-            ×
+            <X className="w-6 h-6" />
           </button>
         </div>
 
         {/* Content */}
-        <div style={{ flex: 1, overflow: "auto", padding: "32px" }}>
-          <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "32px" }}>
+        <div className="flex-1 overflow-auto p-8">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Colonne gauche - Informations */}
             <div>
               {/* Statut */}
-              <div style={{ marginBottom: "24px" }}>
-                <div
-                  style={{
-                    display: "inline-flex",
-                    alignItems: "center",
-                    gap: "8px",
-                    padding: "8px 16px",
-                    borderRadius: "8px",
-                    fontSize: "0.875rem",
-                    fontWeight: "600",
-                    ...getStatusBadge(signalement.statut),
-                  }}
-                >
+              <div className="mb-6">
+                <span className={`badge ${getStatusBadgeClass(signalement.statut)} badge-lg gap-2`}>
                   <span
-                    style={{
-                      width: "8px",
-                      height: "8px",
-                      borderRadius: "50%",
-                      background: getStatusColor(signalement.statut),
-                    }}
+                    className="w-2 h-2 rounded-full"
+                    style={{ background: getStatusColor(signalement.statut) }}
                   />
                   {getStatusLabel(signalement.statut)}
-                </div>
+                </span>
               </div>
 
               {/* Carte d'information */}
-              <div
-                style={{
-                  background: "linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%)",
-                  borderRadius: "16px",
-                  padding: "24px",
-                  marginBottom: "20px",
-                }}
-              >
+              <div className="bg-base-200 rounded-xl p-5 mb-5">
                 <InfoRow
                   label="Surface"
                   value={`${signalement.surfaceM2 || signalement.surface || 0} m²`}
-                  icon="📐"
+                  icon={<Ruler className="w-4 h-4" />}
                 />
                 <InfoRow
                   label="Budget Estimé"
                   value={`${(signalement.budget || 0).toLocaleString()} Ar`}
-                  icon="💰"
+                  icon={<DollarSign className="w-4 h-4" />}
                 />
                 <InfoRow
                   label="Entreprise"
                   value={signalement.entreprise || "Non assignée"}
-                  icon="🏢"
+                  icon={<Building2 className="w-4 h-4" />}
                 />
                 <InfoRow
                   label="Date"
@@ -208,53 +113,23 @@ export default function SignalementOverlay({ signalement, onClose }) {
                       ? new Date(signalement.dateCreation || signalement.date).toLocaleDateString("fr-FR")
                       : "Non définie"
                   }
-                  icon="📅"
+                  icon={<Calendar className="w-4 h-4" />}
                 />
               </div>
 
               {/* Description */}
-              <div
-                style={{
-                  background: "#fff",
-                  border: "1px solid #e5e7eb",
-                  borderRadius: "12px",
-                  padding: "20px",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: "0 0 12px 0",
-                    fontSize: "1rem",
-                    fontWeight: "600",
-                    color: "#1e293b",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <span>📝</span> Description des travaux
+              <div className="bg-base-100 border border-silver rounded-xl p-5">
+                <h3 className="text-base font-semibold text-neutral flex items-center gap-2 mb-3">
+                  <FileText className="w-4 h-4 text-primary" />
+                  Description des travaux
                 </h3>
-                <p
-                  style={{
-                    margin: 0,
-                    color: "#64748b",
-                    lineHeight: "1.6",
-                    fontSize: "0.95rem",
-                  }}
-                >
+                <p className="text-slate-500 leading-relaxed text-sm">
                   {signalement.description || "Aucune description disponible"}
                 </p>
               </div>
 
               {/* Coordonnées */}
-              <div
-                style={{
-                  display: "grid",
-                  gridTemplateColumns: "1fr 1fr",
-                  gap: "12px",
-                  marginTop: "20px",
-                }}
-              >
+              <div className="grid grid-cols-2 gap-3 mt-5">
                 <CoordBox
                   label="Latitude"
                   value={
@@ -276,38 +151,12 @@ export default function SignalementOverlay({ signalement, onClose }) {
 
             {/* Colonne droite - Carte */}
             <div>
-              <div
-                style={{
-                  background: "#f8fafc",
-                  border: "2px solid #e5e7eb",
-                  borderRadius: "16px",
-                  padding: "16px",
-                  height: "100%",
-                  minHeight: "500px",
-                }}
-              >
-                <h3
-                  style={{
-                    margin: "0 0 16px 0",
-                    fontSize: "1rem",
-                    fontWeight: "600",
-                    color: "#1e293b",
-                    display: "flex",
-                    alignItems: "center",
-                    gap: "8px",
-                  }}
-                >
-                  <span style={{ fontSize: "1.2rem" }}>📍</span>
+              <div className="bg-base-200 rounded-xl p-4 h-full min-h-[500px] flex flex-col">
+                <h3 className="text-base font-semibold text-neutral flex items-center gap-2 mb-4">
+                  <MapPin className="w-4 h-4 text-primary" />
                   Emplacement Géographique
                 </h3>
-                <div
-                  style={{
-                    height: "calc(100% - 40px)",
-                    borderRadius: "12px",
-                    overflow: "hidden",
-                    boxShadow: "0 4px 12px rgba(0, 0, 0, 0.1)",
-                  }}
-                >
+                <div className="flex-1 rounded-xl overflow-hidden shadow-md">
                   {signalement.latitude && signalement.longitude ? (
                     <MapContainer
                       center={[
@@ -329,15 +178,7 @@ export default function SignalementOverlay({ signalement, onClose }) {
                       />
                     </MapContainer>
                   ) : (
-                    <div
-                      style={{
-                        height: "100%",
-                        display: "flex",
-                        alignItems: "center",
-                        justifyContent: "center",
-                        color: "#94a3b8",
-                      }}
-                    >
+                    <div className="h-full flex items-center justify-center text-slate-400">
                       Coordonnées non disponibles
                     </div>
                   )}
@@ -354,29 +195,12 @@ export default function SignalementOverlay({ signalement, onClose }) {
 // Composants auxiliaires
 function InfoRow({ label, value, icon }) {
   return (
-    <div
-      style={{
-        display: "flex",
-        justifyContent: "space-between",
-        alignItems: "center",
-        padding: "12px 0",
-        borderBottom: "1px solid rgba(255, 255, 255, 0.5)",
-      }}
-    >
-      <span
-        style={{
-          color: "#64748b",
-          fontSize: "0.875rem",
-          fontWeight: "500",
-          display: "flex",
-          alignItems: "center",
-          gap: "8px",
-        }}
-      >
-        <span style={{ fontSize: "1.1rem" }}>{icon}</span>
+    <div className="flex justify-between items-center py-3 border-b border-base-300 last:border-b-0">
+      <span className="text-slate-500 text-sm font-medium flex items-center gap-2">
+        <span className="text-primary">{icon}</span>
         {label}
       </span>
-      <span style={{ color: "#1e293b", fontWeight: "600", fontSize: "0.95rem" }}>
+      <span className="text-neutral font-semibold text-sm">
         {value}
       </span>
     </div>
@@ -385,28 +209,11 @@ function InfoRow({ label, value, icon }) {
 
 function CoordBox({ label, value }) {
   return (
-    <div
-      style={{
-        background: "#fff",
-        border: "1px solid #e5e7eb",
-        borderRadius: "8px",
-        padding: "12px",
-        textAlign: "center",
-      }}
-    >
-      <div
-        style={{
-          fontSize: "0.75rem",
-          color: "#64748b",
-          fontWeight: "600",
-          marginBottom: "4px",
-          textTransform: "uppercase",
-          letterSpacing: "0.5px",
-        }}
-      >
+    <div className="bg-base-100 border border-silver rounded-lg p-3 text-center">
+      <div className="text-xs text-slate-500 font-semibold uppercase tracking-wide mb-1">
         {label}
       </div>
-      <div style={{ fontSize: "0.95rem", color: "#1e293b", fontWeight: "700" }}>
+      <div className="text-sm text-neutral font-bold">
         {value}
       </div>
     </div>
