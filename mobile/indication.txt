@@ -1,3 +1,7 @@
+# APRES CLONE OU PULL, TOUJOURS FAIRE :
+cd mobile/app
+npx cap add android
+
 # Dans mobile/app :
 npm run build
 npx cap sync android

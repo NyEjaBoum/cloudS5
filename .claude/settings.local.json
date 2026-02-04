@@ -5,7 +5,9 @@
       "Bash(git rm:*)",
       "Bash(npm run build:*)",
       "Bash(./mvnw compile:*)",
-      "Bash(npm install:*)"
+      "Bash(npm install:*)",
+      "Bash(npx cap add android:*)",
+      "Bash(ls:*)"
     ]
   }
 }
