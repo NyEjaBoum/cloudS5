@@ -91,7 +91,7 @@ const CarteOffline = ({
                       <button
                         onClick={() => onMarkerClick && onMarkerClick(s)}
                         className="text-sm font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
-                        style={{ color: "#d4a23e" }}
+                        style={{ color: "#3D5E6B" }}
                       >
                         Voir les details
                       </button>

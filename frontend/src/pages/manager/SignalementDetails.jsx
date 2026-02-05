@@ -61,7 +61,7 @@ export default function SignalementDetails() {
 
   if (loading) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-8 h-8 border-3 border-sand-200 border-t-sand-600 rounded-full animate-spin" />
+      <div className="w-8 h-8 border-3 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
     </div>
   );
 
@@ -128,7 +128,7 @@ export default function SignalementDetails() {
             className={`ml-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               edit
                 ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                : "bg-sand-50 text-sand-700 hover:bg-sand-100"
+                : "bg-teal-50 text-teal-700 hover:bg-teal-100"
             }`}
             onClick={() => setEdit(e => !e)}
           >
@@ -166,7 +166,7 @@ export default function SignalementDetails() {
                 {edit ? (
                   <input name="budget" type="number" value={form.budget || ""} onChange={handleInput} className="input-clean" />
                 ) : (
-                  <p className="text-base font-semibold text-sand-700">{signalement.budget ? Number(signalement.budget).toLocaleString() : "-"} MGA</p>
+                  <p className="text-base font-semibold text-teal-700">{signalement.budget ? Number(signalement.budget).toLocaleString() : "-"} MGA</p>
                 )}
               </div>
 
@@ -272,7 +272,7 @@ export default function SignalementDetails() {
         <div>
           <div className="glass-card p-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
-              <MapPin size={15} className="text-sand-500" />
+              <MapPin size={15} className="text-teal-500" />
               Emplacement
             </h3>
             <div className="rounded-xl overflow-hidden h-80">

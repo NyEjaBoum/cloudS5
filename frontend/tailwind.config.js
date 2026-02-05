@@ -4,17 +4,30 @@ export default {
   theme: {
     extend: {
       colors: {
-        sand: {
-          50: "#fefcf8",
-          100: "#fdf8ed",
-          200: "#faf0d5",
-          300: "#f5e3b3",
-          400: "#efd08a",
-          500: "#e8bc61",
-          600: "#d4a23e",
-          700: "#b88630",
-          800: "#956b28",
-          900: "#7a5823",
+        // New teal/slate palette
+        teal: {
+          50: "#f0f5f6",
+          100: "#dce6e9",
+          200: "#b8ccd2",
+          300: "#8fadb6",
+          400: "#5d8391",
+          500: "#4a7280",
+          600: "#3D5E6B",  // Primary
+          700: "#344f5a",
+          800: "#2c424b",
+          900: "#26373f",
+        },
+        stone: {
+          50: "#f5f4f2",
+          100: "#e8e6e2",
+          200: "#D5D0C4",  // Cream/beige
+          300: "#bbb4a5",
+          400: "#9CA5B1",  // Light gray-blue
+          500: "#877C73",  // Warm taupe
+          600: "#6b6159",
+          700: "#44474D",  // Dark gray
+          800: "#3a3c40",
+          900: "#2f3033",
         },
         slate: {
           25: "#fcfcfd",
@@ -61,13 +74,13 @@ export default {
     themes: [
       {
         mapeo: {
-          primary: "#d4a23e",
+          primary: "#3D5E6B",
           "primary-content": "#ffffff",
-          secondary: "#1e293b",
+          secondary: "#44474D",
           "secondary-content": "#ffffff",
-          accent: "#3b82f6",
+          accent: "#877C73",
           "accent-content": "#ffffff",
-          neutral: "#1e293b",
+          neutral: "#44474D",
           "neutral-content": "#f8fafc",
           "base-100": "#ffffff",
           "base-200": "#f8fafc",

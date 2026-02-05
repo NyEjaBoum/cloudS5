@@ -43,14 +43,14 @@ export default function RegisterUserManager() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex flex-col items-center animate-fade-in">
       {/* Header */}
-      <div>
+      <div className="w-full max-w-lg mb-6">
         <h1 className="text-2xl font-bold text-slate-800">Creer un utilisateur</h1>
         <p className="text-sm text-slate-400 mt-0.5">Ajouter un nouvel utilisateur au systeme</p>
       </div>
 
-      <div className="max-w-lg">
+      <div className="w-full max-w-lg">
         <div className="glass-card p-6">
           <form onSubmit={handleSubmit} className="space-y-5">
             {/* Nom / Prenom */}

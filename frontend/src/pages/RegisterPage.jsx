@@ -131,14 +131,14 @@ export default function RegisterPage() {
           <input
             type="checkbox"
             name="termsAccepted"
-            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-sand-600 focus:ring-sand-500"
+            className="w-4 h-4 mt-0.5 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
             checked={formData.termsAccepted}
             onChange={handleChange}
             required
           />
           <span className="text-sm text-slate-500">
             J'accepte les{" "}
-            <Link to="/privacy" className="font-medium text-sand-600 hover:text-sand-700">
+            <Link to="/privacy" className="font-medium text-teal-600 hover:text-teal-700">
               conditions d'utilisation
             </Link>
           </span>
@@ -167,7 +167,7 @@ export default function RegisterPage() {
         {/* Footer link */}
         <div className="text-center text-sm">
           <span className="text-slate-400">Deja un compte ? </span>
-          <Link to="/login" className="font-medium text-sand-600 hover:text-sand-700 transition-colors">
+          <Link to="/login" className="font-medium text-teal-600 hover:text-teal-700 transition-colors">
             Se connecter
           </Link>
         </div>

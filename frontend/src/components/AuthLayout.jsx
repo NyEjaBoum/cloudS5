@@ -10,18 +10,6 @@ export default function AuthLayout({ children, title, subtitle, leftSide = true 
         alt="Illustration"
         className="absolute inset-0 w-full h-full object-cover"
       />
-      <div className="absolute inset-0 bg-gradient-to-br from-sand-900/60 via-sand-800/40 to-sand-700/20" />
-      <div className="absolute inset-0 flex flex-col items-center justify-center p-12">
-        <div className="max-w-md text-center">
-          <div className="w-16 h-16 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mx-auto mb-6">
-            <img src={logo} alt="Mapeo" className="h-9 w-9" />
-          </div>
-          <h2 className="text-3xl font-bold text-white mb-3">Mapeo</h2>
-          <p className="text-white/70 text-sm leading-relaxed">
-            Plateforme de gestion et suivi des signalements geographiques
-          </p>
-        </div>
-      </div>
     </div>
   );
 

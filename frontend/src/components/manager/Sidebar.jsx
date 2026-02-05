@@ -7,7 +7,7 @@ export default function Sidebar() {
   const linkClass = ({ isActive }) =>
     `sidebar-link ${
       isActive
-        ? "bg-sand-100 text-sand-800 font-semibold"
+        ? "bg-teal-100 text-teal-800 font-semibold"
         : "text-slate-500 hover:bg-slate-50 hover:text-slate-700"
     }`;
 
@@ -15,7 +15,7 @@ export default function Sidebar() {
     <aside className="w-[260px] bg-white border-r border-slate-100 flex flex-col shrink-0">
       {/* Brand */}
       <div className="px-5 py-5 flex items-center gap-2.5">
-        <div className="w-9 h-9 bg-sand-100 rounded-xl flex items-center justify-center">
+        <div className="w-9 h-9 bg-teal-100 rounded-xl flex items-center justify-center">
           <img src={logo} alt="Mapeo" className="h-5 w-5" />
         </div>
         <span className="text-lg font-bold text-slate-800 tracking-tight">

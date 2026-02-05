@@ -23,7 +23,7 @@ export default function UserDetails() {
 
   if (!user) return (
     <div className="flex items-center justify-center h-64">
-      <div className="w-8 h-8 border-3 border-sand-200 border-t-sand-600 rounded-full animate-spin" />
+      <div className="w-8 h-8 border-3 border-teal-200 border-t-teal-600 rounded-full animate-spin" />
     </div>
   );
 
@@ -47,9 +47,9 @@ export default function UserDetails() {
   };
 
   return (
-    <div className="space-y-6 animate-fade-in">
+    <div className="flex flex-col items-center animate-fade-in">
       {/* Back + Title */}
-      <div>
+      <div className="w-full max-w-2xl mb-6">
         <button
           className="inline-flex items-center gap-1.5 text-sm text-slate-400 hover:text-slate-600 transition-colors mb-4"
           onClick={() => navigate(-1)}
@@ -66,7 +66,7 @@ export default function UserDetails() {
             className={`ml-auto inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-sm font-medium transition-all ${
               edit
                 ? "bg-slate-100 text-slate-600 hover:bg-slate-200"
-                : "bg-sand-50 text-sand-700 hover:bg-sand-100"
+                : "bg-teal-50 text-teal-700 hover:bg-teal-100"
             }`}
             onClick={() => setEdit(e => !e)}
           >
@@ -78,18 +78,18 @@ export default function UserDetails() {
 
       {/* Error */}
       {error && (
-        <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+        <div className="w-full max-w-2xl flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl mb-6">
           <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
           {error}
         </div>
       )}
 
       {/* User card */}
-      <div className="max-w-2xl">
+      <div className="w-full max-w-2xl">
         <div className="glass-card p-6">
           {/* Avatar */}
           <div className="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
-            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-sand-400 to-sand-600 flex items-center justify-center">
+            <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-teal-400 to-teal-600 flex items-center justify-center">
               <span className="text-lg font-bold text-white">
                 {(user.nom?.[0] || "").toUpperCase()}{(user.prenom?.[0] || "").toUpperCase()}
               </span>

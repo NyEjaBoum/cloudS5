@@ -92,7 +92,7 @@ export default function Users() {
                   <td>
                     <Link
                       to={`/manager/users/${u.id}`}
-                      className="inline-flex items-center gap-1.5 text-sm font-medium text-sand-600 hover:text-sand-700 transition-colors"
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
                     >
                       <Eye size={14} />
                       Details

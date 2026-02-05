@@ -75,8 +75,8 @@ export default function DashboardHome() {
       {/* Stats cards */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <div className="stat-card">
-          <div className="w-11 h-11 rounded-xl bg-sand-100 flex items-center justify-center shrink-0">
-            <Clock size={20} className="text-sand-600" />
+          <div className="w-11 h-11 rounded-xl bg-teal-100 flex items-center justify-center shrink-0">
+            <Clock size={20} className="text-teal-600" />
           </div>
           <div>
             <p className="text-sm text-slate-400">Delai moyen</p>
@@ -125,7 +125,7 @@ export default function DashboardHome() {
         <div className="glass-card">
           <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Utilisateurs</h3>
-            <Link to="/manager/users" className="text-xs font-medium text-sand-600 hover:text-sand-700">
+            <Link to="/manager/users" className="text-xs font-medium text-teal-600 hover:text-teal-700">
               Voir tout
             </Link>
           </div>
@@ -150,7 +150,7 @@ export default function DashboardHome() {
                     <td>
                       <Link
                         to={`/manager/users/${u.id}`}
-                        className="text-sand-600 hover:text-sand-700 transition-colors"
+                        className="text-teal-600 hover:text-teal-700 transition-colors"
                       >
                         <Eye size={15} />
                       </Link>
@@ -166,7 +166,7 @@ export default function DashboardHome() {
         <div className="glass-card">
           <div className="px-6 py-4 border-b border-slate-50 flex items-center justify-between">
             <h3 className="font-semibold text-slate-700">Signalements</h3>
-            <Link to="/manager/signalements" className="text-xs font-medium text-sand-600 hover:text-sand-700">
+            <Link to="/manager/signalements" className="text-xs font-medium text-teal-600 hover:text-teal-700">
               Voir tout
             </Link>
           </div>
@@ -193,7 +193,7 @@ export default function DashboardHome() {
                       <td>
                         <Link
                           to={`/manager/signalements/${s.id}`}
-                          className="text-sand-600 hover:text-sand-700 transition-colors"
+                          className="text-teal-600 hover:text-teal-700 transition-colors"
                         >
                           <Eye size={15} />
                         </Link>
@@ -232,7 +232,7 @@ export default function DashboardHome() {
                   <td>{d.dateCreation}</td>
                   <td>{d.dateCloture}</td>
                   <td>
-                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-sand-50 text-sand-700 rounded-md text-xs font-semibold">
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-50 text-teal-700 rounded-md text-xs font-semibold">
                       {d.dureeJours}j
                     </span>
                   </td>

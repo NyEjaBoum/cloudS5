@@ -17,8 +17,8 @@ export default function Recapitulatif() {
       value: recap ? recap.nombrePoints : "...",
       desc: "Points signales",
       icon: <MapPin className="w-5 h-5" />,
-      bg: "bg-sand-100",
-      color: "text-sand-600",
+      bg: "bg-teal-100",
+      color: "text-teal-600",
     },
     {
       label: "Total surface (m2)",
@@ -50,7 +50,7 @@ export default function Recapitulatif() {
     <div className="glass-card sticky top-6">
       <div className="px-5 py-4 border-b border-slate-50">
         <h2 className="font-semibold text-slate-700 flex items-center gap-2">
-          <BarChart3 className="w-4 h-4 text-sand-500" />
+          <BarChart3 className="w-4 h-4 text-teal-500" />
           Recapitulatif
         </h2>
       </div>

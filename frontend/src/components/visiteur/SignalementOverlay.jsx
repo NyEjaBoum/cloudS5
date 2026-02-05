@@ -99,7 +99,7 @@ export default function SignalementOverlay({ signalement, onClose }) {
               {/* Description */}
               <div>
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-2">
-                  <FileText className="w-3.5 h-3.5 text-sand-500" />
+                  <FileText className="w-3.5 h-3.5 text-teal-500" />
                   Description
                 </h3>
                 <p className="text-sm text-slate-500 leading-relaxed">
@@ -128,7 +128,7 @@ export default function SignalementOverlay({ signalement, onClose }) {
             <div>
               <div className="bg-slate-50 rounded-xl p-4 h-full min-h-[400px] flex flex-col">
                 <h3 className="flex items-center gap-1.5 text-sm font-semibold text-slate-700 mb-3">
-                  <MapPin className="w-3.5 h-3.5 text-sand-500" />
+                  <MapPin className="w-3.5 h-3.5 text-teal-500" />
                   Emplacement
                 </h3>
                 <div className="flex-1 rounded-xl overflow-hidden">
@@ -171,7 +171,7 @@ function InfoRow({ label, value, icon }) {
   return (
     <div className="flex justify-between items-center py-3 border-b border-slate-100 last:border-b-0">
       <span className="text-sm text-slate-400 flex items-center gap-2">
-        <span className="text-sand-500">{icon}</span>
+        <span className="text-teal-500">{icon}</span>
         {label}
       </span>
       <span className="text-sm font-semibold text-slate-700">{value}</span>
