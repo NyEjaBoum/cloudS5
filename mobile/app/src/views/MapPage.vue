@@ -318,14 +318,19 @@ const addReportMarker = (report) => {
   if (!map || !L || !markersLayer) return;
 
   const coords = getCoordinates(report);
-  if (!coords) return;
+  if (!coords) {
+    console.warn(`Pas de coordonnées pour le signalement ${report.id}`);
+    return;
+  }
+
+  console.log(`Ajout marqueur pour ${report.id} aux coordonnées:`, coords);
 
   const marker = L.marker(coords, {
     icon: L.divIcon({
-      className: `report-marker marker-${report.category}`,
+      className: `report-marker marker-${report.category || 'infrastructure'}`,
       html: `
         <div class="marker-container">
-          <div class="marker-icon" style="background-color: ${getCategoryColor(report.category)}">
+          <div class="marker-icon" style="background-color: ${getCategoryColor(report.category || 'infrastructure')}">
             📍
           </div>
           <div class="marker-pulse"></div>
@@ -336,22 +341,84 @@ const addReportMarker = (report) => {
     })
   });
 
+  // Popup enrichi avec toutes les infos
+  const statutLabel = getStatutLabel(report.statut);
+  const statutColor = getStatutColor(report.statut);
+
   marker.bindPopup(`
     <div class="map-popup">
-      <h3>${report.title}</h3>
-      <p>${report.description}</p>
-      <div class="popup-meta">
-        <span class="status-badge ${report.status}">${report.status}</span>
-        <span class="time">${report.timeAgo || ''}</span>
+      <div class="popup-header">
+        <h3>${report.title || report.titre}</h3>
+        <span class="status-badge" style="background: ${statutColor}15; color: ${statutColor}; border: 2px solid ${statutColor}40;">
+          ${statutLabel}
+        </span>
       </div>
+      
+      <p class="popup-description">${report.description || '-'}</p>
+      
+      <div class="popup-details">
+        ${report.surfaceM2 ? `
+          <div class="popup-detail-item">
+            <span class="detail-icon">📐</span>
+            <span class="detail-label">Surface:</span>
+            <span class="detail-value">${Number(report.surfaceM2).toLocaleString()} m²</span>
+          </div>
+        ` : ''}
+        
+        ${report.budget ? `
+          <div class="popup-detail-item">
+            <span class="detail-icon">💰</span>
+            <span class="detail-label">Budget:</span>
+            <span class="detail-value">${Number(report.budget).toLocaleString()} Ar</span>
+          </div>
+        ` : ''}
+        
+        ${report.entreprise ? `
+          <div class="popup-detail-item">
+            <span class="detail-icon">🏢</span>
+            <span class="detail-label">Entreprise:</span>
+            <span class="detail-value">${typeof report.entreprise === 'object' ? report.entreprise.nom : report.entreprise}</span>
+          </div>
+        ` : ''}
+        
+        ${report.dateCreation ? `
+          <div class="popup-detail-item">
+            <span class="detail-icon">📅</span>
+            <span class="detail-label">Date:</span>
+            <span class="detail-value">${new Date(report.dateCreation).toLocaleDateString('fr-FR')}</span>
+          </div>
+        ` : ''}
+      </div>
+      
       <div class="popup-actions">
-        <button onclick="window.viewReportDetails('${report.id}')">Détails</button>
+        <button onclick="window.viewReportDetails('${report.id}')" class="btn-primary">
+          Voir détails complets
+        </button>
       </div>
     </div>
   `);
 
   marker.addTo(markersLayer);
   marker.reportId = report.id;
+};
+
+// Fonction helper pour le statut
+const getStatutLabel = (statut) => {
+  switch (statut) {
+    case 1: return 'Nouveau';
+    case 11: return 'En cours';
+    case 99: return 'Terminé';
+    default: return 'Annulé';
+  }
+};
+
+const getStatutColor = (statut) => {
+  switch (statut) {
+    case 1: return '#667eea';
+    case 11: return '#ed8936';
+    case 99: return '#38a169';
+    default: return '#718096';
+  }
 };
 
 const updateMapMarkers = () => {
@@ -386,22 +453,31 @@ onMounted(async () => {
 
   // S'abonner aux signalements en temps réel depuis Firestore
   unsubscribeReports = reportsService.subscribeToReports((reports) => {
-    console.log('Signalements reçus de Firestore:', reports.length);
+    console.log('Signalements reçus de Firestore:', reports.length, reports);
 
     nearbyReports.value = reports.map(report => {
-      // Extraire les coordonnées (format Firestore: location.lat/lng)
-      const lat = report.location?.lat ?? 0;
-      const lng = report.location?.lng ?? 0;
+      // Le service retourne directement latitude et longitude comme strings
+      const lat = Number(report.latitude) || 0;
+      const lng = Number(report.longitude) || 0;
+
+      // Log pour debug
+      console.log(`Report ${report.id}: lat=${lat}, lng=${lng}`);
 
       return {
         ...report,
-        // Ajouter latitude/longitude pour compatibilité avec getCoordinates
-        latitude: lat,
-        longitude: lng,
+        // Pas besoin de transformer, on garde le format du service
+        // Juste convertir en nombres pour les calculs
+        title: report.titre,
+        description: report.description,
+        status: report.statut === 1 ? 'pending' : report.statut === 11 ? 'in_progress' : 'resolved',
+        category: 'infrastructure', // Valeur par défaut si pas de catégorie
         distance: calculateDistance(centerLat, centerLng, lat, lng).toFixed(1),
-        timeAgo: getTimeAgo(report.createdAt)
+        timeAgo: getTimeAgo(report.dateCreation ? new Date(report.dateCreation) : new Date()),
+        createdAt: report.dateCreation ? new Date(report.dateCreation) : new Date()
       };
     });
+
+    console.log('Signalements transformés:', nearbyReports.value);
 
     // Mettre à jour les marqueurs après réception des données
     setTimeout(() => {

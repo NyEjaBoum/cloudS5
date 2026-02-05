@@ -68,6 +68,36 @@ class ReportsService {
     }
   }
 
+  // Récupérer les signalements pour l'user connecteé par email
+  async getSignalementsByEmail(email: string): Promise<{ success: boolean; signalements: Report[]; error?: string }> {
+  try {
+    const q = query(this.reportsCollection, where('userEmail', '==', email));
+    const snapshot = await getDocs(q);
+    const signalements: Report[] = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
+        id: doc.id,
+        titre: data.titre,
+        description: data.description,
+        statut: data.statut,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        dateCreation: data.dateCreation,
+        surfaceM2: data.surfaceM2,
+        budget: data.budget,
+        entreprise: data.entreprise,
+        userId: data.userId,
+        userEmail: data.userEmail,
+        photos: data.photos || []
+      };
+    });
+    return { success: true, signalements };
+  } catch (error) {
+    console.error('Erreur récupération signalements par email:', error);
+    return { success: false, signalements: [], error: 'Erreur lors de la récupération' };
+  }
+}
+
   async getAllSignalements(): Promise<{ success: boolean; signalements: Report[]; error?: string }> {
     try {
       const snapshot = await getDocs(this.reportsCollection);
