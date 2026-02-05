@@ -10,10 +10,10 @@ import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 
 function getStatutLabel(statut) {
   switch (statut) {
-    case 1: return { label: "Nouveau", color: "#e53e3e" };
-    case 11: return { label: "En cours", color: "#ed8936" };
-    case 99: return { label: "Terminé", color: "#38a169" };
-    default: return { label: "Annulé", color: "#718096" };
+    case 1: return { label: "Nouveau", color: "#3b82f6", bg: "#eff6ff" };
+    case 11: return { label: "En cours", color: "#f59e0b", bg: "#fffbeb" };
+    case 99: return { label: "Termine", color: "#16a34a", bg: "#f0fdf4" };
+    default: return { label: "Annule", color: "#64748b", bg: "#f8fafc" };
   }
 }
 
@@ -56,57 +56,44 @@ const CarteOffline = ({
                 }}
               >
                 <Popup>
-                  <div style={{ minWidth: 220, fontFamily: "inherit" }}>
-                    <div style={{ fontWeight: 700, fontSize: 16, marginBottom: 6 }}>{s.titre}</div>
-                    <div style={{ marginBottom: 8, color: "#4a5568" }}>{s.description}</div>
-                    <div style={{ marginBottom: 8 }}>
+                  <div className="p-4 min-w-[260px] font-sans">
+                    <div className="font-bold text-slate-800 text-base mb-1">{s.titre}</div>
+                    <div className="text-slate-400 text-sm mb-3 line-clamp-2">{s.description}</div>
+                    <div className="mb-3 flex items-center gap-2">
                       <span
-                        style={{
-                          background: statut.color,
-                          color: "#fff",
-                          borderRadius: 8,
-                          padding: "2px 10px",
-                          fontWeight: 600,
-                          fontSize: 13,
-                          marginRight: 8
-                        }}
+                        className="px-2.5 py-1 rounded-lg text-xs font-semibold inline-flex items-center gap-1.5"
+                        style={{ background: statut.bg, color: statut.color }}
                       >
+                        <span className="w-1.5 h-1.5 rounded-full" style={{ background: statut.color, opacity: 0.6 }} />
                         {statut.label}
                       </span>
-                      <span style={{ color: "#718096", fontSize: 13 }}>
-                        {s.dateCreation && (
-                          <>• {new Date(s.dateCreation).toLocaleDateString()}</>
-                        )}
-                      </span>
+                      {s.dateCreation && (
+                        <span className="text-slate-300 text-xs">
+                          {new Date(s.dateCreation).toLocaleDateString()}
+                        </span>
+                      )}
                     </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Surface :</b> {s.surfaceM2 ? s.surfaceM2.toString() : "-"} m²
+                    <div className="space-y-1.5 text-sm">
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Surface</span>
+                        <span className="font-medium text-slate-600">{s.surfaceM2 ? s.surfaceM2.toString() : "-"} m2</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Budget</span>
+                        <span className="font-medium text-slate-600">{s.budget ? Number(s.budget).toLocaleString() : "-"} Ar</span>
+                      </div>
+                      <div className="flex justify-between">
+                        <span className="text-slate-400">Entreprise</span>
+                        <span className="font-medium text-slate-600">{s.entreprise || "-"}</span>
+                      </div>
                     </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Budget :</b> {s.budget ? Number(s.budget).toLocaleString() : "-"} Ar
-                    </div>
-                    <div style={{ fontSize: 14, marginBottom: 4 }}>
-                      <b>Entreprise :</b> {s.entreprise || "-"}
-                    </div>
-                    <div style={{ fontSize: 13, color: "#718096" }}>
-                      <b>Utilisateur :</b> {s.utilisateurNom || ""} {s.utilisateurPrenom || ""}
-                    </div>
-                    {/* Lien vers la page de détails */}
-                    <div style={{ marginTop: 10 }}>
+                    <div className="mt-3 pt-3 border-t border-slate-100">
                       <button
                         onClick={() => onMarkerClick && onMarkerClick(s)}
-                        style={{
-                          color: "#667eea",
-                          textDecoration: "underline",
-                          fontWeight: 600,
-                          fontSize: 14,
-                          background: "none",
-                          border: "none",
-                          cursor: "pointer",
-                          padding: 0
-                        }}
+                        className="text-sm font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
+                        style={{ color: "#3D5E6B" }}
                       >
-                        Voir détails →
+                        Voir les details
                       </button>
                     </div>
                   </div>

@@ -1,8 +1,8 @@
 import React, { useState } from "react";
 import AuthLayout from "../components/AuthLayout.jsx";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { getAuth, signInWithEmailAndPassword, signInWithPopup, GoogleAuthProvider } from "firebase/auth";
-import { handleLogin, loginFirebase, loginLocal } from "../api/auth";
+import { handleLogin } from "../api/auth";
+import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
@@ -12,8 +12,8 @@ export default function LoginPage() {
   });
 
   const location = useLocation();
+  const [showPassword, setShowPassword] = useState(false);
 
-    // Affiche l'erreur passée par la redirection (ex: ProtectedRoute)
   React.useEffect(() => {
     if (location.state?.error) {
       setError(location.state.error);
@@ -32,113 +32,99 @@ export default function LoginPage() {
     });
   };
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  handleLogin(formData, navigate, setError, setLoading);
-};
-
-  // Login Google/Firebase
-  const handleGoogleLogin = async () => {
-    setLoading(true);
-    setError("");
-    try {
-      const auth = getAuth();
-      const provider = new GoogleAuthProvider();
-      const result = await signInWithPopup(auth, provider);
-      const idToken = await result.user.getIdToken();
-      const token = await loginFirebase(idToken);
-      localStorage.setItem("jwt", token);
-      navigate("/manager");
-    } catch (err) {
-      if (err.message.includes("Aucun compte local associé")) {
-        setError("Ce compte Google existe, mais il n'est pas autorisé sur cette application. Contactez un administrateur.");
-      } else {
-        setError(err.message);
-      }
-    }
-    setLoading(false);
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    handleLogin(formData, navigate, setError, setLoading);
   };
 
   return (
     <AuthLayout
-      title="Welcome to Mapeo"
-      subtitle="Please sign in to your account and start the adventure"
+      title="Bienvenue"
+      subtitle="Connectez-vous pour acceder a votre espace"
       leftSide={true}
     >
-      <form onSubmit={handleSubmit} className="auth-form">
-        <div className="form-group">
-          <label>Email or Username</label>
-          <input
-            type="text"
-            name="email"
-            placeholder="Enter your email or username"
-            value={formData.email}
-            onChange={handleChange}
-            required
-          />
+      <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Email */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Email
+          </label>
+          <div className="relative">
+            <Mail size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+            <input
+              type="text"
+              name="email"
+              placeholder="votre@email.com"
+              className="input-clean pl-10"
+              value={formData.email}
+              onChange={handleChange}
+              required
+            />
+          </div>
         </div>
 
-        <div className="form-group">
-          <label>Password</label>
-          <input
-            type="password"
-            name="password"
-            placeholder="············"
-            value={formData.password}
-            onChange={handleChange}
-            required
-          />
+        {/* Password */}
+        <div>
+          <label className="block text-sm font-medium text-slate-700 mb-1.5">
+            Mot de passe
+          </label>
+          <div className="relative">
+            <Lock size={16} className="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-300" />
+            <input
+              type={showPassword ? "text" : "password"}
+              name="password"
+              placeholder="Entrez votre mot de passe"
+              className="input-clean pl-10 pr-10"
+              value={formData.password}
+              onChange={handleChange}
+              required
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword(!showPassword)}
+              className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-300 hover:text-slate-500 transition-colors"
+            >
+              {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+            </button>
+          </div>
         </div>
 
-        <div className="form-options">
-          <label className="checkbox-label">
+        {/* Remember me + Forgot */}
+        <div className="flex items-center justify-between">
+          <label className="flex items-center gap-2 cursor-pointer">
             <input
               type="checkbox"
               name="rememberMe"
+              className="w-4 h-4 rounded border-slate-300 text-teal-600 focus:ring-teal-500"
               checked={formData.rememberMe}
               onChange={handleChange}
             />
-            Remember me
+            <span className="text-sm text-slate-500">Se souvenir de moi</span>
           </label>
-          <Link to="/forgot-password" className="link">
-            Forgot password?
+          <Link to="/forgot-password" className="text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors">
+            Mot de passe oublie ?
           </Link>
         </div>
 
-        {error && <div className="error" style={{ color: "#e53e3e", marginBottom: 16 }}>{error}</div>}
+        {/* Error */}
+        {error && (
+          <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+            <div className="w-1.5 h-1.5 rounded-full bg-red-500 shrink-0" />
+            {error}
+          </div>
+        )}
 
-        <button type="submit" className="btn-primary" disabled={loading}>
-          {loading ? "Logging in..." : "Login"}
+        {/* Submit */}
+        <button
+          type="submit"
+          className="btn-primary-warm w-full flex items-center justify-center gap-2"
+          disabled={loading}
+        >
+          {loading && (
+            <span className="w-4 h-4 border-2 border-white/30 border-t-white rounded-full animate-spin" />
+          )}
+          {loading ? "Connexion..." : "Se connecter"}
         </button>
-
-        <div className="auth-footer">
-          <span>New on our platform? </span>
-          <Link to="/register" className="link">
-            Create an account
-          </Link>
-        </div>
-
-        <div className="divider">or</div>
-
-        <div className="social-login">
-          <button type="button" className="social-btn facebook" disabled>
-            <i className="fab fa-facebook-f"></i>
-          </button>
-          <button type="button" className="social-btn twitter" disabled>
-            <i className="fab fa-twitter"></i>
-          </button>
-          <button type="button" className="social-btn github" disabled>
-            <i className="fab fa-github"></i>
-          </button>
-          <button
-            type="button"
-            className="social-btn google"
-            onClick={handleGoogleLogin}
-            disabled={loading}
-          >
-            <i className="fab fa-google"></i>
-          </button>
-        </div>
       </form>
     </AuthLayout>
   );

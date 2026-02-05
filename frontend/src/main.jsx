@@ -1,8 +1,8 @@
 import { StrictMode } from 'react'
 import { createRoot } from 'react-dom/client'
-import './styles/auth.css'
+import './index.css'
 import App from './App.jsx'
-import './firebase'; // <-- Ajoute cette ligne AVANT tout appel à Firebase
+import './firebase';
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>

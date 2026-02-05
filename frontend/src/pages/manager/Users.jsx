@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, importUsersFromFirebase, exportUsersToFirebase } from "../../api/user";
-import "../../styles/manager.css";
+import { fetchAllUsers, exportUsersToFirebase } from "../../api/user";
+import { Link } from "react-router-dom";
+import { Upload, Eye, Users as UsersIcon, AlertCircle } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -17,19 +18,6 @@ export default function Users() {
     refreshUsers();
   }, []);
 
-  // const handleImport = async () => {
-  //   setLoading(true);
-  //   setError("");
-  //   try {
-  //     await importUsersFromFirebase();
-  //     refreshUsers();
-  //     alert("Import depuis Firebase terminé !");
-  //   } catch (e) {
-  //     setError(e.message);
-  //   }
-  //   setLoading(false);
-  // };
-
   const handleExport = async () => {
     setLoading(true);
     setError("");
@@ -43,39 +31,79 @@ export default function Users() {
   };
 
   return (
-    <div className="card">
-      <h2>Liste des utilisateurs</h2>
-      <div style={{ marginBottom: 16 }}>
-        {/* <button className="sync-btn" onClick={handleImport} disabled={loading}>
-          Importer depuis Firebase
-        </button> */}
-        <button className="sync-btn" onClick={handleExport} disabled={loading} style={{ marginLeft: 8 }}>
+    <div className="space-y-6 animate-fade-in">
+      {/* Header */}
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-800">Utilisateurs</h1>
+          <p className="text-sm text-slate-400 mt-0.5">{users.length} utilisateurs enregistres</p>
+        </div>
+        <button
+          className="btn-primary-warm flex items-center gap-2 text-sm"
+          onClick={handleExport}
+          disabled={loading}
+        >
+          <Upload size={15} />
           Exporter vers Firebase
         </button>
       </div>
-      {error && <div style={{ color: "red" }}>{error}</div>}
-      <table style={{ width: "100%", marginTop: 16 }}>
-        <thead>
-          <tr>
-            <th>ID</th>
-            <th>Email</th>
-            <th>Nom</th>
-            <th>Prénom</th>
-            <th>Rôle</th>
-          </tr>
-        </thead>
-        <tbody>
-          {users.map(u => (
-            <tr key={u.id}>
-              <td>{u.id}</td>
-              <td>{u.email}</td>
-              <td>{u.nom}</td>
-              <td>{u.prenom}</td>
-              <td>{u.role?.nom}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+
+      {/* Error */}
+      {error && (
+        <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+          <AlertCircle size={16} />
+          {error}
+        </div>
+      )}
+
+      {/* Table */}
+      <div className="glass-card">
+        <div className="overflow-x-auto">
+          <table className="table-clean w-full">
+            <thead>
+              <tr>
+                <th>ID</th>
+                <th>Nom complet</th>
+                <th>Email</th>
+                <th>Role</th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.map(u => (
+                <tr key={u.id}>
+                  <td className="text-slate-400 font-mono text-xs">#{u.id}</td>
+                  <td>
+                    <div className="flex items-center gap-3">
+                      <div className="w-8 h-8 rounded-lg bg-slate-100 flex items-center justify-center shrink-0">
+                        <span className="text-xs font-bold text-slate-500">
+                          {(u.nom?.[0] || "").toUpperCase()}{(u.prenom?.[0] || "").toUpperCase()}
+                        </span>
+                      </div>
+                      <div>
+                        <span className="font-medium text-slate-700">{u.nom} {u.prenom}</span>
+                      </div>
+                    </div>
+                  </td>
+                  <td>{u.email}</td>
+                  <td>
+                    <span className="badge-status bg-slate-100 text-slate-600">{u.role?.nom}</span>
+                  </td>
+                  <td>
+                    <Link
+                      to={`/manager/users/${u.id}`}
+                      className="inline-flex items-center gap-1.5 text-sm font-medium text-teal-600 hover:text-teal-700 transition-colors"
+                    >
+                      <Eye size={14} />
+                      Details
+                    </Link>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
   );
 }

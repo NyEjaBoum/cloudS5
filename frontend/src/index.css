@@ -1,23 +1,67 @@
-* {
-  margin: 0;
-  padding: 0;
-  box-sizing: border-box;
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+
+  body {
+    @apply text-slate-800 bg-slate-50;
+  }
+
+  ::selection {
+    @apply bg-teal-200 text-teal-900;
+  }
 }
 
-body {
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-color: #f5f7fa;
+@layer components {
+  .glass-card {
+    @apply bg-white border border-slate-200/60 rounded-2xl shadow-card;
+  }
+
+  .stat-card {
+    @apply bg-white border border-slate-200/60 rounded-2xl p-5 flex items-center gap-4 shadow-soft transition-all duration-200 hover:shadow-card;
+  }
+
+  .table-clean thead th {
+    @apply text-xs font-semibold text-slate-400 uppercase tracking-wider py-3 px-4 border-b border-slate-100 bg-transparent;
+  }
+
+  .table-clean tbody td {
+    @apply py-3.5 px-4 text-sm text-slate-600 border-b border-slate-50;
+  }
+
+  .table-clean tbody tr {
+    @apply transition-colors duration-150 hover:bg-slate-25;
+  }
+
+  .input-clean {
+    @apply w-full px-4 py-2.5 bg-slate-50 border border-slate-200 rounded-xl text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-teal-300 focus:border-teal-400 focus:bg-white placeholder:text-slate-300;
+  }
+
+  .btn-primary-warm {
+    @apply bg-teal-600 hover:bg-teal-700 text-white font-medium px-6 py-2.5 rounded-xl transition-all duration-200 shadow-soft hover:shadow-card active:scale-[0.98];
+  }
+
+  .btn-ghost-clean {
+    @apply text-slate-500 hover:text-slate-700 hover:bg-slate-100 font-medium px-4 py-2 rounded-xl transition-all duration-200;
+  }
+
+  .badge-status {
+    @apply inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold;
+  }
+
+  .sidebar-link {
+    @apply flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium transition-all duration-200;
+  }
 }
 
-#root {
-  min-height: 100vh;
-}
-
-/* Styles Leaflet */
+/* Leaflet overrides */
 .leaflet-container {
   font-family: inherit;
 }
@@ -27,5 +71,31 @@ body {
 }
 
 .leaflet-popup-content-wrapper {
-  border-radius: 8px !important;
+  border-radius: 16px !important;
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12) !important;
+  border: 1px solid rgba(0, 0, 0, 0.04) !important;
+  overflow: hidden;
+}
+
+.leaflet-popup-tip {
+  box-shadow: none !important;
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #cbd5e1;
+  border-radius: 999px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #94a3b8;
 }
