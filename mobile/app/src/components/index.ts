@@ -13,6 +13,8 @@ export { default as CategorySelector } from './report/CategorySelector.vue';
 export { default as UrgencySelector } from './report/UrgencySelector.vue';
 export { default as PhotoUploader } from './report/PhotoUploader.vue';
 export { default as LocationPicker } from './report/LocationPicker.vue';
+export { default as ReportForm } from './report/ReportForm.vue';
+export { default as SignalementsMap } from './report/SignalementsMap.vue';
 
 // Map components
 export { default as FilterSidebar } from './map/FilterSidebar.vue';

@@ -1,4 +1,3 @@
-// src/services/reports.service.ts
 import { db } from '../config/firebase.config';
 import {
   collection,
@@ -10,8 +9,8 @@ import {
   deleteDoc,
   query,
   where,
-  orderBy,
   onSnapshot,
+  setDoc,
   Timestamp,
   type Unsubscribe
 } from 'firebase/firestore';
@@ -19,53 +18,107 @@ import {
 // Types
 export interface Report {
   id: string;
-  title: string;
+  titre: string;
   description: string;
-  category: string;
-  status: 'pending' | 'in_progress' | 'resolved';
-  location: {
-    lat: number;
-    lng: number;
-    address?: string;
+  statut: number; // 1, 11, 99...
+  latitude: string;
+  longitude: string;
+  dateCreation: string; // format ISO ou "YYYY-MM-DDTHH:mm"
+  surfaceM2?: string;
+  budget?: string;
+  entreprise?: {
+    id: number;
+    nom: string;
+    adresse: string;
+    contact: string;
   };
   userId: string;
   userEmail?: string;
-  createdAt: Date;
-  updatedAt?: Date;
-  upvotes?: number;
-  comments?: number;
   photos?: string[];
 }
 
 export interface ReportInput {
-  title: string;
+  titre: string;
   description: string;
-  category: string;
-  location: {
-    lat: number;
-    lng: number;
-    address?: string;
-  };
-  photos?: string[];
+  statut: number;
+  latitude: string;
+  longitude: string;
+  dateCreation: string;
 }
 
-const COLLECTION_NAME = 'signalements'; // Changé de 'reports' à 'signalements'
+const COLLECTION_NAME = 'signalements';
 
 class ReportsService {
   private reportsCollection = collection(db, COLLECTION_NAME);
 
-  async getAllSignalements(): Promise<{ success: boolean; signalements: any[]; error?: string }> {
+  // Générer le prochain ID numérique
+  private async getNextId(): Promise<number> {
     try {
-      const q = query(this.reportsCollection, orderBy('dateCreation', 'desc'));
-      const snapshot = await getDocs(q);
+      const snapshot = await getDocs(this.reportsCollection);
+      if (snapshot.empty) return 1;
+      
+      const ids = snapshot.docs
+        .map(doc => parseInt(doc.id))
+        .filter(id => !isNaN(id));
+      
+      return ids.length > 0 ? Math.max(...ids) + 1 : 1;
+    } catch (error) {
+      console.error('Erreur génération ID:', error);
+      return Date.now(); // Fallback sur timestamp
+    }
+  }
 
-      const signalements = snapshot.docs.map(doc => ({
+  // Récupérer les signalements pour l'user connecteé par email
+  async getSignalementsByEmail(email: string): Promise<{ success: boolean; signalements: Report[]; error?: string }> {
+  try {
+    const q = query(this.reportsCollection, where('userEmail', '==', email));
+    const snapshot = await getDocs(q);
+    const signalements: Report[] = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return {
         id: doc.id,
-        ...doc.data(),
-        // Convertir les timestamps si nécessaire
-        dateCreation: doc.data().dateCreation || null
-      }));
+        titre: data.titre,
+        description: data.description,
+        statut: data.statut,
+        latitude: data.latitude,
+        longitude: data.longitude,
+        dateCreation: data.dateCreation,
+        surfaceM2: data.surfaceM2,
+        budget: data.budget,
+        entreprise: data.entreprise,
+        userId: data.userId,
+        userEmail: data.userEmail,
+        photos: data.photos || []
+      };
+    });
+    return { success: true, signalements };
+  } catch (error) {
+    console.error('Erreur récupération signalements par email:', error);
+    return { success: false, signalements: [], error: 'Erreur lors de la récupération' };
+  }
+}
 
+  async getAllSignalements(): Promise<{ success: boolean; signalements: Report[]; error?: string }> {
+    try {
+      const snapshot = await getDocs(this.reportsCollection);
+      const signalements: Report[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          titre: data.titre,
+          description: data.description,
+          statut: data.statut,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          dateCreation: data.dateCreation,
+          surfaceM2: data.surfaceM2,
+          budget: data.budget,
+          entreprise: data.entreprise,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          photos: data.photos || []
+        };
+      });
       return { success: true, signalements };
     } catch (error) {
       console.error('Erreur récupération signalements:', error);
@@ -73,34 +126,28 @@ class ReportsService {
     }
   }
 
-  // Créer un signalement
+  // Créer un signalement avec ID numérique
   async createReport(reportData: ReportInput, userId: string, userEmail?: string): Promise<{ success: boolean; report?: Report; error?: string }> {
     try {
+      // Générer l'ID numérique
+      const nextId = await this.getNextId();
+      
       const newReport = {
         ...reportData,
         userId,
         userEmail: userEmail || '',
-        status: 'pending' as const,
-        upvotes: 0,
-        comments: 0,
-        createdAt: Timestamp.now(),
-        updatedAt: Timestamp.now()
+        photos: []
       };
-
-      const docRef = await addDoc(this.reportsCollection, newReport);
-
+      
+      // Utiliser setDoc avec un ID numérique au lieu d'addDoc
+      const docRef = doc(db, COLLECTION_NAME, nextId.toString());
+      await setDoc(docRef, newReport);
+      
       return {
         success: true,
         report: {
-          id: docRef.id,
-          ...reportData,
-          userId,
-          userEmail,
-          status: 'pending',
-          upvotes: 0,
-          comments: 0,
-          createdAt: new Date(),
-          updatedAt: new Date()
+          id: nextId.toString(),
+          ...newReport
         }
       };
     } catch (error) {
@@ -115,16 +162,25 @@ class ReportsService {
   // Récupérer tous les signalements (une seule fois)
   async getAllReports(): Promise<{ success: boolean; reports: Report[]; error?: string }> {
     try {
-      const q = query(this.reportsCollection, orderBy('createdAt', 'desc'));
-      const snapshot = await getDocs(q);
-
-      const reports: Report[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate()
-      })) as Report[];
-
+      const snapshot = await getDocs(this.reportsCollection);
+      const reports: Report[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          titre: data.titre,
+          description: data.description,
+          statut: data.statut,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          dateCreation: data.dateCreation,
+          surfaceM2: data.surfaceM2,
+          budget: data.budget,
+          entreprise: data.entreprise,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          photos: data.photos || []
+        };
+      });
       return { success: true, reports };
     } catch (error) {
       console.error('Erreur récupération signalements:', error);
@@ -134,16 +190,28 @@ class ReportsService {
 
   // Écouter les signalements en temps réel
   subscribeToReports(callback: (reports: Report[]) => void): Unsubscribe {
-    const q = query(this.reportsCollection, orderBy('createdAt', 'desc'));
-
+    const q = query(this.reportsCollection);
     return onSnapshot(q, (snapshot) => {
-      const reports: Report[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate()
-      })) as Report[];
-
+      const reports: Report[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          titre: data.titre,
+          description: data.description,
+          statut: data.statut,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          dateCreation: data.dateCreation,
+          surfaceM2: data.surfaceM2,
+          budget: data.budget,
+          entreprise: data.entreprise,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          photos: data.photos || []
+        };
+      });
+      // Tri par dateCreation (string ISO)
+      reports.sort((a, b) => (b.dateCreation || '').localeCompare(a.dateCreation || ''));
       callback(reports);
     }, (error) => {
       console.error('Erreur écoute signalements:', error);
@@ -154,20 +222,26 @@ class ReportsService {
   // Récupérer les signalements d'un utilisateur
   async getMyReports(userId: string): Promise<{ success: boolean; reports: Report[]; error?: string }> {
     try {
-      const q = query(
-        this.reportsCollection,
-        where('userId', '==', userId),
-        orderBy('createdAt', 'desc')
-      );
+      const q = query(this.reportsCollection, where('userId', '==', userId));
       const snapshot = await getDocs(q);
-
-      const reports: Report[] = snapshot.docs.map(doc => ({
-        id: doc.id,
-        ...doc.data(),
-        createdAt: doc.data().createdAt?.toDate() || new Date(),
-        updatedAt: doc.data().updatedAt?.toDate()
-      })) as Report[];
-
+      const reports: Report[] = snapshot.docs.map(doc => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          titre: data.titre,
+          description: data.description,
+          statut: data.statut,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          dateCreation: data.dateCreation,
+          surfaceM2: data.surfaceM2,
+          budget: data.budget,
+          entreprise: data.entreprise,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          photos: data.photos || []
+        };
+      });
       return { success: true, reports };
     } catch (error) {
       console.error('Erreur récupération mes signalements:', error);
@@ -180,20 +254,27 @@ class ReportsService {
     try {
       const docRef = doc(db, COLLECTION_NAME, id);
       const docSnap = await getDoc(docRef);
-
       if (!docSnap.exists()) {
         return { success: false, error: 'Signalement non trouvé' };
       }
-
       const data = docSnap.data();
       return {
         success: true,
         report: {
           id: docSnap.id,
-          ...data,
-          createdAt: data.createdAt?.toDate() || new Date(),
-          updatedAt: data.updatedAt?.toDate()
-        } as Report
+          titre: data.titre,
+          description: data.description,
+          statut: data.statut,
+          latitude: data.latitude,
+          longitude: data.longitude,
+          dateCreation: data.dateCreation,
+          surfaceM2: data.surfaceM2,
+          budget: data.budget,
+          entreprise: data.entreprise,
+          userId: data.userId,
+          userEmail: data.userEmail,
+          photos: data.photos || []
+        }
       };
     } catch (error) {
       console.error('Erreur récupération signalement:', error);
@@ -205,10 +286,7 @@ class ReportsService {
   async updateReport(id: string, updates: Partial<Report>): Promise<{ success: boolean; error?: string }> {
     try {
       const docRef = doc(db, COLLECTION_NAME, id);
-      await updateDoc(docRef, {
-        ...updates,
-        updatedAt: Timestamp.now()
-      });
+      await updateDoc(docRef, updates);
       return { success: true };
     } catch (error) {
       console.error('Erreur mise à jour signalement:', error);
@@ -225,29 +303,6 @@ class ReportsService {
     } catch (error) {
       console.error('Erreur suppression signalement:', error);
       return { success: false, error: 'Erreur lors de la suppression' };
-    }
-  }
-
-  // Statistiques utilisateur
-  async getUserStats(userId: string): Promise<{ total: number; resolved: number }> {
-    try {
-      const q = query(this.reportsCollection, where('userId', '==', userId));
-      const snapshot = await getDocs(q);
-
-      let total = 0;
-      let resolved = 0;
-
-      snapshot.docs.forEach(doc => {
-        total++;
-        if (doc.data().status === 'resolved') {
-          resolved++;
-        }
-      });
-
-      return { total, resolved };
-    } catch (error) {
-      console.error('Erreur stats:', error);
-      return { total: 0, resolved: 0 };
     }
   }
 }
