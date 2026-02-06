@@ -2,8 +2,10 @@ package com.projetCloud.projetCloud.controller;
 
 import com.projetCloud.projetCloud.dto.ApiResponse;
 import com.projetCloud.projetCloud.model.utilisateur.Utilisateur;
+import com.projetCloud.projetCloud.model.utilisateur.HistoriqueBlocage;
 import com.projetCloud.projetCloud.service.UserService;
 import com.projetCloud.projetCloud.service.AuthService;
+import com.projetCloud.projetCloud.service.HistoriqueBlocageService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 import java.util.Map;
@@ -18,6 +20,9 @@ public class UserController {
 
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private HistoriqueBlocageService historiqueBlocageService;
 
     @GetMapping
     public List<Utilisateur> getAllUtilisateurs() {
@@ -58,6 +63,26 @@ public class UserController {
         try {
             userService.unblockUser(userId);
             return new ApiResponse<>("success", "Compte utilisateur " + userId + " débloqué", null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    @GetMapping("/historique-blocage")
+    public ApiResponse<List<HistoriqueBlocage>> getAllHistoriqueBlocage() {
+        try {
+            List<HistoriqueBlocage> historique = historiqueBlocageService.getAll();
+            return new ApiResponse<>("success", historique, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
+    @GetMapping("/{id}/historique-blocage")
+    public ApiResponse<List<HistoriqueBlocage>> getHistoriqueBlocage(@PathVariable Integer id) {
+        try {
+            List<HistoriqueBlocage> historique = historiqueBlocageService.getByUtilisateurId(id);
+            return new ApiResponse<>("success", historique, null);
         } catch (Exception e) {
             return new ApiResponse<>("error", null, e.getMessage());
         }

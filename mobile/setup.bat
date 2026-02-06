@@ -48,10 +48,16 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [5/9] Generation du dossier android...
+echo [5/9] Suppression et re-generation du dossier android...
+if exist android (
+    echo Suppression du dossier android existant...
+    rmdir /s /q android
+)
 call npx cap add android
 if %errorlevel% neq 0 (
-    echo Le dossier android existe deja, synchronisation...
+    echo ERREUR: cap add android a echoue.
+    pause
+    exit /b 1
 )
 
 echo.
@@ -73,20 +79,20 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [8/9] Correction de l'horloge de l'emulateur...
-for /f %%a in ('powershell -command "Get-Date -Format 'MMddHHmmyyyy.ss'"') do set DATETIME=%%a
-adb shell su -c "date %DATETIME%"
-if %errorlevel% neq 0 (
-    echo ATTENTION: Correction horloge echouee (emulateur non demarre?), on continue...
-)
-
-echo.
-echo [9/9] Generation des icones...
+echo [8/9] Generation des icones...
 call npm install @capacitor/assets --save-dev
 call npx @capacitor/assets generate --android
 if %errorlevel% neq 0 (
     echo ATTENTION: Generation des icones echouee, on continue...
 )
+
+@REM echo.
+@REM echo [9/9] Correction de l'horloge de l'emulateur...
+@REM for /f %%a in ('powershell -command "Get-Date -Format 'MMddHHmmyyyy.ss'"') do set DATETIME=%%a
+@REM adb shell su -c "date %DATETIME%"
+@REM if %errorlevel% neq 0 (
+@REM     echo ATTENTION: Correction horloge echouee (emulateur non demarre?), on continue...
+@REM )
 
 echo.
 echo ================================

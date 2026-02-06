@@ -44,6 +44,7 @@ public class SignalementService {
 
     @Autowired
     private SignalementPhotoService signalementPhotoService;
+    private NotificationService notificationService;
 
     public List<DureeSignalementDto> getDureeSignalement() {
         try {
@@ -134,6 +135,22 @@ public class SignalementService {
             historique.setUtilisateur(signalement.getUtilisateur());
             signalementHistoriqueService.save(historique);
 
+            // Notifier l'utilisateur mobile du changement de statut
+            if (!ancienStatut.equals(updated.getStatut())) {
+                String userEmail = signalement.getUtilisateur() != null
+                        ? signalement.getUtilisateur().getEmail()
+                        : null;
+                if (userEmail != null) {
+                    notificationService.sendStatusChangeNotification(
+                            String.valueOf(saved.getId()),
+                            saved.getTitre(),
+                            ancienStatut,
+                            updated.getStatut(),
+                            userEmail
+                    );
+                }
+            }
+
             return saved;
         } catch (Exception e) {
             System.err.println("[ERREUR] update Signalement : " + e.getMessage());
@@ -157,6 +174,20 @@ public class SignalementService {
             historique.setDateChangement(java.time.LocalDateTime.now());
             historique.setUtilisateur(signalement.getUtilisateur());
             signalementHistoriqueService.save(historique);
+
+            // Notifier l'utilisateur mobile de l'annulation
+            String userEmail = signalement.getUtilisateur() != null
+                    ? signalement.getUtilisateur().getEmail()
+                    : null;
+            if (userEmail != null) {
+                notificationService.sendStatusChangeNotification(
+                        String.valueOf(saved.getId()),
+                        saved.getTitre(),
+                        ancienStatut,
+                        21,
+                        userEmail
+                );
+            }
 
             return saved;
         } catch (Exception e) {
