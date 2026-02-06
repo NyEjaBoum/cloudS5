@@ -6,6 +6,7 @@ import LoginPage from '../views/LoginPage.vue'
 import ProfilPage from '../views/ProfilPage.vue'
 import ReportPage from '../views/ReportPage.vue'
 import ReportsListPage from '../views/ReportsListPage.vue'
+import NotificationsPage from '../views/NotificationsPage.vue'
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -41,6 +42,11 @@ const routes: Array<RouteRecordRaw> = [
     path: '/reports',
     name: 'ReportsList',
     component: ReportsListPage
+  },
+  {
+    path: '/notifications',
+    name: 'Notifications',
+    component: NotificationsPage
   },
   {
     path: '/report/:id',

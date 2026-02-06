@@ -7,6 +7,7 @@ export { default as LoadingOverlay } from './common/LoadingOverlay.vue';
 export { default as ReportCard } from './common/ReportCard.vue';
 export { default as QuickActionCard } from './common/QuickActionCard.vue';
 export { default as StatCard } from './common/StatCard.vue';
+export { default as NotificationBell } from './common/NotificationBell.vue';
 
 // Report components
 export { default as CategorySelector } from './report/CategorySelector.vue';
