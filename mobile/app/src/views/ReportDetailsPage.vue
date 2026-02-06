@@ -168,7 +168,12 @@
                   class="photo-item"
                   @click="viewPhoto(photo)"
                 >
-                  <!-- <img :src="photo" :alt="`Photo ${index + 1}`" /> -->
+                  <img 
+                    :src="photo" 
+                    :alt="`Photo ${index + 1}`"
+                    @error="handleImageError"
+                    loading="lazy"
+                  />
                 </div>
               </div>
             </ion-card-content>
@@ -203,7 +208,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted, computed } from 'vue';
+import { ref, onMounted, computed, defineAsyncComponent } from 'vue';
 import { useRoute, useRouter } from 'vue-router';
 import {
   IonPage,
@@ -218,7 +223,8 @@ import {
   IonCardHeader,
   IonCardTitle,
   IonCardContent,
-  IonSpinner
+  IonSpinner,
+  modalController
 } from '@ionic/vue';
 import {
   arrowBackOutline,
@@ -315,9 +321,23 @@ const editReport = () => {
   router.push(`/report/edit/${report.value.id}`);
 };
 
-const viewPhoto = (photoUrl: string) => {
-  // Ouvrir la photo en plein écran
-  window.open(photoUrl, '_blank');
+const viewPhoto = async (photoUrl: string) => {
+  const modal = await modalController.create({
+    component: defineAsyncComponent(() => import('../components/common/ImageViewer.vue')),
+    componentProps: {
+      imageUrl: photoUrl,
+      images: report.value.photos || []
+    },
+    cssClass: 'fullscreen-modal'
+  });
+  
+  await modal.present();
+};
+
+const handleImageError = (event: Event) => {
+  const img = event.target as HTMLImageElement;
+  // Image de fallback en cas d'erreur
+  img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EImage%3C/text%3E%3C/svg%3E';
 };
 
 onMounted(() => {
@@ -484,6 +504,8 @@ onMounted(() => {
   overflow: hidden;
   cursor: pointer;
   transition: transform 0.2s;
+  background: #f0f0f0;
+  position: relative;
 }
 
 .photo-item:active {
@@ -494,6 +516,19 @@ onMounted(() => {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  display: block;
+}
+
+.photo-item::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: rgba(0, 0, 0, 0);
+  transition: background 0.2s;
+}
+
+.photo-item:hover::after {
+  background: rgba(0, 0, 0, 0.1);
 }
 
 .action-buttons {
