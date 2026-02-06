@@ -33,7 +33,7 @@ import {
   mapOutline,
   addOutline,
   documentTextOutline,
-  personOutline
+  notificationsOutline
 } from 'ionicons/icons';
 
 interface NavItem {

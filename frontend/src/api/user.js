@@ -43,6 +43,15 @@ export async function unblockUser(userId) {
   return data.data;
 }
 
+export async function fetchBlocageHistorique(userId) {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch(`http://localhost:8080/api/utilisateurs/${userId}/historique-blocage`, {
+    headers: { "Authorization": "Bearer " + token }
+  });
+  const data = await res.json();
+  return data.data || [];
+}
+
 export async function importUsersFromFirebase() {
   const token = localStorage.getItem("jwt");
   const res = await fetch("http://localhost:8080/api/utilisateurs/firebase/import", {
