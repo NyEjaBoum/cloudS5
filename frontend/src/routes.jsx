@@ -12,6 +12,7 @@ import RegisterUserManager from "./pages/manager/RegisterUserManager.jsx";
 import ProtectedRoute from "./components/ProtectedRoute.jsx";
 import UserDetails from "./pages/manager/UserDetails.jsx";
 import BlockedUsers from "./pages/manager/BlockedUsers.jsx";
+import HistoriqueBlocages from "./pages/manager/HistoriqueBlocages.jsx";
 import DashboardHome from "./pages/manager/DashboardHome.jsx"; // Assurez-vous d'importer le composant DashboardHome
 
 const AppRoutes = () => (
@@ -35,6 +36,7 @@ const AppRoutes = () => (
         <Route path="signalements/:id" element={<SignalementDetails />} />
         <Route path="users/:id" element={<UserDetails />} />
         <Route path="blocked-users" element={<BlockedUsers />} />
+        <Route path="historique-blocages" element={<HistoriqueBlocages />} />
       </Route>
     </Routes>
   </Router>

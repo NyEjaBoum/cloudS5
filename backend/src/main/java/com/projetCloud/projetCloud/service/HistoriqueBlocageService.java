@@ -30,4 +30,8 @@ public class HistoriqueBlocageService {
     public List<HistoriqueBlocage> getByUtilisateurId(Integer utilisateurId) {
         return historiqueBlocageRepository.findByUtilisateurIdOrderByDateActionDesc(utilisateurId);
     }
+
+    public List<HistoriqueBlocage> getAll() {
+        return historiqueBlocageRepository.findAllByOrderByDateActionDesc();
+    }
 }

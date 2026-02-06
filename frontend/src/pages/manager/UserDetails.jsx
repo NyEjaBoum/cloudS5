@@ -39,8 +39,11 @@ export default function UserDetails() {
     setError("");
     try {
       await updateUser(id, form);
-      setUser(form);
+      const refreshed = await fetchUserById(id);
+      setUser(refreshed.data);
+      setForm(refreshed.data);
       setEdit(false);
+      fetchBlocageHistorique(id).then(setHistorique);
       alert("Utilisateur modifie !");
     } catch (e) {
       setError("Erreur lors de la sauvegarde");
@@ -157,9 +160,36 @@ export default function UserDetails() {
                 <Lock size={13} />
                 Compte bloque
               </label>
-              <span className={`badge-status ${user.compteBloque ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
-                {user.compteBloque ? "Oui" : "Non"}
-              </span>
+              {edit ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      !form.compteBloque
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                    }`}
+                    onClick={() => setForm(f => ({ ...f, compteBloque: false }))}
+                  >
+                    Non
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      form.compteBloque
+                        ? "bg-red-50 text-red-600 border-red-200"
+                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                    }`}
+                    onClick={() => setForm(f => ({ ...f, compteBloque: true }))}
+                  >
+                    Oui
+                  </button>
+                </div>
+              ) : (
+                <span className={`badge-status ${user.compteBloque ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
+                  {user.compteBloque ? "Oui" : "Non"}
+                </span>
+              )}
             </div>
           </div>
 
@@ -201,11 +231,12 @@ export default function UserDetails() {
                     <tr key={i}>
                       <td>
                         <span className={`badge-status ${
-                          h.typeAction === "BLOCAGE_AUTO"
+                          h.typeAction.startsWith("BLOCAGE")
                             ? "bg-red-50 text-red-600"
                             : "bg-emerald-50 text-emerald-600"
                         }`}>
                           {h.typeAction === "BLOCAGE_AUTO" && "Blocage auto"}
+                          {h.typeAction === "BLOCAGE_MANUEL" && "Blocage manuel"}
                           {h.typeAction === "DEBLOCAGE_AUTO" && "Deblocage auto"}
                           {h.typeAction === "DEBLOCAGE_MANUEL" && "Deblocage manuel"}
                         </span>

@@ -12,3 +12,6 @@ target/
 .DS_Store
 backend/src/main/resources/serviceAccountKey.json
 mobile/app/android/.gradle/8.14.3/executionHistory/executionHistory.bin
+
+# Claude Code
+.claude/

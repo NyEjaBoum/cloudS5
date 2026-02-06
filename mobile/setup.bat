@@ -48,10 +48,16 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [5/9] Generation du dossier android...
+echo [5/9] Suppression et re-generation du dossier android...
+if exist android (
+    echo Suppression du dossier android existant...
+    rmdir /s /q android
+)
 call npx cap add android
 if %errorlevel% neq 0 (
-    echo Le dossier android existe deja, synchronisation...
+    echo ERREUR: cap add android a echoue.
+    pause
+    exit /b 1
 )
 
 echo.
