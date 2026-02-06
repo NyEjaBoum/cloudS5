@@ -88,13 +88,13 @@ const CarteOffline = ({
                       </div>
                     </div>
                     <div className="mt-3 pt-3 border-t border-slate-100">
-                      <button
-                        onClick={() => onMarkerClick && onMarkerClick(s)}
-                        className="text-sm font-semibold hover:underline bg-transparent border-none cursor-pointer p-0"
+                      <Link
+                        to={`/manager/signalements/${s.id}`}
+                        className="text-sm font-semibold hover:underline cursor-pointer p-0 no-underline"
                         style={{ color: "#3D5E6B" }}
                       >
                         Voir les details
-                      </button>
+                      </Link>
                     </div>
                   </div>
                 </Popup>
