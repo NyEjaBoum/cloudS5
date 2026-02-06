@@ -96,11 +96,11 @@ const defaultItems: NavItem[] = [
     active: props.currentPage === 'reports'
   },
   {
-    id: 'profile',
-    label: 'Profil',
-    icon: personOutline,
-    route: '/profil',
-    active: props.currentPage === 'profil'
+    id: 'notifications',
+    label: 'Notifs',
+    icon: notificationsOutline,
+    route: '/notifications',
+    active: props.currentPage === 'notifications'
   }
 ];
 

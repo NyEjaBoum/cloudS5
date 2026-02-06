@@ -73,19 +73,19 @@ if %errorlevel% neq 0 (
 )
 
 echo.
-echo [8/9] Correction de l'horloge de l'emulateur...
-for /f %%a in ('powershell -command "Get-Date -Format 'MMddHHmmyyyy.ss'"') do set DATETIME=%%a
-adb shell su -c "date %DATETIME%"
-if %errorlevel% neq 0 (
-    echo ATTENTION: Correction horloge echouee (emulateur non demarre?), on continue...
-)
-
-echo.
-echo [9/9] Generation des icones...
+echo [8/9] Generation des icones...
 call npm install @capacitor/assets --save-dev
 call npx @capacitor/assets generate --android
 if %errorlevel% neq 0 (
     echo ATTENTION: Generation des icones echouee, on continue...
+)
+
+echo.
+echo [9/9] Correction de l'horloge de l'emulateur...
+for /f %%a in ('powershell -command "Get-Date -Format 'MMddHHmmyyyy.ss'"') do set DATETIME=%%a
+adb shell su -c "date %DATETIME%"
+if %errorlevel% neq 0 (
+    echo ATTENTION: Correction horloge echouee (emulateur non demarre?), on continue...
 )
 
 echo.
