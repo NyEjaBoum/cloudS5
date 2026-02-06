@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "../styles/board.css";
 import { fetchRecapitulatif } from "../api/recap.js";
 
 export default function RecapPage() {

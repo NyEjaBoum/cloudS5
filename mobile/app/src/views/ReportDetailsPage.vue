@@ -284,10 +284,10 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#667eea';
-    case 11: return '#ed8936';
-    case 99: return '#38a169';
-    default: return '#718096';
+    case 1: return '#3D5E6B';
+    case 11: return '#f59e0b';
+    case 99: return '#16a34a';
+    default: return '#44474D';
   }
 };
 
@@ -364,11 +364,11 @@ onMounted(() => {
 }
 
 .details-container {
-  padding: 0 0 80px 0;
+  padding: 0 0 120px 0;
 }
 
 .header-section {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   padding: 24px 16px;
   color: white;
 }
@@ -430,12 +430,12 @@ onMounted(() => {
   gap: 12px;
   font-size: 18px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
 }
 
 .card-title ion-icon {
   font-size: 24px;
-  color: #667eea;
+  color: #3D5E6B;
 }
 
 .info-grid {
@@ -460,7 +460,7 @@ onMounted(() => {
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #718096;
+  color: #44474D;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -472,11 +472,11 @@ onMounted(() => {
 .info-value {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
 }
 
 .info-value.highlight {
-  color: #667eea;
+  color: #3D5E6B;
   font-size: 18px;
 }
 
@@ -488,7 +488,7 @@ onMounted(() => {
 .description-text {
   margin: 0;
   line-height: 1.6;
-  color: #4a5568;
+  color: #344f5a;
   font-size: 15px;
 }
 

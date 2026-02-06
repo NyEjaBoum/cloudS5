@@ -153,7 +153,7 @@ const handleLogin = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
 }
 
 .gradient-bg::before,
@@ -222,12 +222,12 @@ const handleLogin = async () => {
 .form-title {
   font-size: 22px;
   font-weight: 700;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 8px;
 }
 
 .form-subtitle {
-  color: #718096;
+  color: #44474D;
   margin: 0;
   font-size: 14px;
 }
@@ -257,7 +257,7 @@ const handleLogin = async () => {
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-section {
-    background: #1e1e1e;
+    background: #26373f;
   }
 }
 </style>

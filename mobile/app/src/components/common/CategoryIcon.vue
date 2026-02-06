@@ -48,7 +48,7 @@ const categoryColors: Record<string, string> = {
   utilities: '#9f7aea',
   transportation: '#ed64a6',
   transport: '#ed64a6',
-  other: '#a0aec0'
+  other: '#9CA5B1'
 };
 
 const categoryIconValue = computed(() => {
@@ -56,7 +56,7 @@ const categoryIconValue = computed(() => {
 });
 
 const categoryColor = computed(() => {
-  return categoryColors[props.category] || '#a0aec0';
+  return categoryColors[props.category] || '#9CA5B1';
 });
 </script>
 

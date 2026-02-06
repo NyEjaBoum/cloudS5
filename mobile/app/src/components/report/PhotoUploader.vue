@@ -151,7 +151,7 @@ const removePhoto = (index: number) => {
 
 .add-photo-card {
   aspect-ratio: 1;
-  border: 2px dashed #cbd5e0;
+  border: 2px dashed #b8ccd2;
   border-radius: 12px;
   display: flex;
   align-items: center;
@@ -161,8 +161,8 @@ const removePhoto = (index: number) => {
 }
 
 .add-photo-card:hover {
-  border-color: #667eea;
-  background: #f7fafc;
+  border-color: #3D5E6B;
+  background: #f0f5f6;
 }
 
 .add-photo-content {
@@ -174,29 +174,29 @@ const removePhoto = (index: number) => {
 
 .add-photo-text {
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
 }
 
 .photo-count {
   font-size: 10px;
-  color: #a0aec0;
+  color: #9CA5B1;
 }
 
 .photos-note {
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
   text-align: center;
   margin: 0;
 }
 
 @media (prefers-color-scheme: dark) {
   .add-photo-card {
-    border-color: #4a5568;
-    background: #2d3748;
+    border-color: #2c424b;
+    background: #26373f;
   }
 
   .photos-note {
-    color: #a0aec0;
+    color: #9CA5B1;
   }
 }
 

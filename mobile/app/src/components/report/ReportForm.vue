@@ -434,7 +434,7 @@ const saveAsDraft = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   color: white;
   border-radius: 50%;
   font-size: 14px;
@@ -457,15 +457,15 @@ const saveAsDraft = async () => {
   --border-radius: 12px;
   height: 52px;
   font-weight: 600;
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
 }
 
 .draft-button {
   --border-radius: 12px;
   height: 48px;
   --border-width: 2px;
-  --border-color: #e2e8f0;
-  --color: #718096;
+  --border-color: #dce6e9;
+  --color: #44474D;
 }
 
 /* Modal carte */
@@ -492,11 +492,11 @@ const saveAsDraft = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #2d3748;
+  color: #2c424b;
 }
 
 .modal-location-hint {
-  color: #718096;
+  color: #44474D;
   text-align: center;
 }
 </style>

@@ -95,7 +95,7 @@ defineEmits<{
 
 <style scoped>
 .report-card {
-  background: #f7fafc;
+  background: #f0f5f6;
   border-radius: 12px;
   padding: 16px;
   cursor: pointer;
@@ -104,13 +104,13 @@ defineEmits<{
 }
 
 .report-card:hover {
-  background: #edf2f7;
+  background: #dce6e9;
   transform: translateY(-2px);
 }
 
 .report-card.active {
-  border-color: #667eea;
-  background: #e6edff;
+  border-color: #3D5E6B;
+  background: #dce6e9;
 }
 
 .report-header {
@@ -127,7 +127,7 @@ defineEmits<{
 .report-title {
   font-size: 15px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin: 0 0 4px 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
@@ -140,7 +140,7 @@ defineEmits<{
   flex-wrap: wrap;
   gap: 12px;
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
 }
 
 .report-location {
@@ -151,7 +151,7 @@ defineEmits<{
 
 .report-description {
   font-size: 14px;
-  color: #4a5568;
+  color: #344f5a;
   line-height: 1.4;
   margin-bottom: 12px;
   display: -webkit-box;
@@ -176,34 +176,34 @@ defineEmits<{
   align-items: center;
   gap: 4px;
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
 }
 
 .report-date {
   font-size: 12px;
-  color: #a0aec0;
+  color: #9CA5B1;
 }
 
 @media (prefers-color-scheme: dark) {
   .report-card {
-    background: #2d3748;
+    background: #26373f;
   }
 
   .report-card:hover {
-    background: #4a5568;
+    background: #2c424b;
   }
 
   .report-card.active {
-    background: #4a5568;
-    border-color: #667eea;
+    background: #2c424b;
+    border-color: #3D5E6B;
   }
 
   .report-title {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 
   .report-description {
-    color: #cbd5e0;
+    color: #b8ccd2;
   }
 }
 </style>

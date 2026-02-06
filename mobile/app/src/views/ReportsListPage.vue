@@ -130,18 +130,6 @@
         </div>
       </div>
 
-      <!-- Bouton flottant pour créer un signalement -->
-      <ion-fab 
-        v-if="!loading && signalements.length > 0"
-        vertical="bottom" 
-        horizontal="end" 
-        slot="fixed"
-      >
-        <ion-fab-button @click="goToNewReport" color="primary">
-          <ion-icon :icon="addOutline"></ion-icon>
-        </ion-fab-button>
-      </ion-fab>
-
       <!-- Bottom Navigation -->
       <NavBar :current-page="'reports'" />
     </ion-content>
@@ -160,13 +148,10 @@ import {
   IonButtons,
   IonButton,
   IonIcon,
-  IonSpinner,
-  IonFab,
-  IonFabButton
+  IonSpinner
 } from '@ionic/vue';
 import {
   refreshOutline,
-  addOutline,
   documentOutline,
   arrowBackOutline,
   arrowForwardOutline,
@@ -240,10 +225,10 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#667eea';
-    case 11: return '#ed8936';
-    case 99: return '#38a169';
-    default: return '#718096';
+    case 1: return '#3D5E6B';
+    case 11: return '#f59e0b';
+    case 99: return '#16a34a';
+    default: return '#44474D';
   }
 };
 
@@ -295,7 +280,7 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 16px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   color: white;
 }
 
@@ -332,14 +317,14 @@ onMounted(() => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #718096;
+  color: #44474D;
   font-size: 14px;
 }
 
 /* Liste des signalements */
 .reports-list {
   padding: 16px;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   display: flex;
   flex-direction: column;
   gap: 16px;
@@ -376,13 +361,13 @@ onMounted(() => {
 .report-title {
   font-size: 16px;
   font-weight: 700;
-  color: #2d3748;
+  color: #2c424b;
   margin: 0 0 4px 0;
 }
 
 .report-id {
   font-size: 12px;
-  color: #a0aec0;
+  color: #9CA5B1;
   margin: 0;
 }
 
@@ -409,7 +394,7 @@ onMounted(() => {
 /* Description */
 .report-description {
   font-size: 14px;
-  color: #4a5568;
+  color: #344f5a;
   line-height: 1.5;
   margin: 0 0 12px 0;
 }
@@ -420,7 +405,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: #f7fafc;
+  background: #f0f5f6;
   border-radius: 12px;
   margin-bottom: 12px;
 }
@@ -440,18 +425,18 @@ onMounted(() => {
 
 .detail-icon {
   font-size: 16px;
-  color: #667eea;
+  color: #3D5E6B;
   flex-shrink: 0;
 }
 
 .detail-label {
-  color: #718096;
+  color: #44474D;
   font-weight: 500;
   min-width: 60px;
 }
 
 .detail-value {
-  color: #2d3748;
+  color: #2c424b;
   font-weight: 600;
   flex: 1;
   overflow: hidden;
@@ -464,7 +449,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   padding-top: 8px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dce6e9;
 }
 
 /* Responsive */
@@ -485,36 +470,36 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .report-card {
-    background: #2d3748;
+    background: #26373f;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
   }
 
   .report-title {
-    color: #f7fafc;
+    color: #f0f5f6;
   }
 
   .report-id {
-    color: #718096;
+    color: #44474D;
   }
 
   .report-description {
-    color: #cbd5e0;
+    color: #b8ccd2;
   }
 
   .report-details {
-    background: #1a202c;
+    background: #1e2e34;
   }
 
   .detail-label {
-    color: #a0aec0;
+    color: #9CA5B1;
   }
 
   .detail-value {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 
   .report-footer {
-    border-top-color: #4a5568;
+    border-top-color: #2c424b;
   }
 }
 </style>

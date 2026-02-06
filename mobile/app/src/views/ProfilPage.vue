@@ -181,7 +181,7 @@ onMounted(() => {
 
 <style scoped>
 .profile-container {
-  padding-bottom: 100px;
+  padding-bottom: 120px;
 }
 
 /* Header profil */
@@ -204,7 +204,7 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,12 +219,12 @@ onMounted(() => {
 .user-name {
   font-size: 22px;
   font-weight: 700;
-  color: #2d3748;
+  color: #2c424b;
   margin: 0 0 4px 0;
 }
 
 .user-email {
-  color: #718096;
+  color: #44474D;
   font-size: 14px;
   margin: 0;
 }
@@ -247,13 +247,13 @@ onMounted(() => {
 .stat-value {
   font-size: 28px;
   font-weight: 700;
-  color: #667eea;
+  color: #3D5E6B;
   margin-bottom: 4px;
 }
 
 .stat-label {
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -287,20 +287,20 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .user-name {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 
   .user-email {
-    color: #a0aec0;
+    color: #9CA5B1;
   }
 
   .quick-stats-grid,
   .quick-actions {
-    background: #2d3748;
+    background: #26373f;
   }
 
   .stat-value {
-    color: #a3bffa;
+    color: #8fadb6;
   }
 }
 </style>

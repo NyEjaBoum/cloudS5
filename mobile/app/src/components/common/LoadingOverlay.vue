@@ -38,16 +38,16 @@ withDefaults(defineProps<Props>(), {
 
 .loading-overlay p {
   margin-top: 12px;
-  color: #718096;
+  color: #44474D;
 }
 
 @media (prefers-color-scheme: dark) {
   .loading-overlay {
-    background: rgba(26, 32, 44, 0.9);
+    background: rgba(30, 46, 52, 0.9);
   }
 
   .loading-overlay p {
-    color: #a0aec0;
+    color: #9CA5B1;
   }
 }
 </style>

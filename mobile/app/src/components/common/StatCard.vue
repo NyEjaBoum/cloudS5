@@ -52,7 +52,7 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   color: white;
 }
 
@@ -63,27 +63,27 @@ defineEmits<{
 .stat-value {
   font-size: 32px;
   font-weight: 800;
-  color: #2d3748;
+  color: #2c424b;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #718096;
+  color: #44474D;
   margin-top: 4px;
 }
 
 @media (prefers-color-scheme: dark) {
   .stat-card {
-    background: #2d3748;
+    background: #26373f;
   }
 
   .stat-value {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 
   .stat-label {
-    color: #a0aec0;
+    color: #9CA5B1;
   }
 }
 </style>

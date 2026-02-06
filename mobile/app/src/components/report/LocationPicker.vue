@@ -109,13 +109,13 @@ const getCurrentLocation = () => {
 .section-subtitle {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 12px;
 }
 
 .mini-map {
   height: 100px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #dce6e9;
   border-radius: 12px;
   margin-bottom: 16px;
   display: flex;
@@ -127,7 +127,7 @@ const getCurrentLocation = () => {
 }
 
 .mini-map:hover {
-  border-color: #667eea;
+  border-color: #3D5E6B;
 }
 
 .map-preview {
@@ -138,17 +138,17 @@ const getCurrentLocation = () => {
   gap: 8px;
   width: 100%;
   height: 100%;
-  background: #f7fafc;
+  background: #f0f5f6;
 }
 
 .map-icon {
   font-size: 32px;
-  color: #667eea;
+  color: #3D5E6B;
 }
 
 .map-coordinates {
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
   text-align: center;
 }
 
@@ -158,7 +158,7 @@ const getCurrentLocation = () => {
   align-items: center;
   justify-content: center;
   gap: 8px;
-  color: #a0aec0;
+  color: #9CA5B1;
 }
 
 .form-item {
@@ -173,12 +173,12 @@ const getCurrentLocation = () => {
 
 @media (prefers-color-scheme: dark) {
   .mini-map {
-    border-color: #4a5568;
-    background: #2d3748;
+    border-color: #2c424b;
+    background: #26373f;
   }
 
   .map-preview {
-    background: #2d3748;
+    background: #26373f;
   }
 }
 </style>

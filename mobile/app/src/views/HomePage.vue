@@ -39,8 +39,8 @@
             <QuickActionCard
               :icon="addCircleOutline"
               label="Nouveau signalement"
-              icon-color="#667eea"
-              icon-background="rgba(102, 126, 234, 0.1)"
+              icon-color="#3D5E6B"
+              icon-background="rgba(61, 94, 107, 0.1)"
               @click="goToNewReport"
             />
             <QuickActionCard
@@ -163,7 +163,7 @@ onMounted(() => {
 <style scoped>
 /* Header styles */
 .home-header {
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   color: white;
   padding-bottom: 20px;
 }
@@ -182,7 +182,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(102, 126, 234, 0.9) 0%, rgba(118, 75, 162, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(74, 114, 128, 0.9) 0%, rgba(61, 94, 107, 0.9) 100%);
 }
 
 .transparent-toolbar {
@@ -209,9 +209,9 @@ onMounted(() => {
 
 /* Contenu principal */
 .home-content {
-  background: #f5f5f9;
+  background: #f8fafc;
   padding: 20px 16px;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
 }
 
 /* Quick stats */
@@ -223,7 +223,7 @@ onMounted(() => {
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 16px;
 }
 
@@ -251,11 +251,11 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .home-content {
-    background: #1a202c;
+    background: #1e2e34;
   }
 
   .section-title {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 }
 </style>

@@ -71,22 +71,22 @@ const markerStyles = `
 .user-pulse {
   width: 20px;
   height: 20px;
-  background: #667eea;
+  background: #3D5E6B;
   border-radius: 50%;
   border: 3px solid white;
-  box-shadow: 0 0 0 rgba(102, 126, 234, 0.4);
+  box-shadow: 0 0 0 rgba(61, 94, 107, 0.4);
   animation: user-pulse 2s infinite;
 }
 
 @keyframes user-pulse {
   0% {
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0.4);
+    box-shadow: 0 0 0 0 rgba(61, 94, 107, 0.4);
   }
   70% {
-    box-shadow: 0 0 0 20px rgba(102, 126, 234, 0);
+    box-shadow: 0 0 0 20px rgba(61, 94, 107, 0);
   }
   100% {
-    box-shadow: 0 0 0 0 rgba(102, 126, 234, 0);
+    box-shadow: 0 0 0 0 rgba(61, 94, 107, 0);
   }
 }
 
@@ -108,13 +108,13 @@ const markerStyles = `
 .map-popup h3 {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 8px;
 }
 
 .map-popup p {
   font-size: 14px;
-  color: #4a5568;
+  color: #344f5a;
   margin-bottom: 12px;
 }
 
@@ -158,7 +158,7 @@ const markerStyles = `
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
-  background: #667eea;
+  background: #3D5E6B;
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -166,13 +166,13 @@ const markerStyles = `
 }
 
 .popup-actions button:hover {
-  background: #5568d3;
+  background: #344f5a;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .leaflet-container {
-    background: #1a202c;
+    background: #1e2e34;
   }
 
   .leaflet-tile {

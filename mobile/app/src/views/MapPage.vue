@@ -143,7 +143,7 @@ const getCategoryColor = (category) => {
     utilities: '#9f7aea',
     transport: '#ed64a6'
   };
-  return colors[category] || '#a0aec0';
+  return colors[category] || '#9CA5B1';
 };
 
 // Références Leaflet
@@ -414,10 +414,10 @@ const getStatutLabel = (statut) => {
 
 const getStatutColor = (statut) => {
   switch (statut) {
-    case 1: return '#667eea';
-    case 11: return '#ed8936';
-    case 99: return '#38a169';
-    default: return '#718096';
+    case 1: return '#3D5E6B';
+    case 11: return '#f59e0b';
+    case 99: return '#16a34a';
+    default: return '#44474D';
   }
 };
 
@@ -510,7 +510,7 @@ onUnmounted(() => {
 /* Header styles */
 .app-title {
   font-weight: 700;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -518,7 +518,7 @@ onUnmounted(() => {
 
 .location-subtitle {
   font-size: 12px;
-  color: #718096;
+  color: #44474D;
   margin-left: 8px;
 }
 
@@ -622,13 +622,13 @@ onUnmounted(() => {
 :global(.map-popup h3) {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 8px;
 }
 
 :global(.map-popup p) {
   font-size: 14px;
-  color: #4a5568;
+  color: #344f5a;
   margin-bottom: 12px;
 }
 
@@ -672,7 +672,7 @@ onUnmounted(() => {
   padding: 8px 12px;
   border: none;
   border-radius: 6px;
-  background: #667eea;
+  background: #3D5E6B;
   color: white;
   font-weight: 600;
   cursor: pointer;
@@ -680,13 +680,13 @@ onUnmounted(() => {
 }
 
 :global(.popup-actions button:hover) {
-  background: #5568d3;
+  background: #344f5a;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   :global(.leaflet-container) {
-    background: #1a202c;
+    background: #1e2e34;
   }
 
   :global(.leaflet-tile) {
