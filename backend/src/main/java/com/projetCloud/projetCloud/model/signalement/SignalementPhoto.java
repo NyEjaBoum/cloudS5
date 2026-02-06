@@ -15,7 +15,9 @@ public class SignalementPhoto {
 
     private String url;
 
-    // Getters & setters
+    public SignalementPhoto() {}
+
+    // Getters & Setters
     public Integer getId() { return id; }
     public void setId(Integer id) { this.id = id; }
 

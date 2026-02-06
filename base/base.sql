@@ -68,7 +68,7 @@ CREATE TABLE signalements (
 CREATE TABLE signalement_photo (
     id SERIAL PRIMARY KEY,
     id_signalement INTEGER REFERENCES signalements(id) ON DELETE CASCADE,
-    url VARCHAR(512) NOT NULL
+    url TEXT NOT NULL
 );
 
 -- =========================
