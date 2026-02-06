@@ -93,3 +93,12 @@ CREATE TABLE sessions (
     expiration TIMESTAMP NOT NULL,
     date_creation TIMESTAMP DEFAULT NOW()
 );
+
+
+CREATE TABLE historique_blocage (
+    id SERIAL PRIMARY KEY,
+    id_utilisateur INTEGER NOT NULL REFERENCES utilisateurs(id),
+    type_action VARCHAR(50) NOT NULL,
+    date_action TIMESTAMP NOT NULL,
+    raison VARCHAR(255)
+);

@@ -22,6 +22,9 @@ public class UserService {
     private UtilisateurRepository utilisateurRepository;
 
     @Autowired
+    private HistoriqueBlocageService historiqueBlocageService;
+
+    @Autowired
     private RoleRepository roleRepository;
 
     public List<Utilisateur> getAllUsers() {
@@ -52,6 +55,7 @@ public class UserService {
         utilisateur.setTentativesEchouees(0);
         utilisateur.setDateBlocage(null);
         utilisateurRepository.save(utilisateur);
+        historiqueBlocageService.enregistrer(utilisateur, "DEBLOCAGE_MANUEL", "Deblocage par le manager");
     }
 
     // ========== IMPORT DEPUIS FIREBASE ==========
