@@ -68,6 +68,16 @@ public class UserController {
         }
     }
 
+    @GetMapping("/historique-blocage")
+    public ApiResponse<List<HistoriqueBlocage>> getAllHistoriqueBlocage() {
+        try {
+            List<HistoriqueBlocage> historique = historiqueBlocageService.getAll();
+            return new ApiResponse<>("success", historique, null);
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, e.getMessage());
+        }
+    }
+
     @GetMapping("/{id}/historique-blocage")
     public ApiResponse<List<HistoriqueBlocage>> getHistoriqueBlocage(@PathVariable Integer id) {
         try {

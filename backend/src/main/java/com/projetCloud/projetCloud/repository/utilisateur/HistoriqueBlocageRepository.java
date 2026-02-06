@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface HistoriqueBlocageRepository extends JpaRepository<HistoriqueBlocage, Integer> {
     List<HistoriqueBlocage> findByUtilisateurIdOrderByDateActionDesc(Integer utilisateurId);
+    List<HistoriqueBlocage> findAllByOrderByDateActionDesc();
 }

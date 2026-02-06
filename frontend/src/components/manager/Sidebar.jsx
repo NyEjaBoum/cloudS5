@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, UserPlus, ShieldOff, MapPin, Map } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, ShieldOff, Clock, MapPin, Map } from "lucide-react";
 import logo from "../../assets/mapeo.png";
 
 export default function Sidebar() {
@@ -55,6 +55,10 @@ export default function Sidebar() {
             <NavLink to="/manager/blocked-users" className={linkClass}>
               <ShieldOff size={18} />
               Utilisateurs bloques
+            </NavLink>
+            <NavLink to="/manager/historique-blocages" className={linkClass}>
+              <Clock size={18} />
+              Historique blocages
             </NavLink>
           </div>
         </div>

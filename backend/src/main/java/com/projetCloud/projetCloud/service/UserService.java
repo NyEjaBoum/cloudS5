@@ -38,6 +38,9 @@ public class UserService {
 
     public Utilisateur updateUser(Integer id, Utilisateur updated) {
         Utilisateur user = getUserById(id);
+        Boolean ancienBloque = Boolean.TRUE.equals(user.getCompteBloque());
+        Boolean nouveauBloque = Boolean.TRUE.equals(updated.getCompteBloque());
+
         user.setNom(updated.getNom());
         user.setPrenom(updated.getPrenom());
         user.setEmail(updated.getEmail());
@@ -45,6 +48,17 @@ public class UserService {
         user.setCompteBloque(updated.getCompteBloque());
         user.setTentativesEchouees(updated.getTentativesEchouees());
         user.setDateBlocage(updated.getDateBlocage());
+
+        if (!ancienBloque && nouveauBloque) {
+            user.setDateBlocage(LocalDateTime.now());
+            user.setTentativesEchouees(0);
+            historiqueBlocageService.enregistrer(user, "BLOCAGE_MANUEL", "Blocage par le manager");
+        } else if (ancienBloque && !nouveauBloque) {
+            user.setDateBlocage(null);
+            user.setTentativesEchouees(0);
+            historiqueBlocageService.enregistrer(user, "DEBLOCAGE_MANUEL", "Deblocage par le manager");
+        }
+
         utilisateurRepository.save(user);
         return user;
     }
