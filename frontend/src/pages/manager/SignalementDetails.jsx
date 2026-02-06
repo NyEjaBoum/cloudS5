@@ -8,7 +8,7 @@ import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { ArrowLeft, Save, Edit3, MapPin, Building2, DollarSign, Ruler, Clock, FileText } from "lucide-react";
+import { ArrowLeft, Save, Edit3, MapPin, Building2, DollarSign, Ruler, Clock, FileText, Image } from "lucide-react";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -36,6 +36,7 @@ export default function SignalementDetails() {
   const [saving, setSaving] = useState(false);
   const [entreprises, setEntreprises] = useState([]);
   const [historique, setHistorique] = useState([]);
+  const [photos, setPhotos] = useState([]);
 
   useEffect(() => {
     fetchEntreprises().then(setEntreprises);
@@ -53,6 +54,12 @@ export default function SignalementDetails() {
         }
         setForm({ ...data, entreprise: entrepriseObj });
         setSignalement(data);
+        
+        // Récupérer les photos depuis le signalement
+        if (data.photos && data.photos.length > 0) {
+          setPhotos(data.photos);
+        }
+        
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -140,8 +147,7 @@ export default function SignalementDetails() {
 
       {/* Content grid */}
       <div className="grid grid-cols-1 xl:grid-cols-3 gap-6">
-        {/* Left column - Info */}
-        <div className="xl:col-span-2">
+        <div className="xl:col-span-2 space-y-6">
           <div className="glass-card p-6">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Surface */}
@@ -266,10 +272,46 @@ export default function SignalementDetails() {
               </div>
             )}
           </div>
+
+          {/* Section Photos */}
+          {photos.length > 0 && (
+            <div className="glass-card p-6">
+              <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-4">
+                <Image size={15} className="text-teal-500" />
+                Photos du signalement ({photos.length})
+              </h3>
+              
+              <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                {photos.map((base64Url, index) => (
+                  <div 
+                    key={index} 
+                    className="relative group aspect-square rounded-xl overflow-hidden bg-slate-100 hover:shadow-lg transition-shadow cursor-pointer"
+                    onClick={() => {
+                      // Ouvrir l'image en plein écran
+                      const win = window.open();
+                      win.document.write(`<img src="${base64Url}" style="width:100%; height:auto;" />`);
+                    }}
+                  >
+                    <img
+                      src={base64Url}
+                      alt={`Photo ${index + 1}`}
+                      className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                      onError={(e) => {
+                        e.target.src = "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Crect fill='%23ddd' width='200' height='200'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3EErreur%3C/text%3E%3C/svg%3E";
+                      }}
+                    />
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 flex items-center justify-center transition-opacity">
+                      <span className="text-white text-sm font-medium">Cliquer pour agrandir</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
-        {/* Right column - Map */}
         <div>
+          {/* Map */}
           <div className="glass-card p-5">
             <h3 className="flex items-center gap-2 text-sm font-semibold text-slate-700 mb-3">
               <MapPin size={15} className="text-teal-500" />

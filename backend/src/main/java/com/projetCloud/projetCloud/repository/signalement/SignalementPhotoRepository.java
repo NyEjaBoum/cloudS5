@@ -6,4 +6,5 @@ import java.util.List;
 
 public interface SignalementPhotoRepository extends JpaRepository<SignalementPhoto, Integer> {
     List<SignalementPhoto> findBySignalementId(Integer idSignalement);
+    void deleteBySignalementId(Integer idSignalement);
 }

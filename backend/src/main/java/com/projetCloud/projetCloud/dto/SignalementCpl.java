@@ -1,6 +1,7 @@
 package com.projetCloud.projetCloud.dto;
 
 import java.math.BigDecimal;
+import java.util.List;
 
 public class SignalementCpl {
     private Integer id;
@@ -20,14 +21,15 @@ public class SignalementCpl {
     private String utilisateurPrenom;
     private String utilisateurEmail;
     private String dateCreation;
-    private Integer avancementPourcent; // <-- Ajouté
+    private Integer avancementPourcent;
+    private List<String> photos; // <-- Ajout
 
     public SignalementCpl(
         Integer id, String titre, String description, Integer statut,
         BigDecimal latitude, BigDecimal longitude, BigDecimal surfaceM2, BigDecimal budget,
         Integer idEntreprise, String entreprise, String entrepriseAdresse, String entrepriseContact,
         Integer idUtilisateur, String utilisateurNom, String utilisateurPrenom, String utilisateurEmail,
-        String dateCreation, Integer avancementPourcent // <-- Ajouté
+        String dateCreation, Integer avancementPourcent
     ) {
         this.id = id;
         this.titre = titre;
@@ -46,7 +48,8 @@ public class SignalementCpl {
         this.utilisateurPrenom = utilisateurPrenom;
         this.utilisateurEmail = utilisateurEmail;
         this.dateCreation = dateCreation;
-        this.avancementPourcent = avancementPourcent; // <-- Ajouté
+        this.avancementPourcent = avancementPourcent;
+        this.photos = new java.util.ArrayList<>(); // <-- Initialisation
     }
 
     public Integer getId() { return id; }
@@ -102,4 +105,7 @@ public class SignalementCpl {
 
     public Integer getAvancementPourcent() { return avancementPourcent; }
     public void setAvancementPourcent(Integer avancementPourcent) { this.avancementPourcent = avancementPourcent; }
+
+    public List<String> getPhotos() { return photos; }
+    public void setPhotos(List<String> photos) { this.photos = photos; }
 }
