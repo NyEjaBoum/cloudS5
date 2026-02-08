@@ -76,5 +76,4 @@ public class AuthController {
             return new ApiResponse<>("error", null, e.getMessage());
         }
     }
- 
 }
