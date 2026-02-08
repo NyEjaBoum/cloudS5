@@ -27,6 +27,7 @@ import com.google.firebase.auth.UserRecord;
 import com.google.firebase.auth.ListUsersPage;
 import com.google.firebase.auth.ExportedUserRecord;
 import com.google.firebase.auth.FirebaseAuthException;
+import java.util.HashMap;
 
 @Service
 public class AuthService {
@@ -258,6 +259,62 @@ public class AuthService {
             return token;
         } catch (Exception e) {
             throw new IllegalArgumentException("Invalid Firebase token: " + e.getMessage());
+        }
+    }
+
+    public Map<String, Object> checkFirebaseUserStatus(String idToken) {
+        try {
+            FirebaseToken decodedToken = FirebaseAuth.getInstance().verifyIdToken(idToken);
+            String email = decodedToken.getEmail();
+            
+            Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+            
+            Map<String, Object> status = new HashMap<>();
+            
+            if (utilisateur == null) {
+                status.put("exists", false);
+                status.put("blocked", false);
+                status.put("message", "Aucun compte local trouvé");
+                return status;
+            }
+            
+            status.put("exists", true);
+            status.put("blocked", Boolean.TRUE.equals(utilisateur.getCompteBloque()));
+            status.put("tentativesRestantes", maxAttempts - (utilisateur.getTentativesEchouees() != null ? utilisateur.getTentativesEchouees() : 0));
+            
+            if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
+                status.put("message", "Compte bloqué. Contactez un administrateur.");
+                status.put("dateBlocage", utilisateur.getDateBlocage());
+            }
+            
+            return status;
+        } catch (Exception e) {
+            throw new IllegalArgumentException("Token Firebase invalide: " + e.getMessage());
+        }
+    }
+
+    public void incrementFailedAttempts(String email) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+        if (utilisateur == null) return;
+        
+        int tentatives = utilisateur.getTentativesEchouees() != null ? utilisateur.getTentativesEchouees() : 0;
+        tentatives++;
+        utilisateur.setTentativesEchouees(tentatives);
+        
+        if (tentatives >= maxAttempts) {
+            utilisateur.setCompteBloque(true);
+            utilisateur.setDateBlocage(LocalDateTime.now());
+            historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion échouées depuis mobile (" + maxAttempts + " max)");
+        }
+        
+        utilisateurRepository.save(utilisateur);
+    }
+
+    public void resetFailedAttempts(String email) {
+        Utilisateur utilisateur = utilisateurRepository.findByEmail(email).orElse(null);
+        if (utilisateur != null) {
+            utilisateur.setTentativesEchouees(0);
+            utilisateurRepository.save(utilisateur);
         }
     }
 }

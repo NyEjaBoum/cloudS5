@@ -9,16 +9,17 @@ import {
   sendPasswordResetEmail
 } from 'firebase/auth';
 import { auth } from '../config/firebase.config';
+import { checkUserStatus, loginWithFirebaseToken, registerFailedAttempt } from './api';
 
-// Interface pour les résultats d'authentification
 interface AuthResult {
   success: boolean;
   user?: User | null;
   token?: string;
   error?: string;
+  blocked?: boolean;
+  tentativesRestantes?: number;
 }
 
-// Interface pour les données d'inscription
 interface RegisterData {
   email: string;
   password: string;
@@ -29,11 +30,9 @@ class AuthService {
   private currentUser: User | null = null;
 
   constructor() {
-    // Écouter les changements d'état d'authentification
     onAuthStateChanged(auth, (user) => {
       this.currentUser = user;
       if (user) {
-        // Stocker le token quand l'utilisateur est connecté
         user.getIdToken().then(token => {
           this.setStoredToken(token);
         });
@@ -41,12 +40,109 @@ class AuthService {
         this.clearStoredData();
       }
     });
-
-    // Récupérer l'utilisateur stocké au démarrage
     this.currentUser = auth.currentUser;
   }
 
-  // ===== INSCRIPTION (signUp) =====
+  // ===== CONNEXION avec vérification blocage =====
+  async signIn(email: string, password: string): Promise<AuthResult> {
+    try {
+      console.log('🔐 Tentative de connexion avec:', email);
+
+      // Étape 1: Tenter la connexion Firebase
+      let userCredential: UserCredential;
+      try {
+        userCredential = await signInWithEmailAndPassword(auth, email, password);
+      } catch (firebaseError: any) {
+        console.log('❌ Erreur Firebase:', firebaseError.code);
+        
+        // Enregistrer la tentative échouée côté backend
+        const failedResult = await registerFailedAttempt(email);
+        
+        if (failedResult.status === 'success' && failedResult.data) {
+          if (failedResult.data.blocked) {
+            return {
+              success: false,
+              blocked: true,
+              error: 'Compte bloqué après trop de tentatives. Contactez un administrateur.',
+              tentativesRestantes: 0
+            };
+          }
+          
+          return {
+            success: false,
+            error: this.getFirebaseErrorMessage(firebaseError.code),
+            tentativesRestantes: failedResult.data.tentativesRestantes
+          };
+        }
+        
+        return {
+          success: false,
+          error: this.getFirebaseErrorMessage(firebaseError.code)
+        };
+      }
+
+      // Étape 2: Obtenir le token Firebase
+      const firebaseToken = await userCredential.user.getIdToken();
+
+      // Étape 3: Vérifier le statut côté backend
+      const statusResult = await checkUserStatus(firebaseToken);
+      
+      if (statusResult.status === 'success' && statusResult.data) {
+        if (statusResult.data.blocked) {
+          // Déconnecter de Firebase si bloqué côté backend
+          await firebaseSignOut(auth);
+          return {
+            success: false,
+            blocked: true,
+            error: 'Compte bloqué. Contactez un administrateur.',
+            tentativesRestantes: 0
+          };
+        }
+        
+        if (!statusResult.data.exists) {
+          await firebaseSignOut(auth);
+          return {
+            success: false,
+            error: 'Aucun compte local associé. Contactez un administrateur.'
+          };
+        }
+      }
+
+      // Étape 4: Obtenir le JWT backend
+      const loginResult = await loginWithFirebaseToken(firebaseToken);
+      
+      if (loginResult.status === 'error') {
+        await firebaseSignOut(auth);
+        return {
+          success: false,
+          error: loginResult.error || 'Erreur de connexion au serveur'
+        };
+      }
+
+      // Étape 5: Stocker les tokens
+      if (loginResult.data) {
+        this.setStoredToken(loginResult.data.token);
+        localStorage.setItem('backend_jwt', loginResult.data.token);
+        this.setStoredUser(userCredential.user);
+      }
+
+      console.log('✅ Connexion réussie');
+      return {
+        success: true,
+        user: userCredential.user,
+        token: loginResult.data?.token
+      };
+
+    } catch (error: any) {
+      console.error('❌ Erreur inattendue:', error);
+      return {
+        success: false,
+        error: 'Erreur de connexion inattendue'
+      };
+    }
+  }
+
+  // ===== INSCRIPTION =====
   async signUp(data: RegisterData): Promise<AuthResult> {
     try {
       console.log('📝 Tentative d\'inscription avec:', data.email);
@@ -60,7 +156,6 @@ class AuthService {
       const user = userCredential.user;
       const token = await user.getIdToken();
 
-      // Stocker le token
       this.setStoredToken(token);
       this.setStoredUser(user);
 
@@ -71,115 +166,19 @@ class AuthService {
         token
       };
     } catch (error: any) {
-      console.error('❌ Erreur d\'inscription:', error.code, error.message);
-
-      let errorMessage = 'Erreur lors de l\'inscription';
-
-      // Messages d'erreur Firebase traduits
-      switch (error.code) {
-        case 'auth/email-already-in-use':
-          errorMessage = 'Un compte avec cet email existe déjà';
-          break;
-        case 'auth/invalid-email':
-          errorMessage = 'Adresse email invalide';
-          break;
-        case 'auth/operation-not-allowed':
-          errorMessage = 'L\'inscription par email/mot de passe n\'est pas activée';
-          break;
-        case 'auth/weak-password':
-          errorMessage = 'Le mot de passe doit contenir au moins 6 caractères';
-          break;
-      }
-
+      console.error('❌ Erreur d\'inscription:', error.code);
       return {
         success: false,
-        error: errorMessage
+        error: this.getFirebaseErrorMessage(error.code)
       };
     }
   }
 
-  // ===== CONNEXION (signIn) =====
-  async signIn(email: string, password: string): Promise<AuthResult> {
-    try {
-      console.log('🔐 Tentative de connexion avec:', email);
-      console.log('⏳ Appel Firebase en cours...');
-
-      // Ajouter un timeout de 15 secondes
-      const timeoutPromise = new Promise<never>((_, reject) => {
-        setTimeout(() => reject(new Error('TIMEOUT')), 15000);
-      });
-
-      const authPromise = signInWithEmailAndPassword(auth, email, password);
-
-      const userCredential: UserCredential = await Promise.race([
-        authPromise,
-        timeoutPromise
-      ]) as UserCredential;
-
-      console.log('✅ Réponse Firebase reçue');
-
-      const user = userCredential.user;
-      const token = await user.getIdToken();
-
-      // Stocker le token
-      this.setStoredToken(token);
-      this.setStoredUser(user);
-
-      console.log('✅ Connexion réussie');
-      return {
-        success: true,
-        user,
-        token
-      };
-    } catch (error: any) {
-      console.error('❌ Erreur de connexion:', error.code || error.message, error);
-
-      let errorMessage = 'Erreur de connexion';
-
-      // Timeout personnalisé
-      if (error.message === 'TIMEOUT') {
-        errorMessage = 'Connexion trop lente. Vérifiez votre connexion internet.';
-        return { success: false, error: errorMessage };
-      }
-
-      // Messages d'erreur Firebase traduits
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'Adresse email invalide';
-          break;
-        case 'auth/user-disabled':
-          errorMessage = 'Ce compte a été désactivé';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'Aucun compte trouvé avec cet email';
-          break;
-        case 'auth/wrong-password':
-          errorMessage = 'Mot de passe incorrect';
-          break;
-        case 'auth/invalid-credential':
-          errorMessage = 'Email ou mot de passe incorrect';
-          break;
-        case 'auth/too-many-requests':
-          errorMessage = 'Trop de tentatives. Réessayez plus tard.';
-          break;
-        case 'auth/network-request-failed':
-          errorMessage = 'Erreur réseau. Vérifiez votre connexion internet.';
-          break;
-      }
-
-      return {
-        success: false,
-        error: errorMessage
-      };
-    }
-  }
-
-  // ===== DÉCONNEXION (signOut) =====
+  // ===== DÉCONNEXION =====
   async signOut(): Promise<AuthResult> {
     try {
       await firebaseSignOut(auth);
       this.clearStoredData();
-
       console.log('✅ Déconnexion réussie');
       return { success: true };
     } catch (error: any) {
@@ -191,17 +190,40 @@ class AuthService {
     }
   }
 
-  // ===== VÉRIFICATION (isLoggedIn) =====
+  // ===== HELPERS =====
+  private getFirebaseErrorMessage(code: string): string {
+    switch (code) {
+      case 'auth/invalid-email':
+        return 'Adresse email invalide';
+      case 'auth/user-disabled':
+        return 'Ce compte a été désactivé';
+      case 'auth/user-not-found':
+        return 'Aucun compte trouvé avec cet email';
+      case 'auth/wrong-password':
+        return 'Mot de passe incorrect';
+      case 'auth/invalid-credential':
+        return 'Email ou mot de passe incorrect';
+      case 'auth/too-many-requests':
+        return 'Trop de tentatives. Réessayez plus tard.';
+      case 'auth/network-request-failed':
+        return 'Erreur réseau. Vérifiez votre connexion.';
+      case 'auth/email-already-in-use':
+        return 'Un compte avec cet email existe déjà';
+      case 'auth/weak-password':
+        return 'Le mot de passe doit contenir au moins 6 caractères';
+      default:
+        return 'Erreur de connexion';
+    }
+  }
+
   isLoggedIn(): boolean {
     return !!auth.currentUser || !!this.getStoredToken();
   }
 
-  // ===== RÉCUPÉRER L'UTILISATEUR ACTUEL =====
   getCurrentUser(): User | null {
     return auth.currentUser || this.currentUser;
   }
 
-  // ===== RÉCUPÉRER LE TOKEN =====
   async getToken(): Promise<string | null> {
     const user = auth.currentUser;
     if (user) {
@@ -210,36 +232,18 @@ class AuthService {
     return this.getStoredToken();
   }
 
-  // ===== RÉINITIALISATION MOT DE PASSE =====
   async resetPassword(email: string): Promise<AuthResult> {
     try {
       await sendPasswordResetEmail(auth, email);
-      console.log('✅ Email de réinitialisation envoyé');
-      return {
-        success: true
-      };
+      return { success: true };
     } catch (error: any) {
-      console.error('❌ Erreur de réinitialisation:', error.code);
-
-      let errorMessage = 'Erreur lors de la réinitialisation';
-
-      switch (error.code) {
-        case 'auth/invalid-email':
-          errorMessage = 'Adresse email invalide';
-          break;
-        case 'auth/user-not-found':
-          errorMessage = 'Aucun compte trouvé avec cet email';
-          break;
-      }
-
       return {
         success: false,
-        error: errorMessage
+        error: this.getFirebaseErrorMessage(error.code)
       };
     }
   }
 
-  // ===== GESTION LOCALSTORAGE =====
   private setStoredUser(user: User): void {
     const userData = {
       uid: user.uid,
@@ -266,10 +270,10 @@ class AuthService {
   private clearStoredData(): void {
     this.currentUser = null;
     localStorage.removeItem('auth_token');
+    localStorage.removeItem('backend_jwt');
     localStorage.removeItem('user');
   }
 }
 
-// Exporter une instance unique (singleton)
 const authService = new AuthService();
 export default authService;
