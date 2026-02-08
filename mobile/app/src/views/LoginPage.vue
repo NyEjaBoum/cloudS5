@@ -26,7 +26,16 @@
             <p class="form-subtitle">Entrez vos identifiants</p>
           </div>
 
-          <form @submit.prevent="handleLogin">
+          <!-- Message de blocage -->
+          <ion-note v-if="isBlocked" color="danger" class="error-note blocked-note">
+            <ion-icon :icon="lockClosedOutline"></ion-icon>
+            <div>
+              <strong>Compte bloqué</strong>
+              <p style="margin: 4px 0 0 0; font-size: 12px;">Contactez un administrateur pour le débloquer.</p>
+            </div>
+          </ion-note>
+
+          <form @submit.prevent="handleLogin" v-if="!isBlocked">
             <!-- Email -->
             <ion-item class="form-item" fill="outline">
               <ion-label position="floating">Email</ion-label>
@@ -60,6 +69,12 @@
               </ion-button>
             </ion-item>
 
+            <!-- Tentatives restantes -->
+            <ion-note v-if="tentativesRestantes !== null && tentativesRestantes < 3" color="warning" class="warning-note">
+              <ion-icon :icon="warningOutline"></ion-icon>
+              Attention: {{ tentativesRestantes }} tentative(s) restante(s)
+            </ion-note>
+
             <!-- Error -->
             <ion-note v-if="error" color="danger" class="error-note">
               <ion-icon :icon="alertCircleOutline"></ion-icon>
@@ -77,6 +92,17 @@
               <span v-else>Se connecter</span>
             </ion-button>
           </form>
+
+          <!-- Bouton réessayer si bloqué -->
+          <ion-button
+            v-if="isBlocked"
+            expand="block"
+            fill="outline"
+            @click="resetBlockedState"
+            class="login-button"
+          >
+            Réessayer avec un autre compte
+          </ion-button>
         </div>
       </div>
     </ion-content>
@@ -103,7 +129,9 @@ import {
 import {
   eyeOutline,
   eyeOffOutline,
-  alertCircleOutline
+  alertCircleOutline,
+  lockClosedOutline,
+  warningOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
 
@@ -117,6 +145,8 @@ const form = reactive({
 const loading = ref(false);
 const error = ref('');
 const showPassword = ref(false);
+const isBlocked = ref(false);
+const tentativesRestantes = ref<number | null>(null);
 
 const handleLogin = async () => {
   loading.value = true;
@@ -127,10 +157,32 @@ const handleLogin = async () => {
   loading.value = false;
 
   if (result.success) {
+    // Réinitialiser les états
+    isBlocked.value = false;
+    tentativesRestantes.value = null;
     router.push('/home');
   } else {
+    // Vérifier si le compte est bloqué
+    if (result.blocked) {
+      isBlocked.value = true;
+      tentativesRestantes.value = 0;
+    }
+    
+    // Mettre à jour les tentatives restantes
+    if (result.tentativesRestantes !== undefined) {
+      tentativesRestantes.value = result.tentativesRestantes;
+    }
+    
     error.value = result.error || 'Erreur de connexion';
   }
+};
+
+const resetBlockedState = () => {
+  isBlocked.value = false;
+  error.value = '';
+  tentativesRestantes.value = null;
+  form.email = '';
+  form.password = '';
 };
 </script>
 
@@ -247,6 +299,22 @@ const handleLogin = async () => {
   background: #fee;
 }
 
+.warning-note {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 16px;
+  padding: 12px;
+  border-radius: 8px;
+  background: #fffbeb;
+  color: #92400e;
+}
+
+.blocked-note {
+  flex-direction: row;
+  align-items: flex-start;
+}
+
 .login-button {
   --border-radius: 12px;
   height: 48px;
@@ -258,6 +326,11 @@ const handleLogin = async () => {
 @media (prefers-color-scheme: dark) {
   .form-section {
     background: #1e1e1e;
+  }
+  
+  .warning-note {
+    background: #451a03;
+    color: #fbbf24;
   }
 }
 </style>
