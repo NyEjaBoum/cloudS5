@@ -13,6 +13,9 @@
             <span class="greeting">Bonjour,</span>
             <span class="user-name">{{ user.name }}</span>
           </ion-title>
+          <ion-buttons slot="end">
+            <NotificationBell />
+          </ion-buttons>
         </ion-toolbar>
       </ion-header>
 
@@ -103,6 +106,7 @@ import {
   IonToolbar,
   IonTitle,
   IonButton,
+  IonButtons,
   IonIcon
 } from '@ionic/vue';
 import {
@@ -114,7 +118,7 @@ import {
   documentOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
-import { NavBar, StatCard, QuickActionCard, ReportCard, EmptyState } from '../components';
+import { NavBar, StatCard, QuickActionCard, ReportCard, EmptyState, NotificationBell } from '../components';
 
 const router = useRouter();
 

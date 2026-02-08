@@ -12,10 +12,13 @@ export default function Signalements() {
 
   const handleSync = async () => {
     try {
-      const message = await syncAllSignalements();
-      alert(message);
+      const result = await syncAllSignalements();
+      const msg = result.message || JSON.stringify(result.data);
+      alert("Synchronisation terminée !\n" + msg);
+      fetchSignalementInfos().then(setSignalements);
     } catch (e) {
-      alert("Erreur lors de la synchronisation : " + e.message);
+      alert("❌ ERREUR lors de la synchronisation :\n\n" + e.message);
+      console.error("Erreur sync:", e);
     }
   };
 
@@ -27,6 +30,20 @@ export default function Signalements() {
       default: return { label: "Annule", cls: "bg-slate-100 text-slate-500" };
     }
   };
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }) + " " + d.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
 
   return (
     <div className="space-y-6 animate-fade-in">
@@ -79,7 +96,7 @@ export default function Signalements() {
                     <td>{s.surfaceM2 ? Number(s.surfaceM2).toLocaleString() : "-"}</td>
                     <td>{s.budget ? Number(s.budget).toLocaleString() : "-"}</td>
                     <td className="text-slate-500">{s.entreprise || "-"}</td>
-                    <td className="text-slate-400 text-xs">{s.dateCreation}</td>
+                    <td className="text-slate-400 text-xs">{formatDate(s.dateCreation)}</td>
                     <td>
                       <Link
                         to={`/manager/signalements/${s.id}`}

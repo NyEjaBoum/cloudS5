@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { fetchUserById, updateUser } from "../../api/user";
-import { ArrowLeft, Save, Edit3, User, Mail, Shield, Lock } from "lucide-react";
+import { fetchUserById, updateUser, fetchBlocageHistorique } from "../../api/user";
+import { ArrowLeft, Save, Edit3, User, Mail, Shield, Lock, Clock } from "lucide-react";
 
 export default function UserDetails() {
   const { id } = useParams();
@@ -11,6 +11,7 @@ export default function UserDetails() {
   const [edit, setEdit] = useState(false);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [historique, setHistorique] = useState([]);
 
   useEffect(() => {
     fetchUserById(id)
@@ -19,6 +20,7 @@ export default function UserDetails() {
         setForm(data.data);
       })
       .catch(() => setError("Utilisateur non trouve"));
+    fetchBlocageHistorique(id).then(setHistorique);
   }, [id]);
 
   if (!user) return (
@@ -37,8 +39,11 @@ export default function UserDetails() {
     setError("");
     try {
       await updateUser(id, form);
-      setUser(form);
+      const refreshed = await fetchUserById(id);
+      setUser(refreshed.data);
+      setForm(refreshed.data);
       setEdit(false);
+      fetchBlocageHistorique(id).then(setHistorique);
       alert("Utilisateur modifie !");
     } catch (e) {
       setError("Erreur lors de la sauvegarde");
@@ -155,9 +160,36 @@ export default function UserDetails() {
                 <Lock size={13} />
                 Compte bloque
               </label>
-              <span className={`badge-status ${user.compteBloque ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
-                {user.compteBloque ? "Oui" : "Non"}
-              </span>
+              {edit ? (
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      !form.compteBloque
+                        ? "bg-emerald-50 text-emerald-600 border-emerald-200"
+                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                    }`}
+                    onClick={() => setForm(f => ({ ...f, compteBloque: false }))}
+                  >
+                    Non
+                  </button>
+                  <button
+                    type="button"
+                    className={`px-4 py-2 rounded-xl text-sm font-medium border transition-all ${
+                      form.compteBloque
+                        ? "bg-red-50 text-red-600 border-red-200"
+                        : "bg-white text-slate-400 border-slate-100 hover:border-slate-200"
+                    }`}
+                    onClick={() => setForm(f => ({ ...f, compteBloque: true }))}
+                  >
+                    Oui
+                  </button>
+                </div>
+              ) : (
+                <span className={`badge-status ${user.compteBloque ? "bg-red-50 text-red-600" : "bg-emerald-50 text-emerald-600"}`}>
+                  {user.compteBloque ? "Oui" : "Non"}
+                </span>
+              )}
             </div>
           </div>
 
@@ -170,6 +202,55 @@ export default function UserDetails() {
               </button>
             </div>
           )}
+        </div>
+      </div>
+
+      {/* Historique de blocage */}
+      <div className="w-full max-w-2xl mt-6">
+        <div className="glass-card">
+          <div className="px-6 py-4 border-b border-slate-50 flex items-center gap-2">
+            <Clock size={15} className="text-slate-400" />
+            <h3 className="font-semibold text-slate-700">Historique de blocage</h3>
+          </div>
+          <div className="overflow-x-auto">
+            {historique.length === 0 ? (
+              <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+                <p className="text-sm">Aucun historique de blocage</p>
+              </div>
+            ) : (
+              <table className="table-clean w-full">
+                <thead>
+                  <tr>
+                    <th>Type</th>
+                    <th>Raison</th>
+                    <th>Date</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {historique.map((h, i) => (
+                    <tr key={i}>
+                      <td>
+                        <span className={`badge-status ${
+                          h.typeAction.startsWith("BLOCAGE")
+                            ? "bg-red-50 text-red-600"
+                            : "bg-emerald-50 text-emerald-600"
+                        }`}>
+                          {h.typeAction === "BLOCAGE_AUTO" && "Blocage auto"}
+                          {h.typeAction === "BLOCAGE_MANUEL" && "Blocage manuel"}
+                          {h.typeAction === "DEBLOCAGE_AUTO" && "Deblocage auto"}
+                          {h.typeAction === "DEBLOCAGE_MANUEL" && "Deblocage manuel"}
+                        </span>
+                      </td>
+                      <td className="text-sm text-slate-600">{h.raison}</td>
+                      <td className="text-sm text-slate-400">
+                        {h.dateAction ? new Date(h.dateAction).toLocaleString("fr-FR") : ""}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
         </div>
       </div>
     </div>

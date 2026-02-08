@@ -35,6 +35,7 @@ public class AuthService {
     private final RoleRepository roleRepository;
     private final SessionsRepository sessionsRepository;
     private final ActionRoleRepository actionRoleRepository;
+    private final HistoriqueBlocageService historiqueBlocageService;
 
     @Value("${auth.max.attempts:3}")
     private int maxAttempts;
@@ -58,11 +59,13 @@ public class AuthService {
     public AuthService(UtilisateurRepository utilisateurRepository,
                       RoleRepository roleRepository,
                       SessionsRepository sessionsRepository,
-                      ActionRoleRepository actionRoleRepository) {
+                      ActionRoleRepository actionRoleRepository,
+                      HistoriqueBlocageService historiqueBlocageService) {
         this.utilisateurRepository = utilisateurRepository;
         this.roleRepository = roleRepository;
         this.sessionsRepository = sessionsRepository;
         this.actionRoleRepository = actionRoleRepository;
+        this.historiqueBlocageService = historiqueBlocageService;
     }
 
     // ========== CHIFFREMENT ==========
@@ -177,6 +180,7 @@ public class AuthService {
                 utilisateur.setTentativesEchouees(0);
                 utilisateur.setDateBlocage(null);
                 utilisateurRepository.save(utilisateur);
+                historiqueBlocageService.enregistrer(utilisateur, "DEBLOCAGE_AUTO", "Expiration du delai de 24h");
             } else {
                 throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
             }
@@ -192,9 +196,11 @@ public class AuthService {
             if (tentatives >= maxAttempts) {
                 utilisateur.setCompteBloque(true);
                 utilisateur.setDateBlocage(LocalDateTime.now());
+                utilisateurRepository.save(utilisateur);
+                historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion echouees (" + maxAttempts + " max)");
+            } else {
+                utilisateurRepository.save(utilisateur);
             }
-
-            utilisateurRepository.save(utilisateur);
             throw new IllegalArgumentException("Invalid password. Attempts left: " + (maxAttempts - tentatives));
         }
 

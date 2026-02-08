@@ -36,24 +36,22 @@ public class SignalementDto {
         this.surfaceM2 = s.getSurfaceM2() != null ? s.getSurfaceM2().toString() : null;
         this.budget = s.getBudget() != null ? s.getBudget().toString() : null;
 
-        // Simplification entreprise
         if (s.getEntreprise() != null) {
             this.entrepriseId = s.getEntreprise().getId();
             this.entrepriseNom = s.getEntreprise().getNom();
         }
 
-        // Ajout utilisateur
         if (s.getUtilisateur() != null) {
             this.utilisateurId = s.getUtilisateur().getId();
             this.userEmail = s.getUtilisateur().getEmail();
         }
 
-        // Ajout photos (si la relation existe)
-        // if (s.getPhotos() != null) {
-        //     this.photos = s.getPhotos();
-        // }
+        if (s.getDateCreation() != null) {
+            this.dateCreation = s.getDateCreation().toString();
+        }
 
-        this.dateCreation = s.getDateCreation() != null ? s.getDateCreation().toString().substring(0, 16) : null;
+        // Initialiser la liste de photos (sera remplie par le service)
+        this.photos = new java.util.ArrayList<>();
     }
 
     // Getters et Setters

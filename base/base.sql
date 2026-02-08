@@ -68,7 +68,7 @@ CREATE TABLE signalements (
 CREATE TABLE signalement_photo (
     id SERIAL PRIMARY KEY,
     id_signalement INTEGER REFERENCES signalements(id) ON DELETE CASCADE,
-    url VARCHAR(512) NOT NULL
+    url TEXT NOT NULL
 );
 
 -- =========================
@@ -92,4 +92,13 @@ CREATE TABLE sessions (
     token_jwt VARCHAR(512) NOT NULL,
     expiration TIMESTAMP NOT NULL,
     date_creation TIMESTAMP DEFAULT NOW()
+);
+
+
+CREATE TABLE historique_blocage (
+    id SERIAL PRIMARY KEY,
+    id_utilisateur INTEGER NOT NULL REFERENCES utilisateurs(id),
+    type_action VARCHAR(50) NOT NULL,
+    date_action TIMESTAMP NOT NULL,
+    raison VARCHAR(255)
 );

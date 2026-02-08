@@ -182,6 +182,7 @@ import { PhotoUploader, LocationPicker } from '../../components';
 import reportsService from '../../services/reports.service';
 import storageService from '../../services/storage.service';
 import authService from '../../services/auth.service';
+import { compressImage } from '../../utils/imageCompression';
 
 const router = useRouter();
 
@@ -271,6 +272,15 @@ const cleanupModalMap = () => {
   tempLocation.value = null;
 };
 
+const encodeFileToBase64 = (file: File): Promise<string> => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result as string);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+};
+
 const submitReport = async () => {
   const currentUser = authService.getCurrentUser();
 
@@ -297,20 +307,33 @@ const submitReport = async () => {
   saving.value = true;
 
   const loading = await loadingController.create({
-    message: 'Envoi du signalement...'
+    message: 'Compression et envoi...'
   });
   await loading.present();
 
   try {
-    // Construction du signalement avec les bons champs (FR, statut INT)
+    // Encoder et COMPRESSER les photos
+    let photosBase64: string[] = [];
+    if (form.photos.length > 0) {
+      for (const p of form.photos) {
+        const originalBase64 = await encodeFileToBase64(p.file);
+        // Compresser l'image (800px max, qualité 0.7)
+        const compressedBase64 = await compressImage(originalBase64, 800, 0.7);
+        photosBase64.push(compressedBase64);
+      }
+    }
+
+    // CORRECTION: Définir la variable now
     const now = new Date();
+
     const reportData = {
       titre: form.titre,
       description: form.description,
       statut: 1,
       latitude: form.location.lat.toString(),
       longitude: form.location.lng.toString(),
-      dateCreation: now.toISOString().slice(0, 16)
+      dateCreation: now.toISOString().slice(0, 16),
+      photos: photosBase64 // Images compressées
     };
 
     const result = await reportsService.createReport(
@@ -323,29 +346,7 @@ const submitReport = async () => {
       throw new Error(result.error || 'Erreur lors de la création');
     }
 
-    // Upload des photos si présentes
-    if (form.photos.length > 0) {
-      await loading.dismiss();
-      const uploadLoading = await loadingController.create({
-        message: `Upload des photos (0/${form.photos.length})...`
-      });
-      await uploadLoading.present();
-
-      const photoUrls = await storageService.uploadReportPhotos(
-        form.photos,
-        result.report.id
-      );
-
-      if (photoUrls.length > 0) {
-        await reportsService.updateReport(result.report.id, {
-          photos: photoUrls
-        });
-      }
-
-      await uploadLoading.dismiss();
-    } else {
-      await loading.dismiss();
-    }
+    await loading.dismiss();
 
     const toast = await toastController.create({
       message: '✅ Signalement envoyé avec succès !',
