@@ -6,8 +6,8 @@ import { Mail, Lock, Eye, EyeOff } from "lucide-react";
 
 export default function LoginPage() {
   const [formData, setFormData] = useState({
-    email: "",
-    password: "",
+    email: "admin@gmail.com",
+    password: "admin123",
     rememberMe: false
   });
 
