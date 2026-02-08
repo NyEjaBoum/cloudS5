@@ -44,6 +44,8 @@ public class SignalementService {
 
     @Autowired
     private SignalementPhotoService signalementPhotoService;
+    
+    @Autowired
     private NotificationService notificationService;
 
     public List<DureeSignalementDto> getDureeSignalement() {
@@ -102,6 +104,11 @@ public class SignalementService {
             historique.setUtilisateur(saved.getUtilisateur());
             signalementHistoriqueService.save(historique);
 
+            // ...existing code...
+System.out.println("[DEBUG] Ajout historique : " + historique);
+signalementHistoriqueService.save(historique);
+// ...existing code...
+
             return saved;
         } catch (Exception e) {
             System.err.println("[ERREUR] save Signalement : " + e.getMessage());
@@ -134,6 +141,11 @@ public class SignalementService {
             historique.setDateChangement(java.time.LocalDateTime.now());
             historique.setUtilisateur(signalement.getUtilisateur());
             signalementHistoriqueService.save(historique);
+
+            // ...existing code...
+System.out.println("[DEBUG] Ajout historique : " + historique);
+signalementHistoriqueService.save(historique);
+// ...existing code...
 
             // Notifier l'utilisateur mobile du changement de statut
             if (!ancienStatut.equals(updated.getStatut())) {

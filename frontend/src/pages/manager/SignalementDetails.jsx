@@ -8,7 +8,7 @@ import "leaflet/dist/leaflet.css";
 import markerIcon from "leaflet/dist/images/marker-icon.png";
 import markerIcon2x from "leaflet/dist/images/marker-icon-2x.png";
 import markerShadow from "leaflet/dist/images/marker-shadow.png";
-import { ArrowLeft, Save, Edit3, MapPin, Building2, DollarSign, Ruler, Clock, FileText, Image } from "lucide-react";
+import { ArrowLeft, Save, Edit3, MapPin, Building2, DollarSign, Ruler, Clock, FileText, Image, AlertCircle } from "lucide-react";
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -37,6 +37,7 @@ export default function SignalementDetails() {
   const [entreprises, setEntreprises] = useState([]);
   const [historique, setHistorique] = useState([]);
   const [photos, setPhotos] = useState([]);
+  const [error, setError] = useState("");
 
   useEffect(() => {
     fetchEntreprises().then(setEntreprises);
@@ -99,6 +100,7 @@ export default function SignalementDetails() {
 
   const handleSave = async () => {
     setSaving(true);
+    setError("");
     try {
       await updateSignalement(id, form);
       const updated = await fetchSignalementById(id);
@@ -107,13 +109,22 @@ export default function SignalementDetails() {
       setEdit(false);
       alert("Modifications enregistrees !");
     } catch (e) {
-      alert("Erreur lors de la sauvegarde");
+      setError(e.message || "Erreur lors de la sauvegarde");
+      console.error("Erreur update:", e);
     }
     setSaving(false);
   };
 
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Error Banner */}
+      {error && (
+        <div className="flex items-center gap-2 bg-red-50 border border-red-100 text-red-600 text-sm px-4 py-3 rounded-xl">
+          <AlertCircle size={16} />
+          {error}
+        </div>
+      )}
+      
       {/* Back + Title */}
       <div>
         <button
