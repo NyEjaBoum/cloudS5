@@ -28,11 +28,15 @@ export default function DashboardHome() {
     setError("");
     try {
       await synchronizeUsers();
-      await syncAllSignalements();
+      const result = await syncAllSignalements();
       refreshAll();
-      alert("Synchronisation utilisateurs et signalements terminée !");
+      const msg = result.message || JSON.stringify(result.data);
+      alert("✅ Synchronisation terminée !\n\n" + msg);
     } catch (e) {
-      setError(e.message);
+      const errorMsg = e.message || "Erreur inconnue";
+      setError(errorMsg);
+      console.error("Erreur sync:", e);
+      alert("❌ ERREUR :\n\n" + errorMsg);
     }
     setLoading(false);
   };
@@ -45,6 +49,20 @@ export default function DashboardHome() {
       default: return { label: "Annule", cls: "bg-slate-100 text-slate-500" };
     }
   };
+
+  function formatDate(dateStr) {
+    if (!dateStr) return "-";
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return dateStr;
+    return d.toLocaleDateString("fr-FR", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    }) + " " + d.toLocaleTimeString("fr-FR", {
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+  }
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -229,8 +247,8 @@ export default function DashboardHome() {
                 <tr key={d.id}>
                   <td className="text-slate-400 font-mono text-xs">#{d.id}</td>
                   <td className="font-medium text-slate-700">{d.titre}</td>
-                  <td>{d.dateCreation}</td>
-                  <td>{d.dateCloture}</td>
+                  <td>{formatDate(d.dateCreation)}</td>
+                  <td>{formatDate(d.dateCloture)}</td>
                   <td>
                     <span className="inline-flex items-center gap-1 px-2 py-0.5 bg-teal-50 text-teal-700 rounded-md text-xs font-semibold">
                       {d.dureeJours}j

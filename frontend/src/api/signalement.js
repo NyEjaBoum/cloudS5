@@ -72,14 +72,17 @@ export async function updateSignalement(id, data) {
     },
     body: JSON.stringify(payload),
   });
-  if (!res.ok) throw new Error("Erreur lors de la mise à jour");
-  return (await res.json()).data;
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de la mise à jour");
+  }
+  return json.data;
 }
 
 
 
 export async function syncAllSignalements() {
-  const token = localStorage.getItem("jwt"); // ou récupère le token où tu le stockes
+  const token = localStorage.getItem("jwt");
   console.log(localStorage.getItem("jwt"));
   const res = await fetch("http://localhost:8080/api/signalements/sync", {
     method: "POST",
@@ -88,6 +91,9 @@ export async function syncAllSignalements() {
       "Content-Type": "application/json"
     }
   });
-  if (!res.ok) throw new Error("Erreur lors de la synchronisation");
-  return await res.text();
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de la synchronisation");
+  }
+  return json;
 }
