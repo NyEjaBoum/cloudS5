@@ -9,10 +9,13 @@
         </div>
 
         <ion-toolbar class="transparent-toolbar">
-          <ion-title class="home-title">
-            <span class="greeting">Bonjour,</span>
-            <span class="user-name">{{ user.name }}</span>
-          </ion-title>
+          <!-- Nom utilisateur à gauche -->
+          <div class="user-info">
+            <div class="greeting">Bonjour,</div>
+            <div class="user-name">{{ user.name }}</div>
+          </div>
+          
+          <!-- Icône notifications -->
           <ion-buttons slot="end">
             <NotificationBell />
           </ion-buttons>
@@ -32,6 +35,9 @@
           />
         </div>
 
+        <!-- Espacement -->
+        <div class="spacing"></div>
+
         <!-- Actions rapides -->
         <div class="quick-actions-section">
           <h2 class="section-title">Actions rapides</h2>
@@ -50,13 +56,6 @@
               icon-background="rgba(78, 205, 196, 0.1)"
               @click="goToMap"
             />
-            <QuickActionCard
-              :icon="listOutline"
-              label="Mes signalements"
-              icon-color="#A78BFA"
-              icon-background="rgba(167, 139, 250, 0.1)"
-              @click="goToReports"
-            />
           </div>
         </div>
 
@@ -64,7 +63,7 @@
         <div class="recent-reports-section">
           <div class="section-header">
             <h2 class="section-title">Signalements récents</h2>
-            <ion-button fill="clear" @click="goToReports">
+            <ion-button fill="clear" size="small" class="view-all-btn" @click="goToReports">
               Voir tout
               <ion-icon :icon="arrowForwardOutline" slot="end"></ion-icon>
             </ion-button>
@@ -79,14 +78,24 @@
             />
           </div>
 
-          <EmptyState
-            v-else
-            :icon="documentOutline"
-            title="Aucun signalement"
-            description="Commencez par signaler un problème"
-            action-label="Créer un signalement"
-            @action="goToNewReport"
-          />
+          <!-- État vide amélioré -->
+          <div v-else class="empty-state">
+            <div class="empty-state-content">
+              <ion-icon :icon="documentOutline" class="empty-state-icon"></ion-icon>
+              <h3 class="empty-state-title">Commencez par créer votre premier signalement !</h3>
+              <p class="empty-state-description">
+                Ajoutez votre premier signalement pour suivre les problèmes dans votre ville
+              </p>
+              <ion-button 
+                expand="block" 
+                class="create-report-btn"
+                @click="goToNewReport"
+              >
+                <ion-icon :icon="addOutline" slot="start"></ion-icon>
+                CRÉER UN SIGNALEMENT
+              </ion-button>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -104,7 +113,6 @@ import {
   IonContent,
   IonHeader,
   IonToolbar,
-  IonTitle,
   IonButton,
   IonButtons,
   IonIcon
@@ -113,12 +121,12 @@ import {
   documentTextOutline,
   addCircleOutline,
   mapOutline,
-  listOutline,
   arrowForwardOutline,
-  documentOutline
+  documentOutline,
+  addOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
-import { NavBar, StatCard, QuickActionCard, ReportCard, EmptyState, NotificationBell } from '../components';
+import { NavBar, StatCard, QuickActionCard, ReportCard, NotificationBell } from '../components';
 
 const router = useRouter();
 
@@ -165,7 +173,8 @@ onMounted(() => {
 .home-header {
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
-  padding-bottom: 20px;
+  padding-bottom: 30px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .header-background {
@@ -182,65 +191,99 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.92) 0%, rgba(255, 142, 83, 0.92) 100%);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(255, 142, 83, 0.95) 100%);
 }
 
 .transparent-toolbar {
   --background: transparent;
   --color: white;
+  --min-height: 80px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
 }
 
-.home-title {
+/* Info utilisateur à gauche */
+.user-info {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-left: 16px;
+  flex: 1;
 }
 
 .greeting {
   font-size: 14px;
   opacity: 0.9;
   font-weight: 500;
+  letter-spacing: 0.3px;
+  margin-bottom: 4px;
 }
 
 .user-name {
   font-size: 22px;
   font-weight: 800;
+  letter-spacing: 0.5px;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
 }
 
 /* Contenu principal */
 .home-content {
   background: #FAFAF8;
   padding: 20px 16px;
-  padding-bottom: 120px;
+  padding-bottom: 100px;
+  min-height: 100vh;
+}
+
+/* Espacement entre sections */
+.spacing {
+  height: 24px;
 }
 
 /* Quick stats */
 .quick-stats {
-  margin-bottom: 24px;
+  margin-bottom: 8px;
 }
 
 /* Quick actions */
+.quick-actions-section {
+  margin-bottom: 32px;
+}
+
 .section-title {
   font-size: 18px;
   font-weight: 700;
   color: #1A1A2E;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+  letter-spacing: -0.3px;
 }
 
 .quick-actions-grid {
   display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-  margin-bottom: 24px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
 }
 
 /* Recent reports */
+.recent-reports-section {
+  margin-bottom: 32px;
+}
+
 .section-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 16px;
+  margin-bottom: 20px;
+}
+
+.view-all-btn {
+  --color: #666;
+  font-size: 14px;
+  font-weight: 500;
+  text-transform: none;
+  --padding-start: 8px;
+  --padding-end: 8px;
+  height: 36px;
 }
 
 .recent-reports {
@@ -249,14 +292,112 @@ onMounted(() => {
   gap: 12px;
 }
 
+/* Empty state amélioré */
+.empty-state {
+  background: white;
+  border-radius: 24px;
+  padding: 40px 24px;
+  text-align: center;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #F0F0F0;
+  margin-top: 8px;
+}
+
+.empty-state-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.empty-state-icon {
+  font-size: 64px;
+  color: #E0E0E0;
+  margin-bottom: 8px;
+}
+
+.empty-state-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #1A1A2E;
+  margin: 0;
+  line-height: 1.4;
+  max-width: 280px;
+}
+
+.empty-state-description {
+  font-size: 14px;
+  color: #666;
+  margin: 0;
+  line-height: 1.5;
+  max-width: 280px;
+}
+
+.create-report-btn {
+  --border-radius: 16px;
+  --padding-top: 18px;
+  --padding-bottom: 18px;
+  height: 56px;
+  font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  box-shadow: 
+    0 6px 20px rgba(255, 107, 107, 0.3),
+    0 2px 8px rgba(255, 107, 107, 0.2);
+  transition: all 0.3s ease;
+  margin-top: 8px;
+  max-width: 300px;
+}
+
+.create-report-btn:hover {
+  box-shadow: 
+    0 8px 24px rgba(255, 107, 107, 0.4),
+    0 4px 12px rgba(255, 107, 107, 0.3);
+  transform: translateY(-2px);
+}
+
+.create-report-btn:active {
+  transform: translateY(0);
+}
+
+.create-report-btn ion-icon {
+  font-size: 20px;
+}
+
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .home-content {
-    background: #1A1A2E;
+    background: #121212;
   }
 
   .section-title {
     color: #E8E6F0;
+  }
+
+  .view-all-btn {
+    --color: #AAA;
+  }
+
+  .empty-state {
+    background: #1E1E1E;
+    border-color: #333;
+  }
+
+  .empty-state-title {
+    color: #FFFFFF;
+  }
+
+  .empty-state-description {
+    color: #AAA;
+  }
+
+  .empty-state-icon {
+    color: #444;
+  }
+
+  .home-header {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 }
 </style>
