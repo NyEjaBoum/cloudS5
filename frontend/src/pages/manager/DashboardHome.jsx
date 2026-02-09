@@ -1,15 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, synchronizeUsers } from "../../api/user";
-import { fetchSignalementInfos, syncAllSignalements, fetchDureeSignalements, fetchStatsDelaiMoyen } from "../../api/signalement";
+import { fetchAllUsers, synchronizeUsers, importUsers, exportUsers } from "../../api/user";
+import { fetchSignalementInfos, syncAllSignalements, fetchDureeSignalements, fetchStatsDelaiMoyen, importSignalements, exportSignalements } from "../../api/signalement";
 import { Link } from "react-router-dom";
-import { RefreshCw, AlertCircle, Clock, BarChart3, Eye, Users, MapPin, Timer } from "lucide-react";
+import { RefreshCw, AlertCircle, Clock, BarChart3, Eye, Users, MapPin, Timer, Download, Upload } from "lucide-react";
 
 export default function DashboardHome() {
   const [users, setUsers] = useState([]);
   const [signalements, setSignalements] = useState([]);
   const [durees, setDurees] = useState([]);
   const [stats, setStats] = useState(null);
-  const [loading, setLoading] = useState(false);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [loadingSignalements, setLoadingSignalements] = useState(false);
   const [error, setError] = useState("");
 
   const refreshAll = () => {
@@ -23,22 +24,34 @@ export default function DashboardHome() {
     refreshAll();
   }, []);
 
-  const handleSyncAll = async () => {
-    setLoading(true);
+  // Sync Users
+  const handleSyncUsers = async () => {
+    setLoadingUsers(true);
     setError("");
     try {
-      await synchronizeUsers();
+      const result = await synchronizeUsers();
+      refreshAll();
+      alert(`✅ Sync Utilisateurs terminée !\n\nImportés: ${result.data?.imported || 0}\nMis à jour: ${result.data?.importedUpdated || 0}\nExportés: ${result.data?.exported || 0}`);
+    } catch (e) {
+      setError(e.message);
+      alert("❌ Erreur sync utilisateurs: " + e.message);
+    }
+    setLoadingUsers(false);
+  };
+
+  // Sync Signalements
+  const handleSyncSignalements = async () => {
+    setLoadingSignalements(true);
+    setError("");
+    try {
       const result = await syncAllSignalements();
       refreshAll();
-      const msg = result.message || JSON.stringify(result.data);
-      alert("✅ Synchronisation terminée !\n\n" + msg);
+      alert(`✅ Sync Signalements terminée !\n\nImportés: ${result.data?.imported || 0}\nMis à jour: ${result.data?.importedUpdated || 0}\nExportés: ${result.data?.exported || 0}`);
     } catch (e) {
-      const errorMsg = e.message || "Erreur inconnue";
-      setError(errorMsg);
-      console.error("Erreur sync:", e);
-      alert("❌ ERREUR :\n\n" + errorMsg);
+      setError(e.message);
+      alert("❌ Erreur sync signalements: " + e.message);
     }
-    setLoading(false);
+    setLoadingSignalements(false);
   };
 
   const getStatusBadge = (statut) => {
@@ -67,19 +80,29 @@ export default function DashboardHome() {
   return (
     <div className="space-y-8 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Dashboard</h1>
           <p className="text-sm text-slate-400 mt-0.5">Vue d'ensemble de votre activite</p>
         </div>
-        <button
-          className="btn-primary-warm flex items-center gap-2 text-sm"
-          onClick={handleSyncAll}
-          disabled={loading}
-        >
-          <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
-          {loading ? "Synchronisation..." : "Synchroniser"}
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            className="btn-primary-warm flex items-center gap-2 text-sm"
+            onClick={handleSyncUsers}
+            disabled={loadingUsers}
+          >
+            <Users size={15} className={loadingUsers ? "animate-pulse" : ""} />
+            {loadingUsers ? "Sync Users..." : "Sync Utilisateurs"}
+          </button>
+          <button
+            className="btn-primary-warm flex items-center gap-2 text-sm bg-purple-600 hover:bg-purple-700"
+            onClick={handleSyncSignalements}
+            disabled={loadingSignalements}
+          >
+            <MapPin size={15} className={loadingSignalements ? "animate-pulse" : ""} />
+            {loadingSignalements ? "Sync..." : "Sync Signalements"}
+          </button>
+        </div>
       </div>
 
       {/* Error */}

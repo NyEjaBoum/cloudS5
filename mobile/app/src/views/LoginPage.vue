@@ -151,29 +151,23 @@ const tentativesRestantes = ref<number | null>(null);
 const handleLogin = async () => {
   loading.value = true;
   error.value = '';
+  isBlocked.value = false;
+  tentativesRestantes.value = null;
 
   const result = await authService.signIn(form.email, form.password);
 
   loading.value = false;
 
   if (result.success) {
-    // Réinitialiser les états
-    isBlocked.value = false;
-    tentativesRestantes.value = null;
     router.push('/home');
   } else {
-    // Vérifier si le compte est bloqué
+    error.value = result.error || 'Erreur de connexion';
+    
     if (result.blocked) {
       isBlocked.value = true;
-      tentativesRestantes.value = 0;
-    }
-    
-    // Mettre à jour les tentatives restantes
-    if (result.tentativesRestantes !== undefined) {
+    } else if (result.tentativesRestantes !== undefined) {
       tentativesRestantes.value = result.tentativesRestantes;
     }
-    
-    error.value = result.error || 'Erreur de connexion';
   }
 };
 

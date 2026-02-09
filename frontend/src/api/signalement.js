@@ -79,7 +79,39 @@ export async function updateSignalement(id, data) {
   return json.data;
 }
 
+// ...existing code...
 
+export async function importSignalements() {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch("http://localhost:8080/api/signalements/firebase/import", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    }
+  });
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de l'import");
+  }
+  return json;
+}
+
+export async function exportSignalements() {
+  const token = localStorage.getItem("jwt");
+  const res = await fetch("http://localhost:8080/api/signalements/firebase/export", {
+    method: "POST",
+    headers: {
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
+    }
+  });
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de l'export");
+  }
+  return json;
+}
 
 export async function syncAllSignalements() {
   const token = localStorage.getItem("jwt");

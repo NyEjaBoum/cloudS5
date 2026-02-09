@@ -10,7 +10,13 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.HashMap;
 import com.projetCloud.projetCloud.util.FirebaseUtil;
+import com.google.cloud.firestore.Firestore;
+import com.google.cloud.firestore.DocumentSnapshot;
+import com.google.firebase.cloud.FirestoreClient;
+import java.time.ZoneId;
+import java.util.Date;
 
 @Service
 public class UserService {
@@ -74,13 +80,13 @@ public class UserService {
 
     // ========== IMPORT DEPUIS FIREBASE ==========
     public Map<String, Integer> importUsersFromFirebase() {
-        // FirebaseUtil.ensureInitialized();
-
         int imported = 0;
         int updated = 0;
 
         try {
+            Firestore db = FirestoreClient.getFirestore();
             ListUsersPage page = FirebaseAuth.getInstance().listUsers(null);
+            
             for (ExportedUserRecord firebaseUser : page.iterateAll()) {
                 Utilisateur localUser = utilisateurRepository.findByEmail(firebaseUser.getEmail()).orElse(null);
 
@@ -92,13 +98,71 @@ public class UserService {
                     u.setMotDePasse(null);
                     u.setRole(roleRepository.findByNom("UTILISATEUR")
                         .orElseThrow(() -> new IllegalArgumentException("Role UTILISATEUR not found")));
-                    u.setTentativesEchouees(0);
-                    u.setCompteBloque(false);
+                    
+                    // 🔥 Récupérer le statut de blocage depuis Firestore
+                    try {
+                        DocumentSnapshot statusDoc = db.collection("utilisateurs_status")
+                            .document(firebaseUser.getEmail()).get().get();
+                        
+                        if (statusDoc.exists()) {
+                            Long tentatives = statusDoc.getLong("tentativesEchouees");
+                            Boolean bloque = statusDoc.getBoolean("compteBloque");
+                            Date dateBlocageTimestamp = statusDoc.getDate("dateBlocage");
+                            
+                            u.setTentativesEchouees(tentatives != null ? tentatives.intValue() : 0);
+                            u.setCompteBloque(bloque != null ? bloque : false);
+                            
+                            if (dateBlocageTimestamp != null) {
+                                LocalDateTime dateBlocage = dateBlocageTimestamp.toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime();
+                                u.setDateBlocage(dateBlocage);
+                            } else {
+                                u.setDateBlocage(null);
+                            }
+                        } else {
+                            u.setTentativesEchouees(0);
+                            u.setCompteBloque(false);
+                            u.setDateBlocage(null);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Erreur lecture Firestore status pour " + firebaseUser.getEmail());
+                        u.setTentativesEchouees(0);
+                        u.setCompteBloque(false);
+                        u.setDateBlocage(null);
+                    }
+                    
                     u.setDateCreation(LocalDateTime.now());
                     utilisateurRepository.save(u);
                     imported++;
                 } else {
-                    // Mise à jour si nécessaire
+                    // 🔥 Synchroniser le statut de blocage pour les utilisateurs existants
+                    try {
+                        DocumentSnapshot statusDoc = db.collection("utilisateurs_status")
+                            .document(firebaseUser.getEmail()).get().get();
+                        
+                        if (statusDoc.exists()) {
+                            Long tentatives = statusDoc.getLong("tentativesEchouees");
+                            Boolean bloque = statusDoc.getBoolean("compteBloque");
+                            Date dateBlocageTimestamp = statusDoc.getDate("dateBlocage");
+                            
+                            localUser.setTentativesEchouees(tentatives != null ? tentatives.intValue() : 0);
+                            localUser.setCompteBloque(bloque != null ? bloque : false);
+                            
+                            if (dateBlocageTimestamp != null) {
+                                LocalDateTime dateBlocage = dateBlocageTimestamp.toInstant()
+                                    .atZone(ZoneId.systemDefault())
+                                    .toLocalDateTime();
+                                localUser.setDateBlocage(dateBlocage);
+                            } else {
+                                localUser.setDateBlocage(null);
+                            }
+                            
+                            utilisateurRepository.save(localUser);
+                        }
+                    } catch (Exception e) {
+                        System.err.println("⚠️ Erreur lecture Firestore status pour " + firebaseUser.getEmail());
+                    }
                     updated++;
                 }
             }
@@ -111,13 +175,13 @@ public class UserService {
 
     // ========== EXPORT VERS FIREBASE ==========
     public Map<String, Integer> exportUsersToFirebase() {
-        // FirebaseUtil.ensureInitialized();
-
         int exported = 0;
         int updated = 0;
 
         try {
+            Firestore db = FirestoreClient.getFirestore();
             Iterable<Utilisateur> utilisateurs = utilisateurRepository.findAll();
+            
             for (Utilisateur user : utilisateurs) {
                 if (user.getMotDePasse() == null || user.getMotDePasse().isEmpty()) {
                     continue;
@@ -129,8 +193,6 @@ public class UserService {
                 try {
                     UserRecord firebaseUser = FirebaseAuth.getInstance().getUserByEmail(user.getEmail());
                     String firebaseDisplayName = firebaseUser.getDisplayName();
-
-                    System.out.println("Comparaison nom Firebase/local : firebase='" + firebaseDisplayName + "', local='" + localDisplayName + "'");
 
                     boolean needUpdate = !localDisplayName.equals(firebaseDisplayName);
 
@@ -156,6 +218,32 @@ public class UserService {
                     FirebaseAuth.getInstance().setCustomUserClaims(newUser.getUid(), Map.of("role", user.getRole().getNom()));
                     exported++;
                 }
+                
+                // 🔥 Synchroniser le statut de blocage vers Firestore
+                try {
+                    Map<String, Object> statusData = new HashMap<>();
+                    statusData.put("email", user.getEmail());
+                    statusData.put("tentativesEchouees", user.getTentativesEchouees() != null ? user.getTentativesEchouees() : 0);
+                    statusData.put("compteBloque", user.getCompteBloque() != null ? user.getCompteBloque() : false);
+                    
+                    if (user.getDateBlocage() != null) {
+                        Date dateBlocageTimestamp = Date.from(user.getDateBlocage()
+                            .atZone(ZoneId.systemDefault())
+                            .toInstant());
+                        statusData.put("dateBlocage", dateBlocageTimestamp);
+                    } else {
+                        statusData.put("dateBlocage", null);
+                    }
+                    
+                    db.collection("utilisateurs_status")
+                        .document(user.getEmail())
+                        .set(statusData)
+                        .get();
+                        
+                    System.out.println("✅ Statut synchronisé pour " + user.getEmail());
+                } catch (Exception e) {
+                    System.err.println("⚠️ Erreur écriture Firestore status pour " + user.getEmail());
+                }
             }
             return Map.of("exported", exported, "updated", updated);
 
@@ -167,10 +255,12 @@ public class UserService {
     // ========== SYNCHRONISATION COMPLÈTE ==========
     @Transactional
     public Map<String, Integer> synchronizeUsers() {
-        // Map<String, Integer> importResult = importUsersFromFirebase();
+        Map<String, Integer> importResult = importUsersFromFirebase();
         Map<String, Integer> exportResult = exportUsersToFirebase();
 
         return Map.of(
+            "imported", importResult.get("imported"),
+            "importedUpdated", importResult.get("updated"),
             "exported", exportResult.get("exported"),
             "exportedUpdated", exportResult.get("updated")
         );
