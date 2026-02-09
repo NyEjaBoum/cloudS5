@@ -1,149 +1,130 @@
 <template>
-  <form @submit.prevent="submitReport" class="report-form">
-    <!-- Type de problème -->
-    <ion-card class="form-section">
-      <ion-card-header>
-        <ion-card-title>
+  <!-- Formulaire principal -->
+  <ion-card class="form-container">
+    <ion-card-content class="form-content">
+      <form @submit.prevent="submitReport" class="report-form">
+        <!-- Type de problème -->
+        <div class="form-section">
           <div class="section-header">
             <span class="step-number">1</span>
             <span>Type de problème</span>
           </div>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item fill="outline" class="form-item">
-          <ion-label position="floating">Titre *</ion-label>
-          <ion-input
-            v-model="form.titre"
-            placeholder="Ex: Nid de poule, Route inondée..."
-            :maxlength="100"
-            required
-          ></ion-input>
-          <div slot="helper">{{ form.titre.length }}/100</div>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+          <ion-item fill="outline" class="form-item">
+            <ion-label position="floating">Titre *</ion-label>
+            <ion-input
+              v-model="form.titre"
+              placeholder="Ex: Nid de poule, Route inondée..."
+              :maxlength="100"
+              required
+            ></ion-input>
+            <div slot="helper">{{ form.titre.length }}/100</div>
+          </ion-item>
+        </div>
 
-    <!-- Description -->
-    <ion-card class="form-section">
-      <ion-card-header>
-        <ion-card-title>
+        <!-- Description -->
+        <div class="form-section">
           <div class="section-header">
             <span class="step-number">2</span>
             <span>Description</span>
           </div>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <ion-item fill="outline" class="form-item">
-          <ion-label position="floating">Décrivez le problème *</ion-label>
-          <ion-textarea
-            v-model="form.description"
-            placeholder="Décrivez le problème en détail..."
-            :auto-grow="true"
-            :rows="4"
-            :maxlength="500"
-            required
-          ></ion-textarea>
-          <div slot="helper">{{ form.description.length }}/500</div>
-        </ion-item>
-      </ion-card-content>
-    </ion-card>
+          <ion-item fill="outline" class="form-item">
+            <ion-label position="floating">Décrivez le problème *</ion-label>
+            <ion-textarea
+              v-model="form.description"
+              placeholder="Décrivez le problème en détail..."
+              :auto-grow="true"
+              :rows="4"
+              :maxlength="500"
+              required
+            ></ion-textarea>
+            <div slot="helper">{{ form.description.length }}/500</div>
+          </ion-item>
+        </div>
 
-    <!-- Emplacement -->
-    <ion-card class="form-section">
-      <ion-card-header>
-        <ion-card-title>
+        <!-- Emplacement -->
+        <div class="form-section">
           <div class="section-header">
             <span class="step-number">3</span>
             <span>Emplacement</span>
           </div>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <LocationPicker
-          v-model:location="form.location"
-          v-model:address="form.address"
-          @open-map="openMapModal"
-        />
-      </ion-card-content>
-    </ion-card>
+          <LocationPicker
+            v-model:location="form.location"
+            v-model:address="form.address"
+            @open-map="openMapModal"
+          />
+        </div>
 
-    <!-- Photos (optionnel) -->
-    <ion-card class="form-section">
-      <ion-card-header>
-        <ion-card-title>
+        <!-- Photos (optionnel) -->
+        <div class="form-section">
           <div class="section-header">
             <span class="step-number">4</span>
             <span>Photos (optionnel)</span>
           </div>
-        </ion-card-title>
-      </ion-card-header>
-      <ion-card-content>
-        <PhotoUploader
-          v-model:photos="form.photos"
-          :max-photos="5"
-          :max-size-m-b="5"
-        />
-      </ion-card-content>
-    </ion-card>
-
-    <!-- Boutons d'action -->
-    <div class="action-buttons">
-      <ion-button
-        expand="block"
-        type="submit"
-        :disabled="!canSubmit || saving"
-        class="submit-button"
-      >
-        <ion-spinner v-if="saving" name="crescent"></ion-spinner>
-        <span v-else>
-          <ion-icon :icon="sendOutline" slot="start"></ion-icon>
-          Envoyer le signalement
-        </span>
-      </ion-button>
-
-      <ion-button
-        expand="block"
-        fill="outline"
-        @click="saveAsDraft"
-        :disabled="saving"
-        class="draft-button"
-      >
-        <ion-icon :icon="saveOutline" slot="start"></ion-icon>
-        Sauvegarder comme brouillon
-      </ion-button>
-    </div>
-
-    <!-- Modal carte -->
-    <ion-modal
-      :is-open="mapModalOpen"
-      @didDismiss="handleMapDismiss"
-      @didPresent="initModalMap"
-    >
-      <ion-header>
-        <ion-toolbar>
-          <ion-title>Sélectionner l'emplacement</ion-title>
-          <ion-buttons slot="end">
-            <ion-button @click="confirmModalLocation" color="primary">
-              <ion-icon :icon="checkmarkOutline"></ion-icon>
-              Confirmer
-            </ion-button>
-          </ion-buttons>
-        </ion-toolbar>
-      </ion-header>
-      <ion-content>
-        <div id="modal-map" class="full-map"></div>
-        <div v-if="tempLocation" class="modal-location-info">
-          <ion-icon :icon="pinOutline"></ion-icon>
-          <span>{{ tempLocation.lat.toFixed(6) }}, {{ tempLocation.lng.toFixed(6) }}</span>
+          <PhotoUploader
+            v-model:photos="form.photos"
+            :max-photos="5"
+            :max-size-m-b="5"
+          />
         </div>
-        <div v-else class="modal-location-hint">
-          Appuyez sur la carte pour sélectionner un emplacement
+
+        <!-- Boutons d'action -->
+        <div class="action-buttons">
+          <ion-button
+            expand="block"
+            type="submit"
+            :disabled="!canSubmit || saving"
+            class="submit-button"
+          >
+            <ion-spinner v-if="saving" name="crescent"></ion-spinner>
+            <span v-else>
+              <ion-icon :icon="sendOutline" slot="start"></ion-icon>
+              Envoyer le signalement
+            </span>
+          </ion-button>
+
+          <ion-button
+            expand="block"
+            fill="outline"
+            @click="saveAsDraft"
+            :disabled="saving"
+            class="draft-button"
+          >
+            <ion-icon :icon="saveOutline" slot="start"></ion-icon>
+            Sauvegarder comme brouillon
+          </ion-button>
         </div>
-      </ion-content>
-    </ion-modal>
-  </form>
+      </form>
+    </ion-card-content>
+  </ion-card>
+
+  <!-- Modal carte -->
+  <ion-modal
+    :is-open="mapModalOpen"
+    @didDismiss="handleMapDismiss"
+    @didPresent="initModalMap"
+  >
+    <ion-header>
+      <ion-toolbar>
+        <ion-title>Sélectionner l'emplacement</ion-title>
+        <ion-buttons slot="end">
+          <ion-button @click="confirmModalLocation" color="primary">
+            <ion-icon :icon="checkmarkOutline"></ion-icon>
+            Confirmer
+          </ion-button>
+        </ion-buttons>
+      </ion-toolbar>
+    </ion-header>
+    <ion-content>
+      <div id="modal-map" class="full-map"></div>
+      <div v-if="tempLocation" class="modal-location-info">
+        <ion-icon :icon="pinOutline"></ion-icon>
+        <span>{{ tempLocation.lat.toFixed(6) }}, {{ tempLocation.lng.toFixed(6) }}</span>
+      </div>
+      <div v-else class="modal-location-hint">
+        Appuyez sur la carte pour sélectionner un emplacement
+      </div>
+    </ion-content>
+  </ion-modal>
 </template>
 
 <script setup lang="ts">
@@ -434,7 +415,7 @@ const saveAsDraft = async () => {
   justify-content: center;
   width: 28px;
   height: 28px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
   border-radius: 50%;
   font-size: 14px;
@@ -457,15 +438,15 @@ const saveAsDraft = async () => {
   --border-radius: 12px;
   height: 52px;
   font-weight: 600;
-  --background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  --background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
 }
 
 .draft-button {
   --border-radius: 12px;
   height: 48px;
   --border-width: 2px;
-  --border-color: #e2e8f0;
-  --color: #718096;
+  --border-color: #dce6e9;
+  --color: #44474D;
 }
 
 /* Modal carte */
@@ -492,11 +473,11 @@ const saveAsDraft = async () => {
   display: flex;
   align-items: center;
   gap: 8px;
-  color: #2d3748;
+  color: #2c424b;
 }
 
 .modal-location-hint {
-  color: #718096;
+  color: #44474D;
   text-align: center;
 }
 </style>

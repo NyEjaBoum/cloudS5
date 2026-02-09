@@ -33,7 +33,7 @@ import {
   mapOutline,
   addOutline,
   documentTextOutline,
-  notificationsOutline
+  personOutline
 } from 'ionicons/icons';
 
 interface NavItem {
@@ -96,11 +96,11 @@ const defaultItems: NavItem[] = [
     active: props.currentPage === 'reports'
   },
   {
-    id: 'notifications',
-    label: 'Notifs',
-    icon: notificationsOutline,
-    route: '/notifications',
-    active: props.currentPage === 'notifications'
+    id: 'profil',
+    label: 'Profil',
+    icon: personOutline,
+    route: '/profil',
+    active: props.currentPage === 'profil'
   }
 ];
 
@@ -128,154 +128,141 @@ const handleClick = (item: NavItem) => {
 <style scoped>
 .bottom-nav {
   position: fixed;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 16px;
+  left: 20px;
+  right: 20px;
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: white;
-  border-top: 1px solid #e2e8f0;
-  padding: 8px 0 12px;
+  background: #1A1A2E;
+  border-radius: 28px;
+  padding: 8px 8px;
   z-index: 1000;
+  box-shadow: 0 8px 32px rgba(26, 26, 46, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-nav.has-padding {
-  padding-bottom: max(12px, env(safe-area-inset-bottom));
+  bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
 }
 
 .nav-item {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 4px;
+  gap: 3px;
   background: transparent;
   border: none;
-  padding: 8px 16px;
+  padding: 8px 14px;
   cursor: pointer;
-  color: #718096;
-  font-size: 11px;
-  transition: color 0.2s;
+  color: #8E8AA0;
+  font-size: 10px;
+  font-weight: 500;
+  transition: color 0.25s ease;
   outline: none;
   position: relative;
-  min-width: 60px;
+  min-width: 56px;
+  font-family: 'Inter', sans-serif;
 }
 
 .nav-item:hover:not(.nav-item-disabled) {
-  color: #667eea;
+  color: #E8E6F0;
 }
 
 .nav-item.active:not(.nav-item-disabled) {
-  color: #667eea;
+  color: #FF6B6B;
 }
 
 .nav-item-disabled {
-  opacity: 0.5;
+  opacity: 0.4;
   cursor: not-allowed;
 }
 
 .nav-item ion-icon {
-  font-size: 24px;
+  font-size: 22px;
   transition: transform 0.2s;
 }
 
 .nav-item:not(.center-button):active:not(.nav-item-disabled) ion-icon {
-  transform: scale(0.95);
+  transform: scale(0.92);
 }
 
 .center-button {
   padding: 0;
-  margin-top: -30px;
+  margin-top: -28px;
 }
 
 .center-button-inner {
-  width: 56px;
-  height: 56px;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
-  transition: transform 0.2s, box-shadow 0.2s;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 3px solid #1A1A2E;
 }
 
 .center-button-inner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5);
 }
 
 .center-button-inner:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.95);
 }
 
 .center-button-inner ion-icon {
-  font-size: 28px;
+  font-size: 26px;
 }
 
-/* Animation pour l'élément actif */
+/* Active indicator dot */
 .nav-item.active:not(.center-button)::after {
   content: '';
   position: absolute;
-  bottom: -2px;
+  bottom: 2px;
   left: 50%;
   transform: translateX(-50%);
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: #667eea;
-}
-
-/* Dark mode */
-@media (prefers-color-scheme: dark) {
-  .bottom-nav {
-    background: #2d3748;
-    border-top-color: #4a5568;
-  }
-
-  .nav-item {
-    color: #a0aec0;
-  }
-
-  .nav-item.active:not(.nav-item-disabled) {
-    color: #a3bffa;
-  }
-
-  .nav-item:hover:not(.nav-item-disabled) {
-    color: #a3bffa;
-  }
-
-  .nav-item.active:not(.center-button)::after {
-    background-color: #a3bffa;
-  }
+  background-color: #FF6B6B;
 }
 
 /* Responsive */
 @media (max-width: 360px) {
+  .bottom-nav {
+    left: 12px;
+    right: 12px;
+    padding: 6px 4px;
+  }
+
   .nav-item {
-    padding: 8px 12px;
-    font-size: 10px;
+    padding: 8px 10px;
+    font-size: 9px;
+    min-width: 48px;
   }
 
   .nav-item ion-icon {
-    font-size: 22px;
+    font-size: 20px;
   }
 
   .center-button-inner {
-    width: 50px;
-    height: 50px;
+    width: 48px;
+    height: 48px;
   }
 
   .center-button-inner ion-icon {
-    font-size: 24px;
+    font-size: 22px;
   }
 }
 
-/* Safe area pour iPhone */
+/* Safe area for iPhone */
 @supports (padding-bottom: env(safe-area-inset-bottom)) {
   .bottom-nav {
-    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    bottom: max(16px, calc(env(safe-area-inset-bottom) + 8px));
   }
 }
 </style>

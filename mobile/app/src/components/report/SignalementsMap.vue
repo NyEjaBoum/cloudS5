@@ -40,10 +40,10 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#3b82f6';
+    case 1: return '#3D5E6B';
     case 11: return '#f59e0b';
-    case 99: return '#10b981';
-    default: return '#6b7280';
+    case 99: return '#16a34a';
+    default: return '#44474D';
   }
 };
 
@@ -134,7 +134,7 @@ onMounted(async () => {
             ${report.description || '-'}
           </p>
           
-          <div style="border-top: 1px solid #e2e8f0; padding-top: 12px; display: grid; gap: 8px; font-size: 13px;">
+          <div style="border-top: 1px solid #dce6e9; padding-top: 12px; display: grid; gap: 8px; font-size: 13px;">
             ${report.budget ? `
               <div style="display: flex; justify-content: space-between;">
                 <span style="color: #64748b;">💰 Budget:</span>

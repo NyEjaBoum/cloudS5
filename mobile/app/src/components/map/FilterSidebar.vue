@@ -163,7 +163,7 @@ const handleUrgencyChange = (event: CustomEvent) => {
 .sidebar-title {
   font-size: 18px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 16px;
 }
 
@@ -180,7 +180,7 @@ const handleUrgencyChange = (event: CustomEvent) => {
 
 .urgency-filter h4 {
   font-size: 14px;
-  color: #4a5568;
+  color: #344f5a;
   margin-bottom: 8px;
 }
 
@@ -199,11 +199,11 @@ const handleUrgencyChange = (event: CustomEvent) => {
 
 @media (prefers-color-scheme: dark) {
   .sidebar {
-    background: #1a202c;
+    background: #1e2e34;
   }
 
   .sidebar-title {
-    color: #e2e8f0;
+    color: #dce6e9;
   }
 }
 

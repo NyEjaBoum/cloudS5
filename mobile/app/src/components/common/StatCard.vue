@@ -33,10 +33,10 @@ defineEmits<{
 
 <style scoped>
 .stat-card {
-  border-radius: 16px;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   margin: 0;
-  padding: 16px;
+  padding: 20px;
 }
 
 .stat-content {
@@ -48,11 +48,11 @@ defineEmits<{
 .stat-icon {
   width: 60px;
   height: 60px;
-  border-radius: 16px;
+  border-radius: 18px;
   display: flex;
   align-items: center;
   justify-content: center;
-  background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
 }
 
@@ -63,27 +63,27 @@ defineEmits<{
 .stat-value {
   font-size: 32px;
   font-weight: 800;
-  color: #2d3748;
+  color: #1A1A2E;
   line-height: 1;
 }
 
 .stat-label {
   font-size: 14px;
-  color: #718096;
+  color: #4A4458;
   margin-top: 4px;
 }
 
 @media (prefers-color-scheme: dark) {
   .stat-card {
-    background: #2d3748;
+    background: #262640;
   }
 
   .stat-value {
-    color: #e2e8f0;
+    color: #E8E6F0;
   }
 
   .stat-label {
-    color: #a0aec0;
+    color: #8E8AA0;
   }
 }
 </style>

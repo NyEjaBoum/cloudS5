@@ -132,7 +132,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'other',
       name: 'Other',
       icon: helpCircleOutline,
-      color: '#a0aec0',
+      color: '#9CA5B1',
       subcategories: [
         { id: 'noise', name: 'Noise Complaint' },
         { id: 'animals', name: 'Animals' },
@@ -172,7 +172,7 @@ const selectCategory = (category: Category) => {
   align-items: center;
   justify-content: center;
   padding: 16px 8px;
-  border: 2px solid #e2e8f0;
+  border: 2px solid #dce6e9;
   border-radius: 12px;
   background: white;
   cursor: pointer;
@@ -182,13 +182,13 @@ const selectCategory = (category: Category) => {
 
 .category-card:hover {
   transform: translateY(-2px);
-  border-color: #cbd5e0;
+  border-color: #b8ccd2;
 }
 
 .category-selected {
-  border-color: #667eea;
-  background: #f7fafc;
-  box-shadow: 0 4px 12px rgba(102, 126, 234, 0.15);
+  border-color: #3D5E6B;
+  background: #f0f5f6;
+  box-shadow: 0 4px 12px rgba(61, 94, 107, 0.15);
 }
 
 .category-icon {
@@ -197,33 +197,33 @@ const selectCategory = (category: Category) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f7fafc;
+  background: #f0f5f6;
   border-radius: 10px;
   margin-bottom: 8px;
-  color: #667eea;
+  color: #3D5E6B;
 }
 
 .category-selected .category-icon {
-  background: #e6edff;
+  background: #dce6e9;
 }
 
 .category-name {
   font-size: 12px;
   font-weight: 600;
-  color: #4a5568;
+  color: #344f5a;
   text-align: center;
 }
 
 .subcategories-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  border-top: 1px solid #dce6e9;
 }
 
 .subcategories-title {
   font-size: 16px;
   font-weight: 600;
-  color: #2d3748;
+  color: #2c424b;
   margin-bottom: 12px;
 }
 
@@ -235,16 +235,16 @@ const selectCategory = (category: Category) => {
 
 @media (prefers-color-scheme: dark) {
   .category-card {
-    background: #2d3748;
-    border-color: #4a5568;
+    background: #26373f;
+    border-color: #2c424b;
   }
 
   .category-name {
-    color: #cbd5e0;
+    color: #b8ccd2;
   }
 
   .category-icon {
-    background: #4a5568;
+    background: #2c424b;
   }
 }
 

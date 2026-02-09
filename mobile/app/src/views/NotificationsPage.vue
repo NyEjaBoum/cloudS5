@@ -158,11 +158,11 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#667eea';
-    case 11: return '#ed8936';
-    case 99: return '#38a169';
-    case 21: return '#718096';
-    default: return '#718096';
+    case 1: return '#4ECDC4';
+    case 11: return '#FFD166';
+    case 99: return '#06D6A0';
+    case 21: return '#8E8AA0';
+    default: return '#8E8AA0';
   }
 };
 
@@ -236,14 +236,14 @@ const goToReports = () => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #718096;
+  color: #4A4458;
   font-size: 14px;
 }
 
 /* Liste des notifications */
 .notifications-list {
   padding: 16px;
-  padding-bottom: 100px;
+  padding-bottom: 120px;
   display: flex;
   flex-direction: column;
   gap: 12px;
@@ -267,8 +267,8 @@ const goToReports = () => {
 }
 
 .notification-card.unread {
-  background: #f0f4ff;
-  border-left: 4px solid #667eea;
+  background: #FFF8F2;
+  border-left: 4px solid #FF6B6B;
   padding-left: 16px;
 }
 
@@ -280,7 +280,7 @@ const goToReports = () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #667eea;
+  background: #FF6B6B;
 }
 
 /* Contenu */
@@ -300,14 +300,14 @@ const goToReports = () => {
 .notif-title {
   font-size: 15px;
   font-weight: 700;
-  color: #2d3748;
+  color: #1A1A2E;
   margin: 0;
   flex: 1;
 }
 
 .notif-date {
   font-size: 11px;
-  color: #a0aec0;
+  color: #8E8AA0;
   white-space: nowrap;
   padding-right: 16px;
 }
@@ -332,12 +332,12 @@ const goToReports = () => {
 
 .arrow-icon {
   font-size: 14px;
-  color: #a0aec0;
+  color: #8E8AA0;
 }
 
 .notif-message {
   font-size: 13px;
-  color: #718096;
+  color: #4A4458;
   margin: 0;
   line-height: 1.4;
 }
@@ -345,24 +345,24 @@ const goToReports = () => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .notification-card {
-    background: #2d3748;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: #262640;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   .notification-card.unread {
-    background: #2a3550;
+    background: #2E2E4A;
   }
 
   .notif-title {
-    color: #f7fafc;
+    color: #E8E6F0;
   }
 
   .notif-date {
-    color: #718096;
+    color: #8E8AA0;
   }
 
   .notif-message {
-    color: #a0aec0;
+    color: #B8B4C8;
   }
 }
 </style>

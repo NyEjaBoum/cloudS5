@@ -1,2 +1,82 @@
-/* For information on how to create your own theme, please refer to:
-http://ionicframework.com/docs/theming/ */
+/* Mapeo Sunrise Theme - Warm & Modern */
+
+:root {
+  /* Primary - Living Coral */
+  --ion-color-primary: #FF6B6B;
+  --ion-color-primary-rgb: 255, 107, 107;
+  --ion-color-primary-contrast: #ffffff;
+  --ion-color-primary-contrast-rgb: 255, 255, 255;
+  --ion-color-primary-shade: #E85555;
+  --ion-color-primary-tint: #FF8E53;
+
+  /* Secondary - Caribbean Teal */
+  --ion-color-secondary: #4ECDC4;
+  --ion-color-secondary-rgb: 78, 205, 196;
+  --ion-color-secondary-contrast: #ffffff;
+  --ion-color-secondary-contrast-rgb: 255, 255, 255;
+  --ion-color-secondary-shade: #44B3AA;
+  --ion-color-secondary-tint: #6DD5CE;
+
+  /* Tertiary - Soft Violet */
+  --ion-color-tertiary: #A78BFA;
+  --ion-color-tertiary-rgb: 167, 139, 250;
+  --ion-color-tertiary-contrast: #ffffff;
+  --ion-color-tertiary-contrast-rgb: 255, 255, 255;
+  --ion-color-tertiary-shade: #8B6FE0;
+  --ion-color-tertiary-tint: #B9A0FB;
+
+  /* Success - Emerald */
+  --ion-color-success: #06D6A0;
+  --ion-color-success-rgb: 6, 214, 160;
+  --ion-color-success-contrast: #ffffff;
+  --ion-color-success-contrast-rgb: 255, 255, 255;
+  --ion-color-success-shade: #05BC8D;
+  --ion-color-success-tint: #1FDDAA;
+
+  /* Warning - Warm Gold */
+  --ion-color-warning: #FFD166;
+  --ion-color-warning-rgb: 255, 209, 102;
+  --ion-color-warning-contrast: #1A1A2E;
+  --ion-color-warning-contrast-rgb: 26, 26, 46;
+  --ion-color-warning-shade: #E0B85A;
+  --ion-color-warning-tint: #FFD87A;
+
+  /* Danger - Warm Red */
+  --ion-color-danger: #EF4444;
+  --ion-color-danger-rgb: 239, 68, 68;
+  --ion-color-danger-contrast: #ffffff;
+  --ion-color-danger-contrast-rgb: 255, 255, 255;
+  --ion-color-danger-shade: #D23C3C;
+  --ion-color-danger-tint: #F15757;
+
+  /* Medium */
+  --ion-color-medium: #8E8AA0;
+  --ion-color-medium-rgb: 142, 138, 160;
+  --ion-color-medium-contrast: #ffffff;
+  --ion-color-medium-contrast-rgb: 255, 255, 255;
+  --ion-color-medium-shade: #7A7690;
+  --ion-color-medium-tint: #9E9AB0;
+
+  /* Light */
+  --ion-color-light: #FFF8F2;
+  --ion-color-light-rgb: 255, 248, 242;
+  --ion-color-light-contrast: #1A1A2E;
+  --ion-color-light-contrast-rgb: 26, 26, 46;
+  --ion-color-light-shade: #EEEAE2;
+  --ion-color-light-tint: #FAFAF8;
+
+  /* Global font */
+  --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+
+  /* Background - Warm white */
+  --ion-background-color: #FAFAF8;
+  --ion-background-color-rgb: 250, 250, 248;
+
+  /* Text - Deep indigo */
+  --ion-text-color: #1A1A2E;
+  --ion-text-color-rgb: 26, 26, 46;
+
+  /* Toolbar */
+  --ion-toolbar-background: #ffffff;
+  --ion-toolbar-color: #1A1A2E;
+}
