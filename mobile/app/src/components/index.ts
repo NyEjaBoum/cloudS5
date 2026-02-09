@@ -18,5 +18,4 @@ export { default as ReportForm } from './report/ReportForm.vue';
 export { default as SignalementsMap } from './report/SignalementsMap.vue';
 
 // Map components
-export { default as FilterSidebar } from './map/FilterSidebar.vue';
 export { default as MapMarkerStyles } from './map/MapMarkerStyles.vue';

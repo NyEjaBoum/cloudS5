@@ -3,19 +3,14 @@
   <ion-page>
     <ion-content :fullscreen="true" class="ion-padding">
       <div class="login-container">
-        <!-- En-tête -->
-        <ion-header class="ion-no-border">
-          <ion-toolbar>
-            <ion-title size="large">Mapeo</ion-title>
-          </ion-toolbar>
-        </ion-header>
-
         <!-- Illustration -->
         <div class="illustration-section">
           <div class="gradient-bg"></div>
           <div class="illustration-content">
-            <h1 class="welcome-title">Bienvenue</h1>
-            <p class="welcome-subtitle">Connectez-vous pour continuer</p>
+            <!-- Logo Mapeo -->
+            <div class="logo-container">
+              <div class="logo-icon">MAPEO</div>
+            </div>
           </div>
         </div>
 
@@ -47,6 +42,7 @@
                 autocorrect="off"
                 enterkeyhint="next"
               ></ion-input>
+              <ion-icon slot="start" :icon="mailOutline" class="input-icon"></ion-icon>
             </ion-item>
 
             <!-- Password -->
@@ -58,6 +54,7 @@
                 required
                 enterkeyhint="done"
               ></ion-input>
+              <ion-icon slot="start" :icon="lockClosedOutline" class="input-icon"></ion-icon>
               <ion-button
                 slot="end"
                 fill="clear"
@@ -89,7 +86,7 @@
               class="login-button"
             >
               <ion-spinner v-if="loading" name="crescent"></ion-spinner>
-              <span v-else>Se connecter</span>
+              <span v-else>SE CONNECTER</span>
             </ion-button>
           </form>
 
@@ -131,7 +128,8 @@ import {
   eyeOffOutline,
   alertCircleOutline,
   lockClosedOutline,
-  warningOutline
+  warningOutline,
+  mailOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
 
@@ -183,6 +181,9 @@ const resetBlockedState = () => {
 <style scoped>
 .login-container {
   min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
 /* Illustration */
@@ -237,6 +238,22 @@ const resetBlockedState = () => {
   text-align: center;
 }
 
+/* Logo Mapeo */
+.logo-container {
+  margin-bottom: 16px;
+}
+
+.logo-icon {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px;
+  font-weight: 900;
+}
+
 .welcome-title {
   font-size: 28px;
   font-weight: 800;
@@ -280,8 +297,31 @@ const resetBlockedState = () => {
 }
 
 .form-item {
-  margin-bottom: 16px;
-  --border-radius: 12px;
+  margin-bottom: 20px;
+  --border-radius: 14px;
+  --border-width: 1px;
+  --border-color: #E0E0E0;
+  --border-style: solid;
+  --min-height: 60px;
+  --background: #FFFFFF;
+}
+
+/* Icônes dans les champs */
+.input-icon {
+  margin-right: 12px;
+  font-size: 20px;
+  color: #666;
+}
+
+/* Augmentation de la hauteur des champs */
+ion-item.form-item::part(native) {
+  min-height: 60px;
+}
+
+ion-input {
+  min-height: 56px;
+  --padding-start: 8px;
+  --padding-end: 8px;
 }
 
 .error-note {
@@ -310,17 +350,41 @@ const resetBlockedState = () => {
   align-items: flex-start;
 }
 
+/* Bouton SE CONNECTER amélioré */
 .login-button {
   --border-radius: 14px;
-  height: 52px;
+  --padding-top: 20px;
+  --padding-bottom: 20px;
+  height: 60px;
   margin: 8px 0 24px;
   font-weight: 700;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+  transition: all 0.3s ease;
+}
+
+.login-button:hover {
+  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
+}
+
+.login-button:active {
+  transform: translateY(1px);
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-section {
     background: #1A1A2E;
+  }
+  
+  .form-item {
+    --border-color: #333;
+    --background: #2A2A3E;
+  }
+  
+  .input-icon {
+    color: #AAA;
   }
   
   .warning-note {

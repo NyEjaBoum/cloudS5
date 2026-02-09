@@ -3,11 +3,16 @@
     <ion-header class="ion-no-border">
       <ion-toolbar>
         <ion-buttons slot="start">
-          <ion-button @click="goBack">
+          <ion-button @click="goBack" class="back-button">
             <ion-icon :icon="arrowBackOutline"></ion-icon>
           </ion-button>
         </ion-buttons>
-        <ion-title>Détails du signalement</ion-title>
+        <ion-title>Détails</ion-title>
+        <ion-buttons slot="end" v-if="report">
+          <ion-button @click="openOptions" class="options-button">
+            <ion-icon :icon="ellipsisVerticalOutline"></ion-icon>
+          </ion-button>
+        </ion-buttons>
       </ion-toolbar>
     </ion-header>
 
@@ -15,136 +20,130 @@
       <!-- Loading state -->
       <div v-if="loading" class="loading-container">
         <ion-spinner name="crescent"></ion-spinner>
-        <p>Chargement...</p>
+        <p>Chargement en cours...</p>
       </div>
 
       <!-- Error state -->
       <div v-else-if="error" class="error-container">
-        <ion-icon :icon="alertCircleOutline" class="error-icon"></ion-icon>
-        <p>{{ error }}</p>
-        <ion-button @click="loadReport">Réessayer</ion-button>
+        <div class="error-content">
+          <ion-icon :icon="alertCircleOutline" class="error-icon"></ion-icon>
+          <h3>Oups !</h3>
+          <p class="error-message">{{ error }}</p>
+          <ion-button @click="loadReport" fill="outline" class="retry-button">
+            <ion-icon :icon="refreshOutline" slot="start"></ion-icon>
+            Réessayer
+          </ion-button>
+        </div>
       </div>
 
       <!-- Content -->
       <div v-else-if="report" class="details-container">
-        <!-- Header avec statut -->
+        <!-- Header Section -->
         <div class="header-section">
-          <div class="header-content">
-            <h1 class="report-title">{{ report.titre }}</h1>
+          <div class="header-top">
+            <span class="report-id">#{{ report.id }}</span>
             <span 
               class="status-badge" 
-              :style="{ 
-                backgroundColor: getStatutColor(report.statut) + '15',
-                color: getStatutColor(report.statut),
-                border: `2px solid ${getStatutColor(report.statut)}40`
-              }"
+              :class="'status-' + report.statut"
             >
-              <span 
-                class="status-dot" 
-                :style="{ backgroundColor: getStatutColor(report.statut) }"
-              ></span>
+              <span class="status-dot"></span>
               {{ getStatutLabel(report.statut) }}
             </span>
           </div>
-          <p class="report-id">Signalement #{{ report.id }}</p>
+          <h1 class="report-title">{{ report.titre || 'Sans titre' }}</h1>
+          <div class="header-meta">
+            <span class="meta-item">
+              <ion-icon :icon="calendarOutline"></ion-icon>
+              {{ formatDateShort(report.dateCreation) }}
+              <span v-if="report.heureCreation" class="time">
+                à {{ report.heureCreation }}
+              </span>
+            </span>
+            <span class="meta-item" v-if="report.userEmail">
+              <ion-icon :icon="personOutline"></ion-icon>
+              {{ report.userEmail }}
+            </span>
+          </div>
         </div>
 
-        <!-- Info Cards -->
-        <div class="info-section">
-          <!-- Informations générales -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title class="card-title">
-                <ion-icon :icon="informationCircleOutline"></ion-icon>
-                Informations générales
-              </ion-card-title>
-            </ion-card-header>
+        <!-- Main Content -->
+        <div class="content-section">
+          <!-- Coordonnées Card -->
+          <ion-card class="info-card location-card">
+            <div class="card-header">
+              <ion-icon :icon="locationOutline" class="card-icon"></ion-icon>
+              <h3 class="card-title">Localisation</h3>
+            </div>
             <ion-card-content>
-              <div class="info-grid">
-                <div class="info-item">
-                  <span class="info-label">
-                    <ion-icon :icon="calendarOutline"></ion-icon>
-                    Date de création
-                  </span>
-                  <span class="info-value">{{ formatDate(report.dateCreation) }}</span>
+              <div class="coordinates-display">
+                <div class="coordinates-row">
+                  <span class="coordinate-label">Latitude</span>
+                  <span class="coordinate-value">{{ Number(report.latitude).toFixed(6) }}</span>
                 </div>
+                <div class="coordinates-row">
+                  <span class="coordinate-label">Longitude</span>
+                  <span class="coordinate-value">{{ Number(report.longitude).toFixed(6) }}</span>
+                </div>
+              </div>
+              <ion-button 
+                @click="viewOnMap" 
+                expand="block" 
+                class="map-button"
+                fill="solid"
+              >
+                <ion-icon :icon="mapOutline" slot="start"></ion-icon>
+                Voir sur la carte
+              </ion-button>
+            </ion-card-content>
+          </ion-card>
 
-                <div class="info-item">
-                  <span class="info-label">
-                    <ion-icon :icon="personOutline"></ion-icon>
-                    Signalé par
-                  </span>
-                  <span class="info-value">{{ report.userEmail || 'Anonyme' }}</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">
-                    <ion-icon :icon="locationOutline"></ion-icon>
-                    Latitude
-                  </span>
-                  <span class="info-value">{{ Number(report.latitude).toFixed(6) }}</span>
-                </div>
-
-                <div class="info-item">
-                  <span class="info-label">
-                    <ion-icon :icon="locationOutline"></ion-icon>
-                    Longitude
-                  </span>
-                  <span class="info-value">{{ Number(report.longitude).toFixed(6) }}</span>
-                </div>
+          <!-- Description Card -->
+          <ion-card class="info-card">
+            <div class="card-header">
+              <ion-icon :icon="documentTextOutline" class="card-icon"></ion-icon>
+              <h3 class="card-title">Description</h3>
+            </div>
+            <ion-card-content>
+              <div class="description-content" :class="{ 'no-description': !report.description }">
+                <p>{{ report.description || 'Aucune description fournie' }}</p>
               </div>
             </ion-card-content>
           </ion-card>
 
-          <!-- Description -->
+          <!-- Détails techniques Card -->
           <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title class="card-title">
-                <ion-icon :icon="documentTextOutline"></ion-icon>
-                Description
-              </ion-card-title>
-            </ion-card-header>
+            <div class="card-header">
+              <ion-icon :icon="constructOutline" class="card-icon"></ion-icon>
+              <h3 class="card-title">Détails techniques</h3>
+            </div>
             <ion-card-content>
-              <p class="description-text">{{ report.description || 'Aucune description disponible' }}</p>
-            </ion-card-content>
-          </ion-card>
-
-          <!-- Détails techniques -->
-          <ion-card class="info-card">
-            <ion-card-header>
-              <ion-card-title class="card-title">
-                <ion-icon :icon="constructOutline"></ion-icon>
-                Détails techniques
-              </ion-card-title>
-            </ion-card-header>
-            <ion-card-content>
-              <div class="info-grid">
-                <div class="info-item full-width">
-                  <span class="info-label">
+              <div class="details-grid">
+                <div class="detail-item">
+                  <div class="detail-header">
                     <ion-icon :icon="resizeOutline"></ion-icon>
-                    Surface
-                  </span>
-                  <span class="info-value highlight">
-                    {{ report.surfaceM2 ? Number(report.surfaceM2).toLocaleString() : '-' }} m²
+                    <span class="detail-label">Surface</span>
+                  </div>
+                  <span class="detail-value" :class="{ 'empty': !report.surfaceM2 }">
+                    {{ report.surfaceM2 ? `${Number(report.surfaceM2).toLocaleString()} m²` : 'Non renseigné' }}
                   </span>
                 </div>
 
-                <div class="info-item full-width">
-                  <span class="info-label">
+                <div class="detail-item">
+                  <div class="detail-header">
                     <ion-icon :icon="cashOutline"></ion-icon>
-                    Budget estimé
-                  </span>
-                  <span class="info-value budget">
-                    {{ report.budget ? Number(report.budget).toLocaleString() : '-' }} Ar
+                    <span class="detail-label">Budget estimé</span>
+                  </div>
+                  <span class="detail-value budget-value" :class="{ 'empty': !report.budget }">
+                    {{ report.budget ? `${Number(report.budget).toLocaleString('fr-MG')} Ar` : 'Non renseigné' }}
                   </span>
                 </div>
 
-                <div class="info-item full-width" v-if="report.entreprise">
-                  <span class="info-label">
+                <div class="detail-item" v-if="report.entreprise">
+                  <div class="detail-header">
                     <ion-icon :icon="businessOutline"></ion-icon>
-                    Entreprise responsable
-                  </span>
-                  <span class="info-value">
+                    <span class="detail-label">Entreprise</span>
+                  </div>
+                  <span class="detail-value">
                     {{ report.entreprise.nom || report.entreprise }}
                   </span>
                 </div>
@@ -152,55 +151,38 @@
             </ion-card-content>
           </ion-card>
 
-          <!-- Photos (si disponibles) -->
+          <!-- Photos Card -->
           <ion-card class="info-card" v-if="report.photos && report.photos.length > 0">
-            <ion-card-header>
-              <ion-card-title class="card-title">
-                <ion-icon :icon="imagesOutline"></ion-icon>
-                Photos ({{ report.photos.length }})
-              </ion-card-title>
-            </ion-card-header>
+            <div class="card-header">
+              <ion-icon :icon="imagesOutline" class="card-icon"></ion-icon>
+              <h3 class="card-title">Photos ({{ report.photos.length }})</h3>
+            </div>
             <ion-card-content>
-              <div class="photos-grid">
-                <div 
-                  v-for="(photo, index) in report.photos" 
-                  :key="index"
-                  class="photo-item"
-                  @click="viewPhoto(photo)"
-                >
-                  <img 
-                    :src="photo" 
-                    :alt="`Photo ${index + 1}`"
-                    @error="handleImageError"
-                    loading="lazy"
-                  />
+              <div class="photos-container">
+                <div class="photos-grid">
+                  <div 
+                    v-for="(photo, index) in report.photos" 
+                    :key="index"
+                    class="photo-item"
+                    @click="viewPhoto(photo, index)"
+                  >
+                    <img 
+                      :src="photo" 
+                      :alt="`Photo ${index + 1}`"
+                      @error="handleImageError"
+                      loading="lazy"
+                    />
+                    <div class="photo-overlay">
+                      <span class="photo-number">{{ index + 1 }}</span>
+                    </div>
+                  </div>
+                </div>
+                <div class="photos-indicator" v-if="report.photos.length > 3">
+                  <span class="indicator-text">{{ report.photos.length }} photos disponibles</span>
                 </div>
               </div>
             </ion-card-content>
           </ion-card>
-        </div>
-
-        <!-- Action buttons -->
-        <div class="action-buttons">
-          <ion-button 
-            expand="block" 
-            @click="viewOnMap"
-            color="primary"
-          >
-            <ion-icon :icon="mapOutline" slot="start"></ion-icon>
-            Voir sur la carte
-          </ion-button>
-
-          <ion-button 
-            v-if="isMyReport"
-            expand="block" 
-            fill="outline"
-            @click="editReport"
-            color="secondary"
-          >
-            <ion-icon :icon="createOutline" slot="start"></ion-icon>
-            Modifier
-          </ion-button>
         </div>
       </div>
     </ion-content>
@@ -220,19 +202,14 @@ import {
   IonIcon,
   IonContent,
   IonCard,
-  IonCardHeader,
-  IonCardTitle,
   IonCardContent,
   IonSpinner,
-  modalController
+  modalController,
+  actionSheetController
 } from '@ionic/vue';
 import {
   arrowBackOutline,
   alertCircleOutline,
-  informationCircleOutline,
-  calendarOutline,
-  personOutline,
-  locationOutline,
   documentTextOutline,
   constructOutline,
   resizeOutline,
@@ -240,10 +217,13 @@ import {
   businessOutline,
   imagesOutline,
   mapOutline,
-  createOutline
+  ellipsisVerticalOutline,
+  refreshOutline,
+  calendarOutline,
+  personOutline,
+  locationOutline
 } from 'ionicons/icons';
 import reportsService from '../services/reports.service';
-import authService from '../services/auth.service';
 
 const route = useRoute();
 const router = useRouter();
@@ -252,22 +232,14 @@ const report = ref<any>(null);
 const loading = ref(true);
 const error = ref('');
 
-// Vérifier si c'est le signalement de l'utilisateur
-const isMyReport = computed(() => {
-  const user = authService.getStoredUser();
-  return user && report.value && report.value.userEmail === user.email;
-});
-
-// Formater la date
-const formatDate = (dateString: string) => {
+// Formater la date (version courte)
+const formatDateShort = (dateString: string) => {
   if (!dateString) return '-';
   const date = new Date(dateString);
   return date.toLocaleDateString('fr-FR', {
     day: '2-digit',
-    month: 'long',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
+    month: 'short',
+    year: 'numeric'
   });
 };
 
@@ -278,16 +250,6 @@ const getStatutLabel = (statut: number) => {
     case 11: return 'En cours';
     case 99: return 'Terminé';
     default: return 'Annulé';
-  }
-};
-
-// Couleur du statut
-const getStatutColor = (statut: number) => {
-  switch (statut) {
-    case 1: return '#4ECDC4';
-    case 11: return '#FFD166';
-    case 99: return '#06D6A0';
-    default: return '#8E8AA0';
   }
 };
 
@@ -314,21 +276,48 @@ const goBack = () => {
 };
 
 const viewOnMap = () => {
-  router.push(`/map?reportId=${report.value.id}`);
+  router.push(`/map?reportId=${report.value.id}&lat=${report.value.latitude}&lng=${report.value.longitude}`);
 };
 
-const editReport = () => {
-  router.push(`/report/edit/${report.value.id}`);
+const openOptions = async () => {
+  const actionSheet = await actionSheetController.create({
+    header: 'Options',
+    buttons: [
+      {
+        text: 'Modifier',
+        icon: 'create-outline',
+        handler: () => {
+          router.push(`/report/edit/${report.value.id}`);
+        }
+      },
+      {
+        text: 'Partager',
+        icon: 'share-outline',
+        handler: () => {
+          // Implémentez le partage
+          console.log('Partager le signalement', report.value.id);
+        }
+      },
+      {
+        text: 'Annuler',
+        icon: 'close',
+        role: 'cancel'
+      }
+    ]
+  });
+  
+  await actionSheet.present();
 };
 
-const viewPhoto = async (photoUrl: string) => {
+const viewPhoto = async (photoUrl: string, index: number) => {
   const modal = await modalController.create({
     component: defineAsyncComponent(() => import('../components/common/ImageViewer.vue')),
     componentProps: {
       imageUrl: photoUrl,
-      images: report.value.photos || []
+      images: report.value.photos || [],
+      currentIndex: index
     },
-    cssClass: 'fullscreen-modal'
+    cssClass: 'image-viewer-modal'
   });
   
   await modal.present();
@@ -336,8 +325,7 @@ const viewPhoto = async (photoUrl: string) => {
 
 const handleImageError = (event: Event) => {
   const img = event.target as HTMLImageElement;
-  // Image de fallback en cas d'erreur
-  img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="100" height="100"%3E%3Crect fill="%23f0f0f0" width="100" height="100"/%3E%3Ctext x="50%25" y="50%25" text-anchor="middle" dy=".3em" fill="%23999"%3EImage%3C/text%3E%3C/svg%3E';
+  img.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" width="150" height="150" viewBox="0 0 150 150"%3E%3Crect width="150" height="150" fill="%23f5f5f5"/%3E%3Cpath d="M75 45L95 85H55L75 45Z" fill="%23ddd"/%3E%3Ccircle cx="75" cy="100" r="10" fill="%23ddd"/%3E%3C/svg%3E';
 };
 
 onMounted(() => {
@@ -346,200 +334,417 @@ onMounted(() => {
 </script>
 
 <style scoped>
-.loading-container,
-.error-container {
+/* Loading State */
+.loading-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: 100%;
-  padding: 32px;
+  height: 70vh;
+  gap: 20px;
+}
+
+.loading-container ion-spinner {
+  width: 48px;
+  height: 48px;
+  color: #FF6B6B;
+}
+
+.loading-container p {
+  color: #666;
+  font-size: 16px;
+  margin-top: 12px;
+}
+
+/* Error State */
+.error-container {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 70vh;
+  padding: 24px;
+}
+
+.error-content {
   text-align: center;
+  max-width: 280px;
 }
 
 .error-icon {
   font-size: 64px;
-  color: #e53e3e;
-  margin-bottom: 16px;
+  color: #FF6B6B;
+  margin-bottom: 20px;
 }
 
-.details-container {
-  padding: 0 0 120px 0;
+.error-content h3 {
+  font-size: 20px;
+  font-weight: 600;
+  color: #333;
+  margin-bottom: 12px;
 }
 
+.error-message {
+  color: #666;
+  font-size: 14px;
+  line-height: 1.5;
+  margin-bottom: 24px;
+}
+
+.retry-button {
+  --border-color: #FF6B6B;
+  --color: #FF6B6B;
+}
+
+/* Header Section */
 .header-section {
+  padding: 24px 20px;
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  padding: 24px 16px;
   color: white;
 }
 
-.header-content {
+.header-top {
   display: flex;
   justify-content: space-between;
-  align-items: flex-start;
-  gap: 16px;
-  margin-bottom: 8px;
+  align-items: center;
+  margin-bottom: 16px;
 }
 
-.report-title {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 0;
-  flex: 1;
+.report-id {
+  font-size: 14px;
+  opacity: 0.8;
+  font-weight: 500;
 }
 
 .status-badge {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
-  padding: 8px 16px;
+  gap: 6px;
+  padding: 6px 12px;
   border-radius: 20px;
-  font-size: 13px;
-  font-weight: 700;
-  white-space: nowrap;
-}
-
-.status-dot {
-  width: 10px;
-  height: 10px;
-  border-radius: 50%;
-}
-
-.report-id {
-  margin: 0;
-  opacity: 0.9;
-  font-size: 14px;
-}
-
-.info-section {
-  padding: 16px;
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.info-card {
-  margin: 0;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-}
-
-.card-title {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  font-size: 18px;
+  font-size: 12px;
   font-weight: 600;
-  color: #1A1A2E;
-}
-
-.card-title ion-icon {
-  font-size: 24px;
-  color: #FF6B6B;
-}
-
-.info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 16px;
-}
-
-.info-item {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
-
-.info-item.full-width {
-  grid-column: 1 / -1;
-}
-
-.info-label {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  color: #4A4458;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
 
-.info-label ion-icon {
-  font-size: 18px;
+.status-1 {
+  background: rgba(78, 205, 196, 0.2);
+  color: #4ECDC4;
+  border: 1px solid rgba(78, 205, 196, 0.3);
 }
 
-.info-value {
+.status-11 {
+  background: rgba(255, 209, 102, 0.2);
+  color: #FFD166;
+  border: 1px solid rgba(255, 209, 102, 0.3);
+}
+
+.status-99 {
+  background: rgba(6, 214, 160, 0.2);
+  color: #06D6A0;
+  border: 1px solid rgba(6, 214, 160, 0.3);
+}
+
+.status-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+}
+
+.status-1 .status-dot { background: #4ECDC4; }
+.status-11 .status-dot { background: #FFD166; }
+.status-99 .status-dot { background: #06D6A0; }
+
+.report-title {
+  font-size: 24px;
+  font-weight: 700;
+  margin: 0 0 16px 0;
+  line-height: 1.3;
+}
+
+.header-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  font-size: 14px;
+}
+
+.meta-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.9;
+}
+
+.meta-item ion-icon {
+  font-size: 16px;
+}
+
+.meta-item .time {
+  margin-left: 4px;
+  opacity: 0.8;
+}
+
+/* Content Section */
+.content-section {
+  padding: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding-bottom: 40px;
+}
+
+.info-card {
+  margin: 0;
+  border-radius: 12px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+  overflow: hidden;
+}
+
+.card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 20px 20px 0;
+  margin-bottom: 12px;
+}
+
+.card-icon {
+  font-size: 24px;
+  color: #FF6B6B;
+}
+
+.card-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: #333;
+  margin: 0;
+}
+
+ion-card-content {
+  padding: 0 20px 20px !important;
+}
+
+/* Location Card */
+.coordinates-display {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.coordinates-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.coordinate-label {
+  font-size: 12px;
+  color: #666;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.coordinate-value {
   font-size: 16px;
   font-weight: 600;
-  color: #1A1A2E;
+  color: #333;
+  font-family: 'Monaco', 'Courier New', monospace;
 }
 
-.info-value.highlight {
+.map-button {
+  --background: #FF6B6B;
+  --background-activated: #ff5252;
+  --background-focused: #ff5252;
+  --background-hover: #ff5252;
+  --border-radius: 10px;
+  height: 44px;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+.map-button ion-icon {
+  margin-right: 8px;
+}
+
+/* Description */
+.description-content {
+  line-height: 1.6;
+  color: #444;
+  font-size: 15px;
+  padding: 8px 0;
+}
+
+.description-content.no-description {
+  color: #999;
+  font-style: italic;
+}
+
+/* Technical Details */
+.details-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 8px 0;
+}
+
+.detail-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-bottom: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.detail-item:last-child {
+  border-bottom: none;
+  padding-bottom: 0;
+}
+
+.detail-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.detail-header ion-icon {
+  font-size: 20px;
+  color: #666;
+}
+
+.detail-label {
+  font-size: 14px;
+  color: #666;
+  font-weight: 500;
+}
+
+.detail-value {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+.detail-value.empty {
+  color: #999;
+  font-weight: normal;
+}
+
+.budget-value {
   color: #FF6B6B;
   font-size: 18px;
 }
 
-.info-value.budget {
-  color: #ed8936;
-  font-size: 20px;
-}
-
-.description-text {
-  margin: 0;
-  line-height: 1.6;
-  color: #4A4458;
-  font-size: 15px;
+/* Photos */
+.photos-container {
+  margin-top: 8px;
 }
 
 .photos-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+  display: flex;
   gap: 12px;
+  overflow-x: auto;
+  padding-bottom: 8px;
+  scrollbar-width: none;
+}
+
+.photos-grid::-webkit-scrollbar {
+  display: none;
 }
 
 .photo-item {
-  aspect-ratio: 1;
+  flex: 0 0 120px;
+  height: 120px;
   border-radius: 12px;
   overflow: hidden;
-  cursor: pointer;
-  transition: transform 0.2s;
-  background: #f0f0f0;
   position: relative;
-}
-
-.photo-item:active {
-  transform: scale(0.95);
+  cursor: pointer;
+  background: #f5f5f5;
 }
 
 .photo-item img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  display: block;
+  transition: transform 0.3s ease;
 }
 
-.photo-item::after {
-  content: '';
+.photo-item:hover img {
+  transform: scale(1.05);
+}
+
+.photo-overlay {
   position: absolute;
-  inset: 0;
-  background: rgba(0, 0, 0, 0);
-  transition: background 0.2s;
-}
-
-.photo-item:hover::after {
-  background: rgba(0, 0, 0, 0.1);
-}
-
-.action-buttons {
-  padding: 16px;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: linear-gradient(transparent, rgba(0,0,0,0.3));
+  padding: 8px;
   display: flex;
-  flex-direction: column;
-  gap: 12px;
+  justify-content: flex-end;
 }
 
-.action-buttons ion-button {
-  --border-radius: 12px;
+.photo-number {
+  background: rgba(0,0,0,0.6);
+  color: white;
+  width: 24px;
+  height: 24px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
   font-weight: 600;
+}
+
+.photos-indicator {
+  text-align: center;
+  margin-top: 12px;
+}
+
+.indicator-text {
+  font-size: 12px;
+  color: #999;
+}
+
+/* Back Button */
+.back-button {
+  --color: white;
+}
+
+.options-button {
+  --color: white;
+}
+
+/* Responsive */
+@media (min-width: 768px) {
+  .content-section {
+    padding: 24px;
+    gap: 24px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .info-card {
+    border-radius: 16px;
+  }
+  
+  .photos-grid {
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  }
+  
+  .photo-item {
+    flex: 0 0 150px;
+    height: 150px;
+  }
+  
+  .coordinates-display {
+    flex-direction: row;
+    gap: 24px;
+  }
+  
+  .coordinates-row {
+    flex: 1;
+  }
 }
 </style>

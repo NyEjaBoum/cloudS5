@@ -1,41 +1,24 @@
+<!-- src/views/mobile/ReportPage.vue -->
 <template>
   <ion-page>
     <ion-content :fullscreen="true">
-      <!-- Header -->
+      <!-- Header sans bouton retour -->
       <ion-header class="ion-no-border report-header">
         <div class="header-background">
           <div class="gradient-overlay"></div>
         </div>
 
         <ion-toolbar class="transparent-toolbar">
-          <ion-buttons slot="start">
-            <ion-button @click="goBack">
-              <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
-            </ion-button>
-          </ion-buttons>
-          <ion-title class="report-title">Nouveau signalement</ion-title>
+          <ion-title class="report-title">
+            Nouveau signalement
+          </ion-title>
         </ion-toolbar>
       </ion-header>
 
       <!-- Contenu principal -->
       <div class="report-content">
-        <!-- Formulaire de création -->
+        <!-- Formulaire simplifié -->
         <ReportForm />
-
-        <!-- Carte des signalements existants -->
-        <ion-card class="form-section">
-          <ion-card-header>
-            <ion-card-title>
-              <div class="section-header">
-                <span class="step-number">2</span>
-                <span>Signalements existants</span>
-              </div>
-            </ion-card-title>
-          </ion-card-header>
-          <ion-card-content>
-            <SignalementsMap />
-          </ion-card-content>
-        </ion-card>
       </div>
 
       <!-- Bottom Navigation -->
@@ -45,15 +28,9 @@
 </template>
 
 <script setup lang="ts">
-import { useRouter } from 'vue-router';
-import { IonPage, IonContent, IonHeader, IonToolbar, IonTitle, IonButtons, IonButton, IonIcon, IonCard, IonCardHeader, IonCardTitle, IonCardContent } from '@ionic/vue';
-import { arrowBackOutline } from 'ionicons/icons';
+import { IonPage, IonContent, IonHeader, IonToolbar, IonTitle } from '@ionic/vue';
 import { NavBar } from '../components';
 import ReportForm from '../components/report/ReportForm.vue';
-import SignalementsMap from '../components/report/SignalementsMap.vue';
-
-const router = useRouter();
-const goBack = () => router.back();
 </script>
 
 <style scoped>
@@ -62,6 +39,7 @@ const goBack = () => router.back();
   background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
   padding-bottom: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
 }
 
 .header-background {
@@ -78,21 +56,24 @@ const goBack = () => router.back();
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.92) 0%, rgba(255, 142, 83, 0.92) 100%);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(255, 142, 83, 0.95) 100%);
 }
 
 .transparent-toolbar {
   --background: transparent;
   --color: white;
+  --min-height: 70px;
 }
 
 .report-title {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
-  padding-left: 16px;
-  font-size: 22px;
+  padding-left: 20px;
+  font-size: 24px;
   font-weight: 800;
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+  letter-spacing: 0.5px;
 }
 
 /* Contenu principal */
@@ -100,12 +81,17 @@ const goBack = () => router.back();
   background: #FAFAF8;
   padding: 20px 16px;
   padding-bottom: 120px;
+  min-height: 100vh;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .report-content {
-    background: #1A1A2E;
+    background: #121212;
+  }
+
+  .report-header {
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
   }
 }
 </style>

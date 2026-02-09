@@ -1,62 +1,12 @@
 <!-- src/views/mobile/MapPage.vue -->
 <template>
   <ion-page>
-    <!-- Header avec bouton de signalement -->
-    <ion-header class="ion-no-border">
-      <ion-toolbar>
-        <ion-buttons slot="start">
-          <ion-button @click="goBack">
-            <ion-icon slot="icon-only" :icon="arrowBackOutline"></ion-icon>
-          </ion-button>
-          <ion-button @click="toggleSidebar">
-            <ion-icon slot="icon-only" :icon="isSidebarOpen ? closeOutline : menuOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-
-        <ion-title>
-          <span class="app-title">Mapeo</span>
-          <span class="location-subtitle">Antananarivo</span>
-        </ion-title>
-
-        <ion-buttons slot="end">
-          <ion-button @click="openReportModal" class="report-button" color="primary">
-            <ion-icon slot="icon-only" :icon="addOutline"></ion-icon>
-            <span class="button-text">Report</span>
-          </ion-button>
-          <ion-button @click="locateUser">
-            <ion-icon slot="icon-only" :icon="navigateOutline"></ion-icon>
-          </ion-button>
-        </ion-buttons>
-      </ion-toolbar>
-
-      <!-- Barre de recherche -->
-      <ion-toolbar>
-        <ion-searchbar
-          v-model="searchQuery"
-          placeholder="Search location or address"
-          @ionInput="handleSearch"
-          @keyup.enter="searchLocation"
-        ></ion-searchbar>
-      </ion-toolbar>
-    </ion-header>
-
-    <!-- Sidebar pour filtres et liste -->
-    <FilterSidebar
-      :is-open="isSidebarOpen"
-      v-model:active-filters="activeFilters"
-      v-model:urgency-filter="urgencyFilter"
-      :reports="nearbyReports"
-      :active-report-id="activeReportId"
-      @report-click="focusOnReport"
-      @report-details="viewReportDetails"
-    />
-
-    <!-- Contenu principal : Carte -->
+    <!-- Contenu principal : Carte uniquement -->
     <ion-content class="map-content">
       <div id="map" class="map-container"></div>
 
       <!-- Overlay de chargement -->
-      <LoadingOverlay :visible="mapLoading" message="Loading map..." />
+      <LoadingOverlay :visible="mapLoading" message="Chargement de la carte..." />
     </ion-content>
 
     <!-- Bottom Navigation -->
@@ -66,39 +16,15 @@
 
 <script setup>
 import { ref, onMounted, onUnmounted, nextTick, watch } from 'vue';
-import { useRouter } from 'vue-router';
-import {
-  IonPage,
-  IonHeader,
-  IonToolbar,
-  IonTitle,
-  IonButtons,
-  IonButton,
-  IonIcon,
-  IonContent,
-  IonSearchbar
-} from '@ionic/vue';
-import {
-  menuOutline,
-  closeOutline,
-  addOutline,
-  navigateOutline,
-  arrowBackOutline
-} from 'ionicons/icons';
+import { IonPage, IonContent } from '@ionic/vue';
 
-import { NavBar, FilterSidebar, LoadingOverlay } from '../components';
+import { NavBar, LoadingOverlay } from '../components';
 import reportsService from '../services/reports.service';
-
-const router = useRouter();
 
 // État de l'application
 const mapLoading = ref(true);
-const isSidebarOpen = ref(false);
-const searchQuery = ref('');
-const urgencyFilter = ref('all');
 const activeFilters = ref([]);
 const activeReportId = ref(null);
-const selectedLocation = ref(null);
 
 // Données des signalements
 const nearbyReports = ref([]);
@@ -151,85 +77,6 @@ let map = null;
 let L = null;
 let markersLayer = null;
 
-// Méthodes
-const toggleSidebar = () => {
-  isSidebarOpen.value = !isSidebarOpen.value;
-};
-
-const openReportModal = () => {
-  router.push('/report');
-};
-
-const goBack = () => {
-  router.back();
-};
-
-const locateUser = () => {
-  if (navigator.geolocation) {
-    navigator.geolocation.getCurrentPosition(
-      (position) => {
-        const userLocation = {
-          lat: position.coords.latitude,
-          lng: position.coords.longitude
-        };
-
-        if (map) {
-          map.setView(userLocation, 16);
-
-          L.marker(userLocation, {
-            icon: L.divIcon({
-              className: 'user-location-marker',
-              html: '<div class="user-pulse"></div>',
-              iconSize: [40, 40],
-              iconAnchor: [20, 20]
-            })
-          }).addTo(map);
-        }
-      },
-      (error) => {
-        console.error('Error getting location:', error);
-      }
-    );
-  }
-};
-
-const searchLocation = () => {
-  if (searchQuery.value.trim() && map) {
-    console.log('Searching for:', searchQuery.value);
-    const searchLoc = { lat: -18.8792, lng: 47.5079 };
-    map.setView(searchLoc, 15);
-
-    L.marker(searchLoc, {
-      icon: L.divIcon({
-        className: 'search-location-marker',
-        html: '<div class="search-pin"></div>',
-        iconSize: [30, 30],
-        iconAnchor: [15, 30]
-      })
-    })
-    .addTo(map)
-    .bindPopup(`Search: ${searchQuery.value}`)
-    .openPopup();
-  }
-};
-
-const handleSearch = (event) => {
-  searchQuery.value = event.target.value;
-};
-
-const focusOnReport = (report) => {
-  activeReportId.value = report.id;
-  const coords = getCoordinates(report);
-
-  if (map && coords) {
-    map.setView(coords, 16);
-  }
-};
-
-const viewReportDetails = (reportId) => {
-  router.push(`/report/${reportId}`);
-};
-
 // Extraire les coordonnées
 const getCoordinates = (report) => {
   if (report.location?.lat && report.location?.lng) {
@@ -239,6 +86,25 @@ const getCoordinates = (report) => {
     return [Number(report.latitude), Number(report.longitude)];
   }
   return null;
+};
+
+// Fonction helper pour le statut
+const getStatutLabel = (statut) => {
+  switch (statut) {
+    case 1: return 'Nouveau';
+    case 11: return 'En cours';
+    case 99: return 'Terminé';
+    default: return 'Annulé';
+  }
+};
+
+const getStatutColor = (statut) => {
+  switch (statut) {
+    case 1: return '#4ECDC4';
+    case 11: return '#FFD166';
+    case 99: return '#06D6A0';
+    default: return '#8E8AA0';
+  }
 };
 
 // Méthodes Leaflet
@@ -274,30 +140,6 @@ const initializeMap = async () => {
     }).addTo(map);
 
     markersLayer = L.layerGroup().addTo(map);
-
-    map.on('click', (e) => {
-      selectedLocation.value = {
-        lat: e.latlng.lat,
-        lng: e.latlng.lng
-      };
-
-      const tempMarker = L.marker(e.latlng, {
-        icon: L.divIcon({
-          className: 'temp-location-marker',
-          html: '<div class="temp-pin"></div>',
-          iconSize: [30, 30],
-          iconAnchor: [15, 30]
-        })
-      })
-      .addTo(map)
-      .bindPopup('Click "Report" to create issue here')
-      .openPopup();
-
-      if (window.tempMarker) {
-        map.removeLayer(window.tempMarker);
-      }
-      window.tempMarker = tempMarker;
-    });
 
     setTimeout(() => {
       if (map) {
@@ -389,36 +231,11 @@ const addReportMarker = (report) => {
           </div>
         ` : ''}
       </div>
-      
-      <div class="popup-actions">
-        <button onclick="window.viewReportDetails('${report.id}')" class="btn-primary">
-          Voir détails complets
-        </button>
-      </div>
     </div>
   `);
 
   marker.addTo(markersLayer);
   marker.reportId = report.id;
-};
-
-// Fonction helper pour le statut
-const getStatutLabel = (statut) => {
-  switch (statut) {
-    case 1: return 'Nouveau';
-    case 11: return 'En cours';
-    case 99: return 'Terminé';
-    default: return 'Annulé';
-  }
-};
-
-const getStatutColor = (statut) => {
-  switch (statut) {
-    case 1: return '#4ECDC4';
-    case 11: return '#FFD166';
-    case 99: return '#06D6A0';
-    default: return '#8E8AA0';
-  }
 };
 
 const updateMapMarkers = () => {
@@ -437,7 +254,7 @@ const updateMapMarkers = () => {
 };
 
 // Watch pour les filtres
-watch([activeFilters, urgencyFilter], () => {
+watch([activeFilters], () => {
   updateMapMarkers();
 });
 
@@ -456,21 +273,17 @@ onMounted(async () => {
     console.log('Signalements reçus de Firestore:', reports.length, reports);
 
     nearbyReports.value = reports.map(report => {
-      // Le service retourne directement latitude et longitude comme strings
       const lat = Number(report.latitude) || 0;
       const lng = Number(report.longitude) || 0;
 
-      // Log pour debug
       console.log(`Report ${report.id}: lat=${lat}, lng=${lng}`);
 
       return {
         ...report,
-        // Pas besoin de transformer, on garde le format du service
-        // Juste convertir en nombres pour les calculs
         title: report.titre,
         description: report.description,
         status: report.statut === 1 ? 'pending' : report.statut === 11 ? 'in_progress' : 'resolved',
-        category: 'infrastructure', // Valeur par défaut si pas de catégorie
+        category: 'infrastructure',
         distance: calculateDistance(centerLat, centerLng, lat, lng).toFixed(1),
         timeAgo: getTimeAgo(report.dateCreation ? new Date(report.dateCreation) : new Date()),
         createdAt: report.dateCreation ? new Date(report.dateCreation) : new Date()
@@ -479,13 +292,10 @@ onMounted(async () => {
 
     console.log('Signalements transformés:', nearbyReports.value);
 
-    // Mettre à jour les marqueurs après réception des données
     setTimeout(() => {
       updateMapMarkers();
     }, 100);
   });
-
-  window.viewReportDetails = viewReportDetails;
 
   setTimeout(() => {
     if (map) {
@@ -495,7 +305,6 @@ onMounted(async () => {
 });
 
 onUnmounted(() => {
-  // Désabonner du listener Firestore
   if (unsubscribeReports) {
     unsubscribeReports();
   }
@@ -507,32 +316,6 @@ onUnmounted(() => {
 </script>
 
 <style scoped>
-/* Header styles */
-.app-title {
-  font-weight: 700;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-}
-
-.location-subtitle {
-  font-size: 12px;
-  color: #4A4458;
-  margin-left: 8px;
-}
-
-.report-button {
-  --padding-start: 12px;
-  --padding-end: 12px;
-}
-
-.report-button .button-text {
-  margin-left: 4px;
-  font-size: 14px;
-  font-weight: 600;
-}
-
 /* Map container styles */
 .map-content {
   --background: transparent;
@@ -551,7 +334,6 @@ onUnmounted(() => {
   bottom: 0;
   width: 100%;
   height: 100%;
-  z-index: 1;
 }
 
 /* Ensure leaflet container takes full space */
@@ -617,6 +399,7 @@ onUnmounted(() => {
 
 :global(.map-popup) {
   padding: 12px;
+  max-width: 280px;
 }
 
 :global(.map-popup h3) {
@@ -624,80 +407,89 @@ onUnmounted(() => {
   font-weight: 600;
   color: #1A1A2E;
   margin-bottom: 8px;
+  line-height: 1.3;
 }
 
-:global(.map-popup p) {
+:global(.map-popup .popup-description) {
   font-size: 14px;
   color: #4A4458;
   margin-bottom: 12px;
+  line-height: 1.4;
 }
 
-:global(.popup-meta) {
+:global(.popup-header) {
   display: flex;
   justify-content: space-between;
-  align-items: center;
-  margin-bottom: 12px;
+  align-items: flex-start;
+  margin-bottom: 8px;
 }
 
 :global(.status-badge) {
   padding: 4px 8px;
   border-radius: 12px;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 600;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
-:global(.status-badge.pending) {
-  background: #fed7d7;
-  color: #c53030;
+:global(.popup-details) {
+  margin: 12px 0;
 }
 
-:global(.status-badge.in_progress) {
-  background: #bee3f8;
-  color: #2b6cb0;
-}
-
-:global(.status-badge.resolved) {
-  background: #c6f6d5;
-  color: #276749;
-}
-
-:global(.popup-actions) {
+:global(.popup-detail-item) {
   display: flex;
+  align-items: center;
   gap: 8px;
+  margin-bottom: 6px;
+  font-size: 13px;
+  color: #4A4458;
 }
 
-:global(.popup-actions button) {
-  flex: 1;
-  padding: 8px 12px;
-  border: none;
-  border-radius: 6px;
-  background: #FF6B6B;
-  color: white;
+:global(.detail-icon) {
+  width: 20px;
+  text-align: center;
+}
+
+:global(.detail-label) {
+  font-weight: 500;
+  color: #666;
+  min-width: 70px;
+}
+
+:global(.detail-value) {
   font-weight: 600;
-  cursor: pointer;
-  font-size: 12px;
-}
-
-:global(.popup-actions button:hover) {
-  background: #E85555;
+  color: #1A1A2E;
 }
 
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   :global(.leaflet-container) {
-    background: #1A1A2E;
+    background: #121212;
   }
 
   :global(.leaflet-tile) {
     filter: brightness(0.9) invert(1) hue-rotate(180deg);
   }
-}
 
-/* Responsive */
-@media (max-width: 768px) {
-  .report-button .button-text {
-    display: none;
+  :global(.map-popup h3) {
+    color: #FFFFFF;
+  }
+
+  :global(.map-popup .popup-description) {
+    color: #AAA;
+  }
+
+  :global(.detail-value) {
+    color: #FFFFFF;
+  }
+
+  :global(.detail-label) {
+    color: #AAA;
+  }
+
+  :global(.popup-detail-item) {
+    color: #AAA;
   }
 }
 </style>
