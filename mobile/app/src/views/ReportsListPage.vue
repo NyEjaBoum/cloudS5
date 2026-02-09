@@ -225,10 +225,10 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#3D5E6B';
-    case 11: return '#f59e0b';
-    case 99: return '#16a34a';
-    default: return '#44474D';
+    case 1: return '#4ECDC4';
+    case 11: return '#FFD166';
+    case 99: return '#06D6A0';
+    default: return '#8E8AA0';
   }
 };
 
@@ -280,7 +280,7 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 16px;
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
 }
 
@@ -317,7 +317,7 @@ onMounted(() => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #44474D;
+  color: #4A4458;
   font-size: 14px;
 }
 
@@ -335,14 +335,14 @@ onMounted(() => {
   background: white;
   border-radius: 16px;
   padding: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-  transition: all 0.3s ease;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
   cursor: pointer;
 }
 
 .report-card:active {
   transform: scale(0.98);
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.12);
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
 }
 
 /* Header de la card */
@@ -361,13 +361,13 @@ onMounted(() => {
 .report-title {
   font-size: 16px;
   font-weight: 700;
-  color: #2c424b;
+  color: #1A1A2E;
   margin: 0 0 4px 0;
 }
 
 .report-id {
   font-size: 12px;
-  color: #9CA5B1;
+  color: #8E8AA0;
   margin: 0;
 }
 
@@ -394,7 +394,7 @@ onMounted(() => {
 /* Description */
 .report-description {
   font-size: 14px;
-  color: #344f5a;
+  color: #4A4458;
   line-height: 1.5;
   margin: 0 0 12px 0;
 }
@@ -405,7 +405,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: #f0f5f6;
+  background: #FFF8F2;
   border-radius: 12px;
   margin-bottom: 12px;
 }
@@ -425,18 +425,18 @@ onMounted(() => {
 
 .detail-icon {
   font-size: 16px;
-  color: #3D5E6B;
+  color: #FF6B6B;
   flex-shrink: 0;
 }
 
 .detail-label {
-  color: #44474D;
+  color: #4A4458;
   font-weight: 500;
   min-width: 60px;
 }
 
 .detail-value {
-  color: #2c424b;
+  color: #1A1A2E;
   font-weight: 600;
   flex: 1;
   overflow: hidden;
@@ -449,7 +449,7 @@ onMounted(() => {
   display: flex;
   justify-content: flex-end;
   padding-top: 8px;
-  border-top: 1px solid #dce6e9;
+  border-top: 1px solid #EEEAE2;
 }
 
 /* Responsive */
@@ -470,36 +470,36 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .report-card {
-    background: #26373f;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: #262640;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   .report-title {
-    color: #f0f5f6;
+    color: #E8E6F0;
   }
 
   .report-id {
-    color: #44474D;
+    color: #8E8AA0;
   }
 
   .report-description {
-    color: #b8ccd2;
+    color: #B8B4C8;
   }
 
   .report-details {
-    background: #1e2e34;
+    background: #1A1A2E;
   }
 
   .detail-label {
-    color: #9CA5B1;
+    color: #8E8AA0;
   }
 
   .detail-value {
-    color: #dce6e9;
+    color: #E8E6F0;
   }
 
   .report-footer {
-    border-top-color: #2c424b;
+    border-top-color: #363650;
   }
 }
 </style>

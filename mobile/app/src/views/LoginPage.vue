@@ -153,7 +153,7 @@ const handleLogin = async () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFD166 100%);
 }
 
 .gradient-bg::before,
@@ -161,7 +161,7 @@ const handleLogin = async () => {
   content: "";
   position: absolute;
   border-radius: 50%;
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.15);
 }
 
 .gradient-bg::before {
@@ -192,10 +192,10 @@ const handleLogin = async () => {
 }
 
 .welcome-title {
-  font-size: 24px;
-  font-weight: 700;
+  font-size: 28px;
+  font-weight: 800;
   margin-bottom: 8px;
-  text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  text-shadow: 0 2px 8px rgba(0, 0, 0, 0.12);
 }
 
 .welcome-subtitle {
@@ -206,10 +206,11 @@ const handleLogin = async () => {
 
 /* Form section */
 .form-section {
-  margin-top: -20px;
+  margin-top: -24px;
   background: white;
-  border-radius: 24px 24px 0 0;
-  padding: 24px 16px;
+  border-radius: 28px 28px 0 0;
+  padding: 32px 20px;
+  box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.05);
   position: relative;
   z-index: 1;
 }
@@ -222,12 +223,12 @@ const handleLogin = async () => {
 .form-title {
   font-size: 22px;
   font-weight: 700;
-  color: #2c424b;
+  color: #1A1A2E;
   margin-bottom: 8px;
 }
 
 .form-subtitle {
-  color: #44474D;
+  color: #4A4458;
   margin: 0;
   font-size: 14px;
 }
@@ -248,16 +249,16 @@ const handleLogin = async () => {
 }
 
 .login-button {
-  --border-radius: 12px;
-  height: 48px;
+  --border-radius: 14px;
+  height: 52px;
   margin: 8px 0 24px;
-  font-weight: 600;
+  font-weight: 700;
 }
 
 /* Dark mode support */
 @media (prefers-color-scheme: dark) {
   .form-section {
-    background: #26373f;
+    background: #1A1A2E;
   }
 }
 </style>

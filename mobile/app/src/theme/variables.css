@@ -1,82 +1,82 @@
-/* Mapeo Teal Theme - Ionic Variables */
+/* Mapeo Sunrise Theme - Warm & Modern */
 
 :root {
-  /* Primary - Teal 600 */
-  --ion-color-primary: #3D5E6B;
-  --ion-color-primary-rgb: 61, 94, 107;
+  /* Primary - Living Coral */
+  --ion-color-primary: #FF6B6B;
+  --ion-color-primary-rgb: 255, 107, 107;
   --ion-color-primary-contrast: #ffffff;
   --ion-color-primary-contrast-rgb: 255, 255, 255;
-  --ion-color-primary-shade: #344f5a;
-  --ion-color-primary-tint: #4a7280;
+  --ion-color-primary-shade: #E85555;
+  --ion-color-primary-tint: #FF8E53;
 
-  /* Secondary - Stone 500 */
-  --ion-color-secondary: #877C73;
-  --ion-color-secondary-rgb: 135, 124, 115;
+  /* Secondary - Caribbean Teal */
+  --ion-color-secondary: #4ECDC4;
+  --ion-color-secondary-rgb: 78, 205, 196;
   --ion-color-secondary-contrast: #ffffff;
   --ion-color-secondary-contrast-rgb: 255, 255, 255;
-  --ion-color-secondary-shade: #6b6159;
-  --ion-color-secondary-tint: #9CA5B1;
+  --ion-color-secondary-shade: #44B3AA;
+  --ion-color-secondary-tint: #6DD5CE;
 
-  /* Tertiary - Teal 400 */
-  --ion-color-tertiary: #5d8391;
-  --ion-color-tertiary-rgb: 93, 131, 145;
+  /* Tertiary - Soft Violet */
+  --ion-color-tertiary: #A78BFA;
+  --ion-color-tertiary-rgb: 167, 139, 250;
   --ion-color-tertiary-contrast: #ffffff;
   --ion-color-tertiary-contrast-rgb: 255, 255, 255;
-  --ion-color-tertiary-shade: #4a7280;
-  --ion-color-tertiary-tint: #8fadb6;
+  --ion-color-tertiary-shade: #8B6FE0;
+  --ion-color-tertiary-tint: #B9A0FB;
 
-  /* Success */
-  --ion-color-success: #16a34a;
-  --ion-color-success-rgb: 22, 163, 74;
+  /* Success - Emerald */
+  --ion-color-success: #06D6A0;
+  --ion-color-success-rgb: 6, 214, 160;
   --ion-color-success-contrast: #ffffff;
   --ion-color-success-contrast-rgb: 255, 255, 255;
-  --ion-color-success-shade: #128c3f;
-  --ion-color-success-tint: #2db85c;
+  --ion-color-success-shade: #05BC8D;
+  --ion-color-success-tint: #1FDDAA;
 
-  /* Warning */
-  --ion-color-warning: #f59e0b;
-  --ion-color-warning-rgb: 245, 158, 11;
-  --ion-color-warning-contrast: #000000;
-  --ion-color-warning-contrast-rgb: 0, 0, 0;
-  --ion-color-warning-shade: #d88a09;
-  --ion-color-warning-tint: #f6a823;
+  /* Warning - Warm Gold */
+  --ion-color-warning: #FFD166;
+  --ion-color-warning-rgb: 255, 209, 102;
+  --ion-color-warning-contrast: #1A1A2E;
+  --ion-color-warning-contrast-rgb: 26, 26, 46;
+  --ion-color-warning-shade: #E0B85A;
+  --ion-color-warning-tint: #FFD87A;
 
-  /* Danger */
-  --ion-color-danger: #dc2626;
-  --ion-color-danger-rgb: 220, 38, 38;
+  /* Danger - Warm Red */
+  --ion-color-danger: #EF4444;
+  --ion-color-danger-rgb: 239, 68, 68;
   --ion-color-danger-contrast: #ffffff;
   --ion-color-danger-contrast-rgb: 255, 255, 255;
-  --ion-color-danger-shade: #c12121;
-  --ion-color-danger-tint: #e03c3c;
+  --ion-color-danger-shade: #D23C3C;
+  --ion-color-danger-tint: #F15757;
 
-  /* Medium - Stone 700 */
-  --ion-color-medium: #44474D;
-  --ion-color-medium-rgb: 68, 71, 77;
+  /* Medium */
+  --ion-color-medium: #8E8AA0;
+  --ion-color-medium-rgb: 142, 138, 160;
   --ion-color-medium-contrast: #ffffff;
   --ion-color-medium-contrast-rgb: 255, 255, 255;
-  --ion-color-medium-shade: #3a3c40;
-  --ion-color-medium-tint: #6b6159;
+  --ion-color-medium-shade: #7A7690;
+  --ion-color-medium-tint: #9E9AB0;
 
-  /* Light - Teal 50 */
-  --ion-color-light: #f0f5f6;
-  --ion-color-light-rgb: 240, 245, 246;
-  --ion-color-light-contrast: #2c424b;
-  --ion-color-light-contrast-rgb: 44, 66, 75;
-  --ion-color-light-shade: #dce6e9;
-  --ion-color-light-tint: #f8fafc;
+  /* Light */
+  --ion-color-light: #FFF8F2;
+  --ion-color-light-rgb: 255, 248, 242;
+  --ion-color-light-contrast: #1A1A2E;
+  --ion-color-light-contrast-rgb: 26, 26, 46;
+  --ion-color-light-shade: #EEEAE2;
+  --ion-color-light-tint: #FAFAF8;
 
   /* Global font */
   --ion-font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
 
-  /* Background */
-  --ion-background-color: #f8fafc;
-  --ion-background-color-rgb: 248, 250, 252;
+  /* Background - Warm white */
+  --ion-background-color: #FAFAF8;
+  --ion-background-color-rgb: 250, 250, 248;
 
-  /* Text */
-  --ion-text-color: #2c424b;
-  --ion-text-color-rgb: 44, 66, 75;
+  /* Text - Deep indigo */
+  --ion-text-color: #1A1A2E;
+  --ion-text-color-rgb: 26, 26, 46;
 
   /* Toolbar */
   --ion-toolbar-background: #ffffff;
-  --ion-toolbar-color: #2c424b;
+  --ion-toolbar-color: #1A1A2E;
 }

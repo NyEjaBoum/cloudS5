@@ -284,10 +284,10 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#3D5E6B';
-    case 11: return '#f59e0b';
-    case 99: return '#16a34a';
-    default: return '#44474D';
+    case 1: return '#4ECDC4';
+    case 11: return '#FFD166';
+    case 99: return '#06D6A0';
+    default: return '#8E8AA0';
   }
 };
 
@@ -368,7 +368,7 @@ onMounted(() => {
 }
 
 .header-section {
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   padding: 24px 16px;
   color: white;
 }
@@ -430,12 +430,12 @@ onMounted(() => {
   gap: 12px;
   font-size: 18px;
   font-weight: 600;
-  color: #2c424b;
+  color: #1A1A2E;
 }
 
 .card-title ion-icon {
   font-size: 24px;
-  color: #3D5E6B;
+  color: #FF6B6B;
 }
 
 .info-grid {
@@ -460,7 +460,7 @@ onMounted(() => {
   gap: 8px;
   font-size: 13px;
   font-weight: 600;
-  color: #44474D;
+  color: #4A4458;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }
@@ -472,11 +472,11 @@ onMounted(() => {
 .info-value {
   font-size: 16px;
   font-weight: 600;
-  color: #2c424b;
+  color: #1A1A2E;
 }
 
 .info-value.highlight {
-  color: #3D5E6B;
+  color: #FF6B6B;
   font-size: 18px;
 }
 
@@ -488,7 +488,7 @@ onMounted(() => {
 .description-text {
   margin: 0;
   line-height: 1.6;
-  color: #344f5a;
+  color: #4A4458;
   font-size: 15px;
 }
 

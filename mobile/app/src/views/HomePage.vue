@@ -39,22 +39,22 @@
             <QuickActionCard
               :icon="addCircleOutline"
               label="Nouveau signalement"
-              icon-color="#3D5E6B"
-              icon-background="rgba(61, 94, 107, 0.1)"
+              icon-color="#FF6B6B"
+              icon-background="rgba(255, 107, 107, 0.1)"
               @click="goToNewReport"
             />
             <QuickActionCard
               :icon="mapOutline"
               label="Voir la carte"
-              icon-color="#4299e1"
-              icon-background="rgba(66, 153, 225, 0.1)"
+              icon-color="#4ECDC4"
+              icon-background="rgba(78, 205, 196, 0.1)"
               @click="goToMap"
             />
             <QuickActionCard
               :icon="listOutline"
               label="Mes signalements"
-              icon-color="#48bb78"
-              icon-background="rgba(72, 187, 120, 0.1)"
+              icon-color="#A78BFA"
+              icon-background="rgba(167, 139, 250, 0.1)"
               @click="goToReports"
             />
           </div>
@@ -163,7 +163,7 @@ onMounted(() => {
 <style scoped>
 /* Header styles */
 .home-header {
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   color: white;
   padding-bottom: 20px;
 }
@@ -182,7 +182,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(74, 114, 128, 0.9) 0%, rgba(61, 94, 107, 0.9) 100%);
+  background: linear-gradient(135deg, rgba(255, 107, 107, 0.92) 0%, rgba(255, 142, 83, 0.92) 100%);
 }
 
 .transparent-toolbar {
@@ -200,16 +200,17 @@ onMounted(() => {
 .greeting {
   font-size: 14px;
   opacity: 0.9;
+  font-weight: 500;
 }
 
 .user-name {
-  font-size: 20px;
-  font-weight: 700;
+  font-size: 22px;
+  font-weight: 800;
 }
 
 /* Contenu principal */
 .home-content {
-  background: #f8fafc;
+  background: #FAFAF8;
   padding: 20px 16px;
   padding-bottom: 120px;
 }
@@ -223,7 +224,7 @@ onMounted(() => {
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  color: #2c424b;
+  color: #1A1A2E;
   margin-bottom: 16px;
 }
 
@@ -251,11 +252,11 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .home-content {
-    background: #1e2e34;
+    background: #1A1A2E;
   }
 
   .section-title {
-    color: #dce6e9;
+    color: #E8E6F0;
   }
 }
 </style>

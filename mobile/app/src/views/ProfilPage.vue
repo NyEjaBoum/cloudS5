@@ -204,7 +204,8 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -219,12 +220,12 @@ onMounted(() => {
 .user-name {
   font-size: 22px;
   font-weight: 700;
-  color: #2c424b;
+  color: #1A1A2E;
   margin: 0 0 4px 0;
 }
 
 .user-email {
-  color: #44474D;
+  color: #4A4458;
   font-size: 14px;
   margin: 0;
 }
@@ -235,9 +236,9 @@ onMounted(() => {
   grid-template-columns: repeat(2, 1fr);
   gap: 16px;
   background: white;
-  padding: 16px;
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  padding: 20px;
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
 }
 
 .stat-item {

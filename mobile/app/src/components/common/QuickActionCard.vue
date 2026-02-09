@@ -20,8 +20,8 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  iconColor: '#3D5E6B',
-  iconBackground: 'rgba(61, 94, 107, 0.1)'
+  iconColor: '#FF6B6B',
+  iconBackground: 'rgba(255, 107, 107, 0.08)'
 });
 
 defineEmits<{
@@ -31,10 +31,15 @@ defineEmits<{
 
 <style scoped>
 .action-card {
-  border-radius: 16px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  border-radius: 20px;
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.05);
   margin: 0;
   padding: 16px 12px;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.action-card:active {
+  transform: scale(0.96);
 }
 
 .action-content {
@@ -47,7 +52,7 @@ defineEmits<{
 .action-icon {
   width: 50px;
   height: 50px;
-  border-radius: 14px;
+  border-radius: 16px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -60,17 +65,17 @@ defineEmits<{
 .action-label {
   font-size: 12px;
   font-weight: 600;
-  color: #344f5a;
+  color: #1A1A2E;
   text-align: center;
 }
 
 @media (prefers-color-scheme: dark) {
   .action-card {
-    background: #26373f;
+    background: #262640;
   }
 
   .action-label {
-    color: #b8ccd2;
+    color: #E8E6F0;
   }
 }
 </style>

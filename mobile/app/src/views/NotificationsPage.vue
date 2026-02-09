@@ -158,11 +158,11 @@ const getStatutLabel = (statut: number) => {
 // Couleur du statut
 const getStatutColor = (statut: number) => {
   switch (statut) {
-    case 1: return '#3D5E6B';
-    case 11: return '#f59e0b';
-    case 99: return '#16a34a';
-    case 21: return '#44474D';
-    default: return '#44474D';
+    case 1: return '#4ECDC4';
+    case 11: return '#FFD166';
+    case 99: return '#06D6A0';
+    case 21: return '#8E8AA0';
+    default: return '#8E8AA0';
   }
 };
 
@@ -236,7 +236,7 @@ const goToReports = () => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #44474D;
+  color: #4A4458;
   font-size: 14px;
 }
 
@@ -267,8 +267,8 @@ const goToReports = () => {
 }
 
 .notification-card.unread {
-  background: #f0f5f6;
-  border-left: 4px solid #3D5E6B;
+  background: #FFF8F2;
+  border-left: 4px solid #FF6B6B;
   padding-left: 16px;
 }
 
@@ -280,7 +280,7 @@ const goToReports = () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #3D5E6B;
+  background: #FF6B6B;
 }
 
 /* Contenu */
@@ -300,14 +300,14 @@ const goToReports = () => {
 .notif-title {
   font-size: 15px;
   font-weight: 700;
-  color: #2c424b;
+  color: #1A1A2E;
   margin: 0;
   flex: 1;
 }
 
 .notif-date {
   font-size: 11px;
-  color: #9CA5B1;
+  color: #8E8AA0;
   white-space: nowrap;
   padding-right: 16px;
 }
@@ -332,12 +332,12 @@ const goToReports = () => {
 
 .arrow-icon {
   font-size: 14px;
-  color: #9CA5B1;
+  color: #8E8AA0;
 }
 
 .notif-message {
   font-size: 13px;
-  color: #44474D;
+  color: #4A4458;
   margin: 0;
   line-height: 1.4;
 }
@@ -345,24 +345,24 @@ const goToReports = () => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .notification-card {
-    background: #26373f;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+    background: #262640;
+    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   .notification-card.unread {
-    background: #2c424b;
+    background: #2E2E4A;
   }
 
   .notif-title {
-    color: #f0f5f6;
+    color: #E8E6F0;
   }
 
   .notif-date {
-    color: #44474D;
+    color: #8E8AA0;
   }
 
   .notif-message {
-    color: #9CA5B1;
+    color: #B8B4C8;
   }
 }
 </style>

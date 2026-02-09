@@ -134,11 +134,11 @@ const handleClick = (item: NavItem) => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: #2c424b;
+  background: #1A1A2E;
   border-radius: 28px;
   padding: 8px 8px;
   z-index: 1000;
-  box-shadow: 0 8px 32px rgba(44, 66, 75, 0.3), 0 2px 8px rgba(0, 0, 0, 0.15);
+  box-shadow: 0 8px 32px rgba(26, 26, 46, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-nav.has-padding {
@@ -154,10 +154,10 @@ const handleClick = (item: NavItem) => {
   border: none;
   padding: 8px 14px;
   cursor: pointer;
-  color: #8fadb6;
+  color: #8E8AA0;
   font-size: 10px;
   font-weight: 500;
-  transition: color 0.2s ease;
+  transition: color 0.25s ease;
   outline: none;
   position: relative;
   min-width: 56px;
@@ -165,11 +165,11 @@ const handleClick = (item: NavItem) => {
 }
 
 .nav-item:hover:not(.nav-item-disabled) {
-  color: #dce6e9;
+  color: #E8E6F0;
 }
 
 .nav-item.active:not(.nav-item-disabled) {
-  color: #ffffff;
+  color: #FF6B6B;
 }
 
 .nav-item-disabled {
@@ -192,26 +192,26 @@ const handleClick = (item: NavItem) => {
 }
 
 .center-button-inner {
-  width: 52px;
-  height: 52px;
-  background: linear-gradient(135deg, #4a7280 0%, #3D5E6B 100%);
+  width: 54px;
+  height: 54px;
+  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 4px 16px rgba(61, 94, 107, 0.4);
-  transition: transform 0.2s, box-shadow 0.2s;
-  border: 3px solid #2c424b;
+  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  transition: transform 0.25s ease, box-shadow 0.25s ease;
+  border: 3px solid #1A1A2E;
 }
 
 .center-button-inner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 20px rgba(61, 94, 107, 0.5);
+  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5);
 }
 
 .center-button-inner:active {
-  transform: translateY(0);
+  transform: translateY(0) scale(0.95);
 }
 
 .center-button-inner ion-icon {
@@ -228,7 +228,7 @@ const handleClick = (item: NavItem) => {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: #4a7280;
+  background-color: #FF6B6B;
 }
 
 /* Responsive */
@@ -250,8 +250,8 @@ const handleClick = (item: NavItem) => {
   }
 
   .center-button-inner {
-    width: 46px;
-    height: 46px;
+    width: 48px;
+    height: 48px;
   }
 
   .center-button-inner ion-icon {
