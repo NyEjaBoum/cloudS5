@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, exportUsersToFirebase } from "../../api/user";
+import { fetchAllUsers, exportUsers } from "../../api/user";
 import { Link } from "react-router-dom";
 import { Upload, Eye, Users as UsersIcon, AlertCircle } from "lucide-react";
 
@@ -22,8 +22,8 @@ export default function Users() {
     setLoading(true);
     setError("");
     try {
-      await exportUsersToFirebase();
-      alert("Export vers Firebase terminé !");
+      const result = await exportUsers();
+      alert(`✅ Export terminé !\n\nExportés: ${result.data?.exported || 0}\nMis à jour: ${result.data?.updated || 0}`);
     } catch (e) {
       setError(e.message);
     }

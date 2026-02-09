@@ -1,25 +1,49 @@
 import React, { useEffect, useState } from "react";
-import { fetchSignalementInfos, syncAllSignalements } from "../../api/signalement.js";
+import { fetchSignalementInfos, syncAllSignalements, importSignalements, exportSignalements } from "../../api/signalement.js";
 import { Link } from "react-router-dom";
-import { RefreshCw, Eye, MapPin } from "lucide-react";
+import { RefreshCw, Eye, MapPin, Download, Upload } from "lucide-react";
 
 export default function Signalements() {
   const [signalements, setSignalements] = useState([]);
+  const [loading, setLoading] = useState({ sync: false, import: false, export: false });
 
   useEffect(() => {
     fetchSignalementInfos().then(setSignalements);
   }, []);
 
   const handleSync = async () => {
+    setLoading(l => ({ ...l, sync: true }));
     try {
       const result = await syncAllSignalements();
-      const msg = result.message || JSON.stringify(result.data);
-      alert("Synchronisation terminée !\n" + msg);
+      alert(`✅ Synchronisation terminée !\n\nImportés: ${result.data?.imported || 0}\nExportés: ${result.data?.exported || 0}`);
       fetchSignalementInfos().then(setSignalements);
     } catch (e) {
-      alert("❌ ERREUR lors de la synchronisation :\n\n" + e.message);
-      console.error("Erreur sync:", e);
+      alert("❌ Erreur: " + e.message);
     }
+    setLoading(l => ({ ...l, sync: false }));
+  };
+
+  const handleImport = async () => {
+    setLoading(l => ({ ...l, import: true }));
+    try {
+      const result = await importSignalements();
+      alert(`✅ Import terminé !\n\nImportés: ${result.data?.imported || 0}\nMis à jour: ${result.data?.updated || 0}`);
+      fetchSignalementInfos().then(setSignalements);
+    } catch (e) {
+      alert("❌ Erreur import: " + e.message);
+    }
+    setLoading(l => ({ ...l, import: false }));
+  };
+
+  const handleExport = async () => {
+    setLoading(l => ({ ...l, export: true }));
+    try {
+      const result = await exportSignalements();
+      alert(`✅ Export terminé !\n\nExportés: ${result.data?.exported || 0}\nMis à jour: ${result.data?.updated || 0}`);
+    } catch (e) {
+      alert("❌ Erreur export: " + e.message);
+    }
+    setLoading(l => ({ ...l, export: false }));
   };
 
   const getStatusBadge = (statut) => {
@@ -48,15 +72,37 @@ export default function Signalements() {
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between flex-wrap gap-4">
         <div>
           <h1 className="text-2xl font-bold text-slate-800">Signalements</h1>
           <p className="text-sm text-slate-400 mt-0.5">{signalements.length} signalements enregistres</p>
         </div>
-        <button className="btn-primary-warm flex items-center gap-2 text-sm" onClick={handleSync}>
-          <RefreshCw size={15} />
-          Synchroniser
-        </button>
+        <div className="flex items-center gap-2">
+          <button 
+            className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-blue-50 text-blue-600 hover:bg-blue-100 transition-colors"
+            onClick={handleImport}
+            disabled={loading.import}
+          >
+            <Download size={15} className={loading.import ? "animate-bounce" : ""} />
+            {loading.import ? "Import..." : "Import Firebase"}
+          </button>
+          <button 
+            className="flex items-center gap-2 text-sm px-4 py-2 rounded-xl bg-emerald-50 text-emerald-600 hover:bg-emerald-100 transition-colors"
+            onClick={handleExport}
+            disabled={loading.export}
+          >
+            <Upload size={15} className={loading.export ? "animate-bounce" : ""} />
+            {loading.export ? "Export..." : "Export Firebase"}
+          </button>
+          <button 
+            className="btn-primary-warm flex items-center gap-2 text-sm" 
+            onClick={handleSync}
+            disabled={loading.sync}
+          >
+            <RefreshCw size={15} className={loading.sync ? "animate-spin" : ""} />
+            {loading.sync ? "Sync..." : "Sync Complet"}
+          </button>
+        </div>
       </div>
 
       {/* Table */}

@@ -61,30 +61,36 @@ export async function fetchBlocageHistorique(userId) {
   return data.data || [];
 }
 
-export async function importUsersFromFirebase() {
+export async function importUsers() {
   const token = localStorage.getItem("jwt");
   const res = await fetch("http://localhost:8080/api/utilisateurs/firebase/import", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer " + token
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
     }
   });
-  const data = await res.json();
-  if (data.status !== "success") throw new Error(data.error || "Erreur import Firebase");
-  return data.data;
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de l'import utilisateurs");
+  }
+  return json;
 }
 
-export async function exportUsersToFirebase() {
+export async function exportUsers() {
   const token = localStorage.getItem("jwt");
   const res = await fetch("http://localhost:8080/api/utilisateurs/firebase/export", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer " + token
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
     }
   });
-  const data = await res.json();
-  if (data.status !== "success") throw new Error(data.error || "Erreur export Firebase");
-  return data.data;
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de l'export utilisateurs");
+  }
+  return json;
 }
 
 export async function synchronizeUsers() {
@@ -92,10 +98,13 @@ export async function synchronizeUsers() {
   const res = await fetch("http://localhost:8080/api/utilisateurs/firebase/sync", {
     method: "POST",
     headers: {
-      "Authorization": "Bearer " + token
+      "Authorization": "Bearer " + token,
+      "Content-Type": "application/json"
     }
   });
-  const data = await res.json();
-  if (data.status !== "success") throw new Error(data.error || "Erreur synchronisation Firebase");
-  return data.data;
+  const json = await res.json();
+  if (json.status === "error" || !res.ok) {
+    throw new Error(json.error || "Erreur lors de la synchronisation utilisateurs");
+  }
+  return json;
 }

@@ -8,8 +8,8 @@ import {
   UserCredential,
   sendPasswordResetEmail
 } from 'firebase/auth';
-import { auth } from '../config/firebase.config';
-import { checkUserStatus, loginWithFirebaseToken, registerFailedAttempt } from './api';
+import { auth, db } from '../config/firebase.config';
+import { doc, getDoc, setDoc, updateDoc, serverTimestamp } from 'firebase/firestore';
 
 interface AuthResult {
   success: boolean;
@@ -25,6 +25,14 @@ interface RegisterData {
   password: string;
   displayName?: string;
 }
+
+interface UserStatus {
+  tentativesEchouees: number;
+  compteBloque: boolean;
+  dateBlocage: Date | null;
+}
+
+const MAX_ATTEMPTS = 3;
 
 class AuthService {
   private currentUser: User | null = null;
@@ -43,94 +51,76 @@ class AuthService {
     this.currentUser = auth.currentUser;
   }
 
-  // ===== CONNEXION avec vérification blocage =====
+  // ===== CONNEXION Firebase uniquement =====
   async signIn(email: string, password: string): Promise<AuthResult> {
     try {
-      console.log('🔐 Tentative de connexion avec:', email);
+      console.log('🔐 Tentative de connexion Firebase avec:', email);
 
-      // Étape 1: Tenter la connexion Firebase
+      // 1. Vérifier le statut de blocage dans Firestore
+      const status = await this.getUserStatus(email);
+      
+      if (status.compteBloque) {
+        // Vérifier si déblocage automatique après 24h
+        if (status.dateBlocage) {
+          const now = new Date();
+          const blocageDate = new Date(status.dateBlocage);
+          const diff = now.getTime() - blocageDate.getTime();
+          const hours = diff / (1000 * 60 * 60);
+          
+          if (hours >= 24) {
+            // Déblocage automatique
+            await this.resetUserStatus(email);
+            console.log('✅ Déblocage automatique après 24h');
+          } else {
+            console.log('❌ Compte bloqué');
+            return {
+              success: false,
+              error: 'Compte bloqué. Contactez un administrateur.',
+              blocked: true,
+              tentativesRestantes: 0
+            };
+          }
+        } else {
+          return {
+            success: false,
+            error: 'Compte bloqué. Contactez un administrateur.',
+            blocked: true,
+            tentativesRestantes: 0
+          };
+        }
+      }
+
+      // 2. Tentative de connexion Firebase
       let userCredential: UserCredential;
       try {
         userCredential = await signInWithEmailAndPassword(auth, email, password);
       } catch (firebaseError: any) {
         console.log('❌ Erreur Firebase:', firebaseError.code);
         
-        // Enregistrer la tentative échouée côté backend
-        const failedResult = await registerFailedAttempt(email);
-        
-        if (failedResult.status === 'success' && failedResult.data) {
-          if (failedResult.data.blocked) {
-            return {
-              success: false,
-              blocked: true,
-              error: 'Compte bloqué après trop de tentatives. Contactez un administrateur.',
-              tentativesRestantes: 0
-            };
-          }
-          
-          return {
-            success: false,
-            error: this.getFirebaseErrorMessage(firebaseError.code),
-            tentativesRestantes: failedResult.data.tentativesRestantes
-          };
-        }
+        // Incrémenter les tentatives échouées
+        await this.incrementFailedAttempts(email);
+        const newStatus = await this.getUserStatus(email);
         
         return {
           success: false,
-          error: this.getFirebaseErrorMessage(firebaseError.code)
+          error: this.getFirebaseErrorMessage(firebaseError.code),
+          blocked: newStatus.compteBloque,
+          tentativesRestantes: MAX_ATTEMPTS - newStatus.tentativesEchouees
         };
       }
 
-      // Étape 2: Obtenir le token Firebase
+      // 3. Connexion réussie - réinitialiser les tentatives
+      await this.resetFailedAttempts(email);
+      
       const firebaseToken = await userCredential.user.getIdToken();
+      this.setStoredToken(firebaseToken);
+      this.setStoredUser(userCredential.user);
 
-      // Étape 3: Vérifier le statut côté backend
-      const statusResult = await checkUserStatus(firebaseToken);
-      
-      if (statusResult.status === 'success' && statusResult.data) {
-        if (statusResult.data.blocked) {
-          // Déconnecter de Firebase si bloqué côté backend
-          await firebaseSignOut(auth);
-          return {
-            success: false,
-            blocked: true,
-            error: 'Compte bloqué. Contactez un administrateur.',
-            tentativesRestantes: 0
-          };
-        }
-        
-        if (!statusResult.data.exists) {
-          await firebaseSignOut(auth);
-          return {
-            success: false,
-            error: 'Aucun compte local associé. Contactez un administrateur.'
-          };
-        }
-      }
-
-      // Étape 4: Obtenir le JWT backend
-      const loginResult = await loginWithFirebaseToken(firebaseToken);
-      
-      if (loginResult.status === 'error') {
-        await firebaseSignOut(auth);
-        return {
-          success: false,
-          error: loginResult.error || 'Erreur de connexion au serveur'
-        };
-      }
-
-      // Étape 5: Stocker les tokens
-      if (loginResult.data) {
-        this.setStoredToken(loginResult.data.token);
-        localStorage.setItem('backend_jwt', loginResult.data.token);
-        this.setStoredUser(userCredential.user);
-      }
-
-      console.log('✅ Connexion réussie');
+      console.log('✅ Connexion Firebase réussie');
       return {
         success: true,
         user: userCredential.user,
-        token: loginResult.data?.token
+        token: firebaseToken
       };
 
     } catch (error: any) {
@@ -142,10 +132,10 @@ class AuthService {
     }
   }
 
-  // ===== INSCRIPTION =====
+  // ===== INSCRIPTION Firebase uniquement =====
   async signUp(data: RegisterData): Promise<AuthResult> {
     try {
-      console.log('📝 Tentative d\'inscription avec:', data.email);
+      console.log('📝 Tentative d\'inscription Firebase avec:', data.email);
 
       const userCredential: UserCredential = await createUserWithEmailAndPassword(
         auth,
@@ -159,7 +149,7 @@ class AuthService {
       this.setStoredToken(token);
       this.setStoredUser(user);
 
-      console.log('✅ Inscription réussie');
+      console.log('✅ Inscription Firebase réussie');
       return {
         success: true,
         user,
@@ -270,8 +260,94 @@ class AuthService {
   private clearStoredData(): void {
     this.currentUser = null;
     localStorage.removeItem('auth_token');
-    localStorage.removeItem('backend_jwt');
     localStorage.removeItem('user');
+  }
+
+  // ===== GESTION BLOCAGE FIRESTORE =====
+  private async getUserStatus(email: string): Promise<UserStatus> {
+    try {
+      const statusRef = doc(db, 'utilisateurs_status', email);
+      const statusDoc = await getDoc(statusRef);
+      
+      if (statusDoc.exists()) {
+        const data = statusDoc.data();
+        return {
+          tentativesEchouees: data.tentativesEchouees || 0,
+          compteBloque: data.compteBloque || false,
+          dateBlocage: data.dateBlocage ? data.dateBlocage.toDate() : null
+        };
+      }
+      
+      // Pas de statut existant = nouvel utilisateur
+      return {
+        tentativesEchouees: 0,
+        compteBloque: false,
+        dateBlocage: null
+      };
+    } catch (error) {
+      console.error('Erreur lecture statut:', error);
+      return {
+        tentativesEchouees: 0,
+        compteBloque: false,
+        dateBlocage: null
+      };
+    }
+  }
+
+  private async incrementFailedAttempts(email: string): Promise<void> {
+    try {
+      const statusRef = doc(db, 'utilisateurs_status', email);
+      const status = await this.getUserStatus(email);
+      
+      const newAttempts = status.tentativesEchouees + 1;
+      const isBlocked = newAttempts >= MAX_ATTEMPTS;
+      
+      await setDoc(statusRef, {
+        email: email,
+        tentativesEchouees: newAttempts,
+        compteBloque: isBlocked,
+        dateBlocage: isBlocked ? serverTimestamp() : null,
+        lastUpdate: serverTimestamp()
+      });
+      
+      console.log(`⚠️ Tentatives échouées: ${newAttempts}/${MAX_ATTEMPTS}`);
+      if (isBlocked) {
+        console.log('🔒 Compte bloqué automatiquement');
+      }
+    } catch (error) {
+      console.error('Erreur mise à jour tentatives:', error);
+    }
+  }
+
+  private async resetFailedAttempts(email: string): Promise<void> {
+    try {
+      const statusRef = doc(db, 'utilisateurs_status', email);
+      await setDoc(statusRef, {
+        email: email,
+        tentativesEchouees: 0,
+        compteBloque: false,
+        dateBlocage: null,
+        lastUpdate: serverTimestamp()
+      });
+      console.log('✅ Tentatives réinitialisées');
+    } catch (error) {
+      console.error('Erreur réinitialisation tentatives:', error);
+    }
+  }
+
+  private async resetUserStatus(email: string): Promise<void> {
+    try {
+      const statusRef = doc(db, 'utilisateurs_status', email);
+      await updateDoc(statusRef, {
+        compteBloque: false,
+        tentativesEchouees: 0,
+        dateBlocage: null,
+        lastUpdate: serverTimestamp()
+      });
+      console.log('✅ Statut utilisateur réinitialisé');
+    } catch (error) {
+      console.error('Erreur réinitialisation statut:', error);
+    }
   }
 }
 

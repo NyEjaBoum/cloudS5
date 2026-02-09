@@ -182,6 +182,38 @@ public class SignalementController {
         }
     }
 
+    @PostMapping("/firebase/import")
+    public ApiResponse<Map<String, Integer>> importSignalementsFromFirebase(
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Utilisateur currentUser = authService.getUserFromToken(authHeader);
+        if (currentUser == null || !authService.hasPermission(currentUser, "SYNC")) {
+            return new ApiResponse<>("error", null, "Permission refusée");
+        }
+        try {
+            Map<String, Integer> result = signalementService.importSignalementsFromFirebase();
+            return new ApiResponse<>("success", result, "Import terminé");
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, "Erreur : " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/firebase/export")
+    public ApiResponse<Map<String, Integer>> exportSignalementsToFirebase(
+        @RequestHeader(value = "Authorization", required = false) String authHeader
+    ) {
+        Utilisateur currentUser = authService.getUserFromToken(authHeader);
+        if (currentUser == null || !authService.hasPermission(currentUser, "SYNC")) {
+            return new ApiResponse<>("error", null, "Permission refusée");
+        }
+        try {
+            Map<String, Integer> result = signalementService.exportSignalementsToFirebase();
+            return new ApiResponse<>("success", result, "Export terminé");
+        } catch (Exception e) {
+            return new ApiResponse<>("error", null, "Erreur : " + e.getMessage());
+        }
+    }
+
     @PostMapping("/sync")
     public ApiResponse<Map<String, Integer>> synchronizeSignalements(
         @RequestHeader(value = "Authorization", required = false) String authHeader
