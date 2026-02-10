@@ -5,12 +5,14 @@ public class InfosSignalementDto {
     private String titre;
     private String description;
     private Integer statut;
-    private Double surfaceM2;
-    private Double budget;
+    private Double surfaceM2; // ✅ Surface au lieu de latitude
+    private Double budget;    // ✅ Budget au lieu de longitude
     private String entreprise;
     private String dateCreation;
+    private Integer niveau;
 
-    public InfosSignalementDto(Integer id, String titre, String description, Integer statut, Double surfaceM2, Double budget, String entreprise, String dateCreation) {
+    public InfosSignalementDto(Integer id, String titre, String description, Integer statut,
+                               Double surfaceM2, Double budget, String entreprise, String dateCreation, Integer niveau) {
         this.id = id;
         this.titre = titre;
         this.description = description;
@@ -19,6 +21,7 @@ public class InfosSignalementDto {
         this.budget = budget;
         this.entreprise = entreprise;
         this.dateCreation = dateCreation;
+        this.niveau = niveau;
     }
 
     // Getters et setters
@@ -38,4 +41,6 @@ public class InfosSignalementDto {
     public void setEntreprise(String entreprise) { this.entreprise = entreprise; }
     public String getDateCreation() { return dateCreation; }
     public void setDateCreation(String dateCreation) { this.dateCreation = dateCreation; }
+    public Integer getNiveau() { return niveau; }
+    public void setNiveau(Integer niveau) { this.niveau = niveau; }
 }

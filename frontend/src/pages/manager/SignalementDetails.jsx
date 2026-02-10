@@ -271,6 +271,53 @@ export default function SignalementDetails() {
                   <p className="text-sm font-semibold text-slate-700 font-mono">{signalement.longitude ? Number(signalement.longitude).toFixed(6) : "-"}</p>
                 )}
               </div>
+
+              {/* Niveau de réparation */}
+              <div>
+                <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                  Niveau de réparation (1-10)
+                  {signalement.niveau !== null && (
+                    <span className="text-xs text-amber-500">(Défini, non modifiable)</span>
+                  )}
+                </label>
+                {edit && signalement.niveau === null ? (
+                  <div className="flex items-center gap-2">
+                    {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map(n => (
+                      <button
+                        key={n}
+                        type="button"
+                        onClick={() => setForm(f => ({ ...f, niveau: n }))}
+                        className={`w-10 h-10 rounded-full border-2 transition-all ${
+                          form.niveau === n
+                            ? "bg-teal-500 border-teal-600 text-white"
+                            : "bg-white border-slate-200 text-slate-600 hover:border-teal-400"
+                        }`}
+                      >
+                        {n}
+                      </button>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      {signalement.niveau !== null ? (
+                        Array.from({ length: signalement.niveau }).map((_, i) => (
+                          <span key={i} className="w-6 h-6 rounded-full bg-teal-500 text-white flex items-center justify-center text-xs font-bold">
+                            {i + 1}
+                          </span>
+                        ))
+                      ) : (
+                        <span className="text-slate-400">Non défini</span>
+                      )}
+                    </div>
+                    {signalement.niveau !== null && (
+                      <span className="px-2 py-1 rounded-lg text-xs font-medium bg-amber-50 text-amber-600">
+                        🔒 Verrouillé
+                      </span>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Save button */}

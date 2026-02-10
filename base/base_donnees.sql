@@ -100,6 +100,7 @@ SELECT
   s.longitude,
   s.surface_m2,
   s.budget,
+  s.niveau, -- ✅ Ajout du niveau
   e.id AS id_entreprise,
   e.nom AS entreprise,
   e.adresse AS entreprise_adresse,
@@ -118,6 +119,7 @@ SELECT
 FROM signalements s
 LEFT JOIN entreprises e ON s.id_entreprise = e.id
 LEFT JOIN utilisateurs u ON s.id_utilisateur = u.id;
+
 
 DROP VIEW IF EXISTS vue_recapitulatif_signalement;
 CREATE OR REPLACE VIEW vue_recapitulatif_signalement AS
