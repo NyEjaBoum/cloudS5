@@ -257,7 +257,7 @@ class AuthService {
     return localStorage.getItem('auth_token');
   }
 
-  private clearStoredData(): void {
+  public clearStoredData(): void {
     this.currentUser = null;
     localStorage.removeItem('auth_token');
     localStorage.removeItem('user');

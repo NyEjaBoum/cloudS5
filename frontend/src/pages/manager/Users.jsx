@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, exportUsers } from "../../api/user";
+import { fetchAllUsers, exportUsers,importUsers,synchronizeUsers } from "../../api/user";
 import { Link } from "react-router-dom";
-import { Upload, Eye, Users as UsersIcon, AlertCircle } from "lucide-react";
+import { Upload, Eye, Users as UsersIcon, AlertCircle, RefreshCw } from "lucide-react";
 
 export default function Users() {
   const [users, setUsers] = useState([]);
@@ -30,6 +30,31 @@ export default function Users() {
     setLoading(false);
   };
 
+
+  const handleImport = async () => {
+    setLoading(true);
+    setError("");
+    try {
+      const result = await importUsers();
+      alert(`✅ Import terminé !\n\nImportés: ${result.data?.imported || 0}\nMis à jour: ${result.data?.updated || 0}`);
+    } catch (e) {
+      setError(e.message);
+    }
+    setLoading(false);
+  };
+
+  const handleSync = async () => {
+    setLoading(true);
+    setError("");
+    try {      
+      const result = await synchronizeUsers();
+      alert(`✅ Synchronisation terminée !\n\nImportés: ${result.data?.imported || 0}\nExportés: ${result.data?.exported || 0}`);
+      refreshUsers();
+    } catch (e) {
+      setError(e.message);
+    }
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
       {/* Header */}
@@ -38,14 +63,32 @@ export default function Users() {
           <h1 className="text-2xl font-bold text-slate-800">Utilisateurs</h1>
           <p className="text-sm text-slate-400 mt-0.5">{users.length} utilisateurs enregistres</p>
         </div>
-        <button
-          className="btn-primary-warm flex items-center gap-2 text-sm"
-          onClick={handleExport}
-          disabled={loading}
-        >
-          <Upload size={15} />
-          Exporter vers Firebase
-        </button>
+        <div className="flex gap-2">
+          <button
+            className="btn-primary-warm flex items-center gap-2 text-sm"
+            onClick={handleImport}
+            disabled={loading}
+          >
+            <Upload size={15} />
+            Importer vers Firebase
+          </button>
+          <button
+            className="btn-primary-warm flex items-center gap-2 text-sm"
+            onClick={handleExport}
+            disabled={loading}
+          >
+            <Upload size={15} />
+            Exporter vers Firebase
+          </button>
+          <button
+            className="btn-primary-warm flex items-center gap-2 text-sm"
+            onClick={refreshUsers}
+            disabled={loading}
+          >
+            <RefreshCw size={15} className={loading ? "animate-spin" : ""} />
+            {loading ? "Sync..." : "Sync Utilisateurs"}
+          </button>
+        </div>
       </div>
 
       {/* Error */}

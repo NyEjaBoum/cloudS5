@@ -42,32 +42,52 @@ public class UserService {
             .orElseThrow(() -> new IllegalArgumentException("Utilisateur non trouvé"));
     }
 
-    public Utilisateur updateUser(Integer id, Utilisateur updated) {
-        Utilisateur user = getUserById(id);
-        Boolean ancienBloque = Boolean.TRUE.equals(user.getCompteBloque());
-        Boolean nouveauBloque = Boolean.TRUE.equals(updated.getCompteBloque());
+public Utilisateur updateUser(Integer id, Utilisateur updated) {
+    System.out.println("[UserService] updateUser called for id=" + id);
+    Utilisateur user = getUserById(id);
+    Boolean ancienBloque = Boolean.TRUE.equals(user.getCompteBloque());
+    Boolean nouveauBloque = Boolean.TRUE.equals(updated.getCompteBloque());
 
-        user.setNom(updated.getNom());
-        user.setPrenom(updated.getPrenom());
-        user.setEmail(updated.getEmail());
-        user.setRole(updated.getRole());
-        user.setCompteBloque(updated.getCompteBloque());
-        user.setTentativesEchouees(updated.getTentativesEchouees());
-        user.setDateBlocage(updated.getDateBlocage());
+    System.out.println("[UserService] Ancien nom: " + user.getNom() + ", Nouveau nom: " + updated.getNom());
+    System.out.println("[UserService] Ancien prenom: " + user.getPrenom() + ", Nouveau prenom: " + updated.getPrenom());
+    System.out.println("[UserService] Ancien role: " + (user.getRole() != null ? user.getRole().getNom() : null) + ", Nouveau role: " + (updated.getRole() != null ? updated.getRole().getNom() : null));
+    System.out.println("[UserService] Ancien compteBloque: " + ancienBloque + ", Nouveau compteBloque: " + nouveauBloque);
+    System.out.println("[UserService] Ancien tentativesEchouees: " + user.getTentativesEchouees() + ", Nouveau tentativesEchouees: " + updated.getTentativesEchouees());
+    System.out.println("[UserService] Ancien dateBlocage: " + user.getDateBlocage() + ", Nouveau dateBlocage: " + updated.getDateBlocage());
+    System.out.println("[UserService] Mot de passe reçu: " + (updated.getMotDePasse() != null && !updated.getMotDePasse().isEmpty() ? "[NON-VIDE]" : "[VIDE]"));
 
-        if (!ancienBloque && nouveauBloque) {
-            user.setDateBlocage(LocalDateTime.now());
-            user.setTentativesEchouees(0);
-            historiqueBlocageService.enregistrer(user, "BLOCAGE_MANUEL", "Blocage par le manager");
-        } else if (ancienBloque && !nouveauBloque) {
-            user.setDateBlocage(null);
-            user.setTentativesEchouees(0);
-            historiqueBlocageService.enregistrer(user, "DEBLOCAGE_MANUEL", "Deblocage par le manager");
-        }
-
-        utilisateurRepository.save(user);
-        return user;
+    user.setNom(updated.getNom());
+    user.setPrenom(updated.getPrenom());
+    // ❌ NE PAS modifier l'email
+    // user.setEmail(updated.getEmail()); 
+    user.setRole(updated.getRole());
+    user.setCompteBloque(updated.getCompteBloque());
+    user.setTentativesEchouees(updated.getTentativesEchouees());
+    user.setDateBlocage(updated.getDateBlocage());
+    
+    // ✅ Si un nouveau mot de passe est fourni, le chiffrer et l'enregistrer
+    if (updated.getMotDePasse() != null && !updated.getMotDePasse().isEmpty()) {
+        String encryptedPassword = authService.encryptPassword(updated.getMotDePasse());
+        user.setMotDePasse(encryptedPassword);
+        System.out.println("[UserService] Mot de passe mis à jour pour l'utilisateur id=" + id);
     }
+
+    if (!ancienBloque && nouveauBloque) {
+        user.setDateBlocage(LocalDateTime.now());
+        user.setTentativesEchouees(0);
+        historiqueBlocageService.enregistrer(user, "BLOCAGE_MANUEL", "Blocage par le manager");
+        System.out.println("[UserService] Blocage manuel appliqué");
+    } else if (ancienBloque && !nouveauBloque) {
+        user.setDateBlocage(null);
+        user.setTentativesEchouees(0);
+        historiqueBlocageService.enregistrer(user, "DEBLOCAGE_MANUEL", "Deblocage par le manager");
+        System.out.println("[UserService] Déblocage manuel appliqué");
+    }
+
+    utilisateurRepository.save(user);
+    System.out.println("[UserService] Utilisateur sauvegardé id=" + id);
+    return user;
+}
 
     public void unblockUser(Integer userId) {
         Utilisateur utilisateur = getUserById(userId);

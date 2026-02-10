@@ -7,6 +7,7 @@ import ProfilPage from '../views/ProfilPage.vue'
 import ReportPage from '../views/ReportPage.vue'
 import ReportsListPage from '../views/ReportsListPage.vue'
 import NotificationsPage from '../views/NotificationsPage.vue'
+import authService from '../services/auth.service';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -59,5 +60,45 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
+
+// router.beforeEach((to, from, next) => {
+//   const isLoggedIn = authService.isLoggedIn();
+//   if (to.path !== '/login' && !isLoggedIn) {
+//     next('/login');
+//   } else if (to.path === '/login' && isLoggedIn) {
+//     next('/home');
+//   } else {
+//     next();
+//   }
+// });
+
+router.beforeEach((to, from, next) => {
+  const token = authService.getStoredToken();
+  let isLoggedIn = false;
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      // Expiration = 3 jours (en secondes)
+      const threeDays = 3 * 24 * 60 * 60;
+      if (payload.exp && payload.exp > now && (payload.exp - payload.iat) <= threeDays) {
+        isLoggedIn = true;
+      } else {
+        authService.clearStoredData();
+      }
+    } catch {
+      authService.clearStoredData();
+    }
+  }
+
+  if (to.path !== '/login' && !isLoggedIn) {
+    next('/login');
+  } else if (to.path === '/login' && isLoggedIn) {
+    next('/home');
+  } else {
+    next();
+  }
+});
 
 export default router

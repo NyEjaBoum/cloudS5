@@ -174,34 +174,34 @@ public class AuthService {
         Utilisateur utilisateur = utilisateurRepository.findByEmail(email)
             .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-        if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
-            if (utilisateur.getDateBlocage() != null &&
-                utilisateur.getDateBlocage().plusHours(24).isBefore(LocalDateTime.now())) {
-                utilisateur.setCompteBloque(false);
-                utilisateur.setTentativesEchouees(0);
-                utilisateur.setDateBlocage(null);
-                utilisateurRepository.save(utilisateur);
-                historiqueBlocageService.enregistrer(utilisateur, "DEBLOCAGE_AUTO", "Expiration du delai de 24h");
-            } else {
-                throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
-            }
-        }
+        // if (Boolean.TRUE.equals(utilisateur.getCompteBloque())) {
+        //     if (utilisateur.getDateBlocage() != null &&
+        //         utilisateur.getDateBlocage().plusHours(24).isBefore(LocalDateTime.now())) {
+        //         utilisateur.setCompteBloque(false);
+        //         utilisateur.setTentativesEchouees(0);
+        //         utilisateur.setDateBlocage(null);
+        //         utilisateurRepository.save(utilisateur);
+        //         historiqueBlocageService.enregistrer(utilisateur, "DEBLOCAGE_AUTO", "Expiration du delai de 24h");
+        //     } else {
+        //         throw new IllegalArgumentException("Account is blocked. Please contact administrator.");
+        //     }
+        // }
 
         String decryptedPassword = decryptPassword(utilisateur.getMotDePasse());
         if (!motDePasse.equals(decryptedPassword)) {
-            int tentatives = utilisateur.getTentativesEchouees() != null ?
-                           utilisateur.getTentativesEchouees() : 0;
-            tentatives++;
-            utilisateur.setTentativesEchouees(tentatives);
+            // int tentatives = utilisateur.getTentativesEchouees() != null ?
+            //                utilisateur.getTentativesEchouees() : 0;
+            // tentatives++;
+            // utilisateur.setTentativesEchouees(tentatives);
 
-            if (tentatives >= maxAttempts) {
-                utilisateur.setCompteBloque(true);
-                utilisateur.setDateBlocage(LocalDateTime.now());
-                utilisateurRepository.save(utilisateur);
-                historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion echouees (" + maxAttempts + " max)");
-            } else {
-                utilisateurRepository.save(utilisateur);
-            }
+            // if (tentatives >= maxAttempts) {
+            //     utilisateur.setCompteBloque(true);
+            //     utilisateur.setDateBlocage(LocalDateTime.now());
+            //     utilisateurRepository.save(utilisateur);
+            //     historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion echouees (" + maxAttempts + " max)");
+            // } else {
+            //     utilisateurRepository.save(utilisateur);
+            // }
             throw new IllegalArgumentException("Invalid password");
         }
 
