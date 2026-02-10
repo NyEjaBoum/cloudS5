@@ -61,8 +61,37 @@ const router = createRouter({
   routes
 })
 
+// router.beforeEach((to, from, next) => {
+//   const isLoggedIn = authService.isLoggedIn();
+//   if (to.path !== '/login' && !isLoggedIn) {
+//     next('/login');
+//   } else if (to.path === '/login' && isLoggedIn) {
+//     next('/home');
+//   } else {
+//     next();
+//   }
+// });
+
 router.beforeEach((to, from, next) => {
-  const isLoggedIn = authService.isLoggedIn();
+  const token = authService.getStoredToken();
+  let isLoggedIn = false;
+
+  if (token) {
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      const now = Math.floor(Date.now() / 1000);
+      // Expiration = 3 jours (en secondes)
+      const threeDays = 3 * 24 * 60 * 60;
+      if (payload.exp && payload.exp > now && (payload.exp - payload.iat) <= threeDays) {
+        isLoggedIn = true;
+      } else {
+        authService.clearStoredData();
+      }
+    } catch {
+      authService.clearStoredData();
+    }
+  }
+
   if (to.path !== '/login' && !isLoggedIn) {
     next('/login');
   } else if (to.path === '/login' && isLoggedIn) {
