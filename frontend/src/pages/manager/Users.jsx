@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { fetchAllUsers, exportUsers,importUsers } from "../../api/user";
+import { fetchAllUsers, exportUsers,importUsers,synchronizeUsers } from "../../api/user";
 import { Link } from "react-router-dom";
 import { Upload, Eye, Users as UsersIcon, AlertCircle, RefreshCw } from "lucide-react";
 
@@ -41,6 +41,18 @@ export default function Users() {
       setError(e.message);
     }
     setLoading(false);
+  };
+
+  const handleSync = async () => {
+    setLoading(true);
+    setError("");
+    try {      
+      const result = await synchronizeUsers();
+      alert(`✅ Synchronisation terminée !\n\nImportés: ${result.data?.imported || 0}\nExportés: ${result.data?.exported || 0}`);
+      refreshUsers();
+    } catch (e) {
+      setError(e.message);
+    }
   };
 
   return (
