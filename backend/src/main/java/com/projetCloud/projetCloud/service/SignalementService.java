@@ -376,7 +376,7 @@ public class SignalementService {
         }
     }
 
-        public Map<String, Integer> importSignalementsFromFirebase() {
+    public Map<String, Integer> importSignalementsFromFirebase() {
         int imported = 0, updated = 0;
         try {
             Firestore db = FirestoreClient.getFirestore();
