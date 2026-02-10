@@ -11,7 +11,6 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
-import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/prix")
@@ -54,11 +53,9 @@ public class PrixController {
     @GetMapping("/calculer")
     public ApiResponse<BigDecimal> calculerBudget(
         @RequestParam BigDecimal surfaceM2,
-        @RequestParam Integer niveau,
-        @RequestParam String dateSignalement // format ISO
+        @RequestParam Integer niveau
     ) {
-        LocalDateTime date = LocalDateTime.parse(dateSignalement);
-        BigDecimal budget = prixService.calculerBudget(surfaceM2, niveau, date);
+        BigDecimal budget = prixService.calculerBudget(surfaceM2, niveau);
         return new ApiResponse<>("success", budget, null);
     }
 }

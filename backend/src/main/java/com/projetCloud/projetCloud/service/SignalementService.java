@@ -144,11 +144,11 @@ public class SignalementService {
             }
             
             // ✅ Calculer automatiquement le budget si surface et niveau sont présents
-            if (signalement.getSurfaceM2() != null && signalement.getNiveau() != null) {
-                signalement.setBudget(
-                    prixService.calculerBudget(signalement.getSurfaceM2(), signalement.getNiveau(), signalement.getDateCreation())
-                );
-            }
+                if (updated.getSurfaceM2() != null && updated.getNiveau() != null) {
+                    signalement.setBudget(
+                        prixService.calculerBudget(updated.getSurfaceM2(), updated.getNiveau())
+                    );
+                }
 
             signalement.setEntreprise(updated.getEntreprise());
 
