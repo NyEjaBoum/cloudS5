@@ -114,6 +114,7 @@ import {
   mapOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
+import reportsService from '../services/reports.service';
 import { NavBar } from '../components';
 
 const router = useRouter();
@@ -129,6 +130,21 @@ const userStats = reactive({
   reports: 0,
   resolved: 0
 });
+
+// Charger les statistiques des signalements
+const loadUserStats = async () => {
+  const storedUser = authService.getStoredUser();
+  if (storedUser && storedUser.email) {
+    const result = await reportsService.getSignalementsByEmail(storedUser.email);
+    if (result.success) {
+      // Nombre total de signalements
+      userStats.reports = result.signalements.length;
+      
+      // Nombre de signalements résolus (statut = 99)
+      userStats.resolved = result.signalements.filter(s => s.statut === 99).length;
+    }
+  }
+};
 
 // Navigation
 const goBack = () => {
@@ -169,13 +185,16 @@ const handleLogout = async () => {
 };
 
 // Charger les données utilisateur au montage
-onMounted(() => {
+onMounted(async () => {
   const storedUser = authService.getStoredUser();
   if (storedUser) {
     user.uid = storedUser.uid || '';
     user.displayName = storedUser.displayName || '';
     user.email = storedUser.email || '';
   }
+  
+  // Charger les statistiques
+  await loadUserStats();
 });
 </script>
 
