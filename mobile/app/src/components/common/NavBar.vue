@@ -134,11 +134,11 @@ const handleClick = (item: NavItem) => {
   display: flex;
   justify-content: space-around;
   align-items: center;
-  background: #1A1A2E;
+  background: #2c3e44;
   border-radius: 28px;
   padding: 8px 8px;
   z-index: 1000;
-  box-shadow: 0 8px 32px rgba(26, 26, 46, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 8px 32px rgba(44, 62, 68, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
 }
 
 .bottom-nav.has-padding {
@@ -154,7 +154,7 @@ const handleClick = (item: NavItem) => {
   border: none;
   padding: 8px 14px;
   cursor: pointer;
-  color: #8E8AA0;
+  color: #7a8994;
   font-size: 10px;
   font-weight: 500;
   transition: color 0.25s ease;
@@ -165,11 +165,11 @@ const handleClick = (item: NavItem) => {
 }
 
 .nav-item:hover:not(.nav-item-disabled) {
-  color: #E8E6F0;
+  color: #b8c5cc;
 }
 
 .nav-item.active:not(.nav-item-disabled) {
-  color: #FF6B6B;
+  color: #5a8a96;
 }
 
 .nav-item-disabled {
@@ -194,20 +194,20 @@ const handleClick = (item: NavItem) => {
 .center-button-inner {
   width: 54px;
   height: 54px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   border-radius: 50%;
   display: flex;
   align-items: center;
   justify-content: center;
   color: white;
-  box-shadow: 0 6px 20px rgba(255, 107, 107, 0.4);
+  box-shadow: 0 6px 20px rgba(61, 95, 107, 0.4);
   transition: transform 0.25s ease, box-shadow 0.25s ease;
-  border: 3px solid #1A1A2E;
+  border: 3px solid #2c3e44;
 }
 
 .center-button-inner:hover {
   transform: translateY(-2px);
-  box-shadow: 0 8px 24px rgba(255, 107, 107, 0.5);
+  box-shadow: 0 8px 24px rgba(61, 95, 107, 0.5);
 }
 
 .center-button-inner:active {
@@ -228,7 +228,7 @@ const handleClick = (item: NavItem) => {
   width: 4px;
   height: 4px;
   border-radius: 50%;
-  background-color: #FF6B6B;
+  background-color: #5a8a96;
 }
 
 /* Responsive */

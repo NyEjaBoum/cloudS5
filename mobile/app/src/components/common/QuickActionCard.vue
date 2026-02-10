@@ -20,8 +20,8 @@ interface Props {
 }
 
 withDefaults(defineProps<Props>(), {
-  iconColor: '#FF6B6B',
-  iconBackground: 'rgba(255, 107, 107, 0.08)'
+  iconColor: '#3d5f6b',
+  iconBackground: 'rgba(61, 95, 107, 0.08)'
 });
 
 defineEmits<{
@@ -65,17 +65,17 @@ defineEmits<{
 .action-label {
   font-size: 12px;
   font-weight: 600;
-  color: #1A1A2E;
+  color: #2c3e44;
   text-align: center;
 }
 
 @media (prefers-color-scheme: dark) {
   .action-card {
-    background: #262640;
+    background: #2c3e44;
   }
 
   .action-label {
-    color: #E8E6F0;
+    color: #b8c5cc;
   }
 }
 </style>

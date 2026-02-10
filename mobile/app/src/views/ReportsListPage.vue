@@ -280,7 +280,7 @@ onMounted(() => {
   grid-template-columns: repeat(4, 1fr);
   gap: 8px;
   padding: 16px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   color: white;
 }
 
@@ -317,7 +317,7 @@ onMounted(() => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #4A4458;
+  color: #5a6b73;
   font-size: 14px;
 }
 
@@ -361,13 +361,13 @@ onMounted(() => {
 .report-title {
   font-size: 16px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin: 0 0 4px 0;
 }
 
 .report-id {
   font-size: 12px;
-  color: #8E8AA0;
+  color: #7a8994;
   margin: 0;
 }
 
@@ -394,7 +394,7 @@ onMounted(() => {
 /* Description */
 .report-description {
   font-size: 14px;
-  color: #4A4458;
+  color: #5a6b73;
   line-height: 1.5;
   margin: 0 0 12px 0;
 }
@@ -405,7 +405,7 @@ onMounted(() => {
   flex-direction: column;
   gap: 8px;
   padding: 12px;
-  background: #FFF8F2;
+  background: #f0f4f5;
   border-radius: 12px;
   margin-bottom: 12px;
 }
@@ -425,18 +425,18 @@ onMounted(() => {
 
 .detail-icon {
   font-size: 16px;
-  color: #FF6B6B;
+  color: #3d5f6b;
   flex-shrink: 0;
 }
 
 .detail-label {
-  color: #4A4458;
+  color: #5a6b73;
   font-weight: 500;
   min-width: 60px;
 }
 
 .detail-value {
-  color: #1A1A2E;
+  color: #2c3e44;
   font-weight: 600;
   flex: 1;
   overflow: hidden;
@@ -470,32 +470,32 @@ onMounted(() => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .report-card {
-    background: #262640;
+    background: #1f2f35;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   .report-title {
-    color: #E8E6F0;
+    color: #dce6e9;
   }
 
   .report-id {
-    color: #8E8AA0;
+    color: #7a8994;
   }
 
   .report-description {
-    color: #B8B4C8;
+    color: #9ca5ab;
   }
 
   .report-details {
-    background: #1A1A2E;
+    background: #2c3e44;
   }
 
   .detail-label {
-    color: #8E8AA0;
+    color: #7a8994;
   }
 
   .detail-value {
-    color: #E8E6F0;
+    color: #dce6e9;
   }
 
   .report-footer {

@@ -36,7 +36,7 @@ import ReportForm from '../components/report/ReportForm.vue';
 <style scoped>
 /* Header styles */
 .report-header {
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   color: white;
   padding-bottom: 20px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -56,7 +56,7 @@ import ReportForm from '../components/report/ReportForm.vue';
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(255, 142, 83, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(61, 95, 107, 0.95) 0%, rgba(90, 138, 150, 0.95) 100%);
 }
 
 .transparent-toolbar {

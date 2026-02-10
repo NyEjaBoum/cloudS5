@@ -114,6 +114,7 @@ import {
   mapOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
+import reportsService from '../services/reports.service';
 import { NavBar } from '../components';
 
 const router = useRouter();
@@ -129,6 +130,21 @@ const userStats = reactive({
   reports: 0,
   resolved: 0
 });
+
+// Charger les statistiques des signalements
+const loadUserStats = async () => {
+  const storedUser = authService.getStoredUser();
+  if (storedUser && storedUser.email) {
+    const result = await reportsService.getSignalementsByEmail(storedUser.email);
+    if (result.success) {
+      // Nombre total de signalements
+      userStats.reports = result.signalements.length;
+      
+      // Nombre de signalements résolus (statut = 99)
+      userStats.resolved = result.signalements.filter(s => s.statut === 99).length;
+    }
+  }
+};
 
 // Navigation
 const goBack = () => {
@@ -169,13 +185,16 @@ const handleLogout = async () => {
 };
 
 // Charger les données utilisateur au montage
-onMounted(() => {
+onMounted(async () => {
   const storedUser = authService.getStoredUser();
   if (storedUser) {
     user.uid = storedUser.uid || '';
     user.displayName = storedUser.displayName || '';
     user.email = storedUser.email || '';
   }
+  
+  // Charger les statistiques
+  await loadUserStats();
 });
 </script>
 
@@ -204,8 +223,8 @@ onMounted(() => {
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
-  box-shadow: 0 4px 16px rgba(255, 107, 107, 0.3);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
+  box-shadow: 0 4px 16px rgba(61, 95, 107, 0.3);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -220,12 +239,12 @@ onMounted(() => {
 .user-name {
   font-size: 22px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin: 0 0 4px 0;
 }
 
 .user-email {
-  color: #4A4458;
+  color: #5a6b73;
   font-size: 14px;
   margin: 0;
 }
@@ -254,7 +273,7 @@ onMounted(() => {
 
 .stat-label {
   font-size: 12px;
-  color: #44474D;
+  color: #5a6b73;
   text-transform: uppercase;
   letter-spacing: 0.5px;
 }

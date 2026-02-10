@@ -47,37 +47,37 @@ defineEmits<{
   width: 80px;
   height: 80px;
   border-radius: 50%;
-  background: #FFF8F2;
+  background: #e8f1f4;
   display: flex;
   align-items: center;
   justify-content: center;
   margin-bottom: 16px;
-  color: #FF6B6B;
+  color: #3d5f6b;
 }
 
 .empty-state h3 {
   font-size: 18px;
   font-weight: 600;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin-bottom: 8px;
 }
 
 .empty-state p {
-  color: #4A4458;
+  color: #5a6b73;
   margin-bottom: 20px;
 }
 
 @media (prefers-color-scheme: dark) {
   .empty-state {
-    background: #262640;
+    background: #1f2f35;
   }
 
   .empty-illustration {
-    background: #2E2E4A;
+    background: #2c3e44;
   }
 
   .empty-state h3 {
-    color: #E8E6F0;
+    color: #dce6e9;
   }
 }
 </style>

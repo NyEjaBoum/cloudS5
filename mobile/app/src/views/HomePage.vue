@@ -126,6 +126,7 @@ import {
   addOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
+import reportsService from '../services/reports.service';
 import { NavBar, StatCard, QuickActionCard, ReportCard, NotificationBell } from '../components';
 
 const router = useRouter();
@@ -141,6 +142,40 @@ const stats = reactive({
 
 // Signalements récents
 const recentReports = reactive([]);
+
+// Charger les statistiques et signalements
+const loadReports = async () => {
+  const storedUser = authService.getStoredUser();
+  if (storedUser && storedUser.email) {
+    const result = await reportsService.getSignalementsByEmail(storedUser.email);
+    if (result.success) {
+      // Mettre à jour le nombre total de signalements
+      stats.totalReports = result.signalements.length;
+      
+      // Charger les 3 signalements les plus récents
+      const sorted = result.signalements
+        .sort((a, b) => {
+          const dateA = new Date(a.dateCreation).getTime();
+          const dateB = new Date(b.dateCreation).getTime();
+          return dateB - dateA;
+        })
+        .slice(0, 3);
+      
+      // Vider et remplir le tableau réactif
+      recentReports.length = 0;
+      sorted.forEach(report => {
+        recentReports.push({
+          id: report.id,
+          title: report.titre,
+          description: report.description,
+          status: report.statut === 1 ? 'pending' : report.statut === 11 ? 'in_progress' : 'resolved',
+          category: 'infrastructure',
+          date: new Date(report.dateCreation).toLocaleDateString('fr-FR')
+        });
+      });
+    }
+  }
+};
 
 // Navigation
 const goToNewReport = () => {
@@ -159,19 +194,22 @@ const viewReport = (id) => {
   router.push(`/report/${id}`);
 };
 
-// Charger les données utilisateur
-onMounted(() => {
+// Charger les données utilisateur et les signalements
+onMounted(async () => {
   const storedUser = authService.getStoredUser();
   if (storedUser) {
     user.name = storedUser.displayName || storedUser.email?.split('@')[0] || 'Utilisateur';
   }
+  
+  // Charger les signalements
+  await loadReports();
 });
 </script>
 
 <style scoped>
 /* Header styles */
 .home-header {
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   color: white;
   padding-bottom: 30px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
@@ -191,7 +229,7 @@ onMounted(() => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, rgba(255, 107, 107, 0.95) 0%, rgba(255, 142, 83, 0.95) 100%);
+  background: linear-gradient(135deg, rgba(61, 95, 107, 0.95) 0%, rgba(90, 138, 150, 0.95) 100%);
 }
 
 .transparent-toolbar {
@@ -229,7 +267,7 @@ onMounted(() => {
 
 /* Contenu principal */
 .home-content {
-  background: #FAFAF8;
+  background: #f8f9fa;
   padding: 20px 16px;
   padding-bottom: 100px;
   min-height: 100vh;
@@ -253,7 +291,7 @@ onMounted(() => {
 .section-title {
   font-size: 18px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin-bottom: 20px;
   letter-spacing: -0.3px;
 }
@@ -319,7 +357,7 @@ onMounted(() => {
 .empty-state-title {
   font-size: 18px;
   font-weight: 600;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin: 0;
   line-height: 1.4;
   max-width: 280px;
@@ -341,10 +379,10 @@ onMounted(() => {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   box-shadow: 
-    0 6px 20px rgba(255, 107, 107, 0.3),
-    0 2px 8px rgba(255, 107, 107, 0.2);
+    0 6px 20px rgba(61, 95, 107, 0.3),
+    0 2px 8px rgba(61, 95, 107, 0.2);
   transition: all 0.3s ease;
   margin-top: 8px;
   max-width: 300px;
@@ -352,8 +390,8 @@ onMounted(() => {
 
 .create-report-btn:hover {
   box-shadow: 
-    0 8px 24px rgba(255, 107, 107, 0.4),
-    0 4px 12px rgba(255, 107, 107, 0.3);
+    0 8px 24px rgba(61, 95, 107, 0.4),
+    0 4px 12px rgba(61, 95, 107, 0.3);
   transform: translateY(-2px);
 }
 
@@ -372,11 +410,11 @@ onMounted(() => {
   }
 
   .section-title {
-    color: #E8E6F0;
+    color: #dce6e9;
   }
 
   .view-all-btn {
-    --color: #AAA;
+    --color: #9ca5ab;
   }
 
   .empty-state {
@@ -385,11 +423,11 @@ onMounted(() => {
   }
 
   .empty-state-title {
-    color: #FFFFFF;
+    color: #dce6e9;
   }
 
   .empty-state-description {
-    color: #AAA;
+    color: #9ca5ab;
   }
 
   .empty-state-icon {
