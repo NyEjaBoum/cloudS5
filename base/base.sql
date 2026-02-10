@@ -110,21 +110,25 @@ CREATE TABLE historique_blocage (
 -- =========================
 -- Table du prix forfaitaire global par m²
 -- =========================
+-- Table du prix forfaitaire global par m²
 CREATE TABLE prix_global (
     id SERIAL PRIMARY KEY,
-    prix_m2 NUMERIC(10,2) NOT NULL DEFAULT 5000,
+    prix_m2 NUMERIC(10,2) NOT NULL,
+    date_debut TIMESTAMP NOT NULL DEFAULT NOW(),
+    date_fin TIMESTAMP, -- NULL = prix en cours de validité
     date_modification TIMESTAMP DEFAULT NOW()
 );
 
--- Valeur initiale
-INSERT INTO prix_global (prix_m2) VALUES (5000);
+-- Valeur initiale (prix en vigueur)
+INSERT INTO prix_global (prix_m2, date_debut, date_modification)
+VALUES (5000, NOW(), NOW());
 
 -- =========================
 -- Historique des modifications du prix par m²
 -- =========================
 CREATE TABLE historique_prix (
     id SERIAL PRIMARY KEY,
-    ancien_prix NUMERIC(10,2) NOT NULL,
+    ancien_prix NUMERIC(10,2),
     nouveau_prix NUMERIC(10,2) NOT NULL,
     date_modification TIMESTAMP DEFAULT NOW(),
     id_utilisateur INT REFERENCES utilisateurs(id)

@@ -2,8 +2,12 @@ package com.projetCloud.projetCloud.repository.signalement;
 
 import com.projetCloud.projetCloud.model.signalement.Signalement;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
+
 import java.util.List;
+
 import org.springframework.data.repository.query.Param;
 
 public interface SignalementRepository extends JpaRepository<Signalement, Integer> {
@@ -25,4 +29,8 @@ public interface SignalementRepository extends JpaRepository<Signalement, Intege
     @Query(value = "SELECT nb_travaux_termines, delai_moyen_jours FROM vue_stats_delai_moyen", nativeQuery = true)
     List<Object[]> getStatsDelaiMoyenRaw();
 
+    @Modifying
+    @Transactional
+    @Query(value = "SELECT setval('signalements_id_seq', :nextVal, false)", nativeQuery = true)
+    void resetSequence(@Param("nextVal") Integer nextVal);
 }
