@@ -428,7 +428,7 @@ const submitReport = async () => {
   display: block;
   font-size: 16px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin-bottom: 12px;
 }
 
@@ -443,8 +443,8 @@ const submitReport = async () => {
 }
 
 .form-item.item-has-focus {
-  --border-color: #FF6B6B;
-  box-shadow: 0 0 0 4px rgba(255, 107, 107, 0.1);
+  --border-color: #3d5f6b;
+  box-shadow: 0 0 0 4px rgba(61, 95, 107, 0.1);
 }
 
 .description-field {
@@ -483,7 +483,7 @@ ion-textarea {
 }
 
 .photo-thumbnail:hover {
-  border-color: #FF6B6B;
+  border-color: #3d5f6b;
   transform: translateY(-2px);
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
 }
@@ -500,7 +500,7 @@ ion-textarea {
   right: 8px;
   width: 28px;
   height: 28px;
-  background: rgba(255, 107, 107, 0.9);
+  background: rgba(61, 95, 107, 0.9);
   color: white;
   border: none;
   border-radius: 50%;
@@ -514,7 +514,7 @@ ion-textarea {
 }
 
 .remove-photo:hover {
-  background: rgba(255, 107, 107, 1);
+  background: rgba(61, 95, 107, 1);
   transform: scale(1.1);
 }
 
@@ -557,9 +557,9 @@ ion-textarea {
 }
 
 .add-photo-btn:hover {
-  border-color: #FF6B6B;
-  color: #FF6B6B;
-  background: rgba(255, 107, 107, 0.05);
+  border-color: #3d5f6b;
+  color: #3d5f6b;
+  background: rgba(61, 95, 107, 0.05);
   transform: translateY(-2px);
 }
 
@@ -592,22 +592,22 @@ ion-textarea {
 }
 
 .add-photos-card:hover {
-  border-color: #FF6B6B;
-  background: rgba(255, 107, 107, 0.05);
+  border-color: #3d5f6b;
+  background: rgba(61, 95, 107, 0.05);
   transform: translateY(-2px);
 }
 
 .camera-icon {
   font-size: 44px;
   margin-bottom: 16px;
-  color: #FF6B6B;
+  color: #3d5f6b;
 }
 
 .add-photos-text {
   font-size: 16px;
   font-weight: 600;
   margin: 0 0 6px 0;
-  color: #1A1A2E;
+  color: #2c3e44;
 }
 
 .add-photos-hint {
@@ -629,17 +629,17 @@ ion-textarea {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 0.5px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   box-shadow: 
-    0 6px 20px rgba(255, 107, 107, 0.3),
-    0 2px 8px rgba(255, 107, 107, 0.2);
+    0 6px 20px rgba(61, 95, 107, 0.3),
+    0 2px 8px rgba(61, 95, 107, 0.2);
   transition: all 0.3s ease;
 }
 
 .submit-button:hover:not(:disabled) {
   box-shadow: 
-    0 8px 24px rgba(255, 107, 107, 0.4),
-    0 4px 12px rgba(255, 107, 107, 0.3);
+    0 8px 24px rgba(61, 95, 107, 0.4),
+    0 4px 12px rgba(61, 95, 107, 0.3);
   transform: translateY(-2px);
 }
 
@@ -678,12 +678,12 @@ ion-textarea {
   display: flex;
   align-items: center;
   gap: 12px;
-  color: #1A1A2E;
+  color: #2c3e44;
   font-weight: 600;
 }
 
 .modal-location-info ion-icon {
-  color: #FF6B6B;
+  color: #3d5f6b;
   font-size: 20px;
 }
 

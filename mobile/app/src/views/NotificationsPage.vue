@@ -236,7 +236,7 @@ const goToReports = () => {
 
 .loading-container p {
   margin-top: 16px;
-  color: #4A4458;
+  color: #5a6b73;
   font-size: 14px;
 }
 
@@ -267,8 +267,8 @@ const goToReports = () => {
 }
 
 .notification-card.unread {
-  background: #FFF8F2;
-  border-left: 4px solid #FF6B6B;
+  background: #e8f1f4;
+  border-left: 4px solid #3d5f6b;
   padding-left: 16px;
 }
 
@@ -280,7 +280,7 @@ const goToReports = () => {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #FF6B6B;
+  background: #3d5f6b;
 }
 
 /* Contenu */
@@ -300,14 +300,14 @@ const goToReports = () => {
 .notif-title {
   font-size: 15px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin: 0;
   flex: 1;
 }
 
 .notif-date {
   font-size: 11px;
-  color: #8E8AA0;
+  color: #7a8994;
   white-space: nowrap;
   padding-right: 16px;
 }
@@ -332,12 +332,12 @@ const goToReports = () => {
 
 .arrow-icon {
   font-size: 14px;
-  color: #8E8AA0;
+  color: #7a8994;
 }
 
 .notif-message {
   font-size: 13px;
-  color: #4A4458;
+  color: #5a6b73;
   margin: 0;
   line-height: 1.4;
 }
@@ -345,24 +345,24 @@ const goToReports = () => {
 /* Dark mode */
 @media (prefers-color-scheme: dark) {
   .notification-card {
-    background: #262640;
+    background: #1f2f35;
     box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
   }
 
   .notification-card.unread {
-    background: #2E2E4A;
+    background: #2c3e44;
   }
 
   .notif-title {
-    color: #E8E6F0;
+    color: #dce6e9;
   }
 
   .notif-date {
-    color: #8E8AA0;
+    color: #7a8994;
   }
 
   .notif-message {
-    color: #B8B4C8;
+    color: #9ca5ab;
   }
 }
 </style>

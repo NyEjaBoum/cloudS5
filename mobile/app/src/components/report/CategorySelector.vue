@@ -9,7 +9,7 @@
         @click="selectCategory(category)"
         type="button"
       >
-        <div class="category-icon">
+        <div class="category-icon" :style="{ color: category.color }">
           <ion-icon :icon="category.icon"></ion-icon>
         </div>
         <span class="category-name">{{ category.name }}</span>
@@ -72,7 +72,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'infrastructure',
       name: 'Infrastructure',
       icon: constructOutline,
-      color: '#4299e1',
+      color: '#3d5f6b',
       subcategories: [
         { id: 'roads', name: 'Roads' },
         { id: 'sidewalks', name: 'Sidewalks' },
@@ -84,7 +84,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'public_safety',
       name: 'Public Safety',
       icon: alertCircleOutline,
-      color: '#ed8936',
+      color: '#8b6f5c',
       subcategories: [
         { id: 'traffic', name: 'Traffic Issues' },
         { id: 'crime', name: 'Crime' },
@@ -96,7 +96,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'environment',
       name: 'Environment',
       icon: trailSignOutline,
-      color: '#48bb78',
+      color: '#4a9c6d',
       subcategories: [
         { id: 'trash', name: 'Trash/Litter' },
         { id: 'pollution', name: 'Pollution' },
@@ -108,7 +108,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'utilities',
       name: 'Utilities',
       icon: flashOutline,
-      color: '#9f7aea',
+      color: '#5a8a96',
       subcategories: [
         { id: 'electricity', name: 'Electricity' },
         { id: 'water', name: 'Water Supply' },
@@ -120,7 +120,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'transportation',
       name: 'Transportation',
       icon: carOutline,
-      color: '#ed64a6',
+      color: '#d4a857',
       subcategories: [
         { id: 'parking', name: 'Parking' },
         { id: 'public_transit', name: 'Public Transit' },
@@ -132,7 +132,7 @@ const props = withDefaults(defineProps<Props>(), {
       id: 'other',
       name: 'Other',
       icon: helpCircleOutline,
-      color: '#9CA5B1',
+      color: '#7a8994',
       subcategories: [
         { id: 'noise', name: 'Noise Complaint' },
         { id: 'animals', name: 'Animals' },
@@ -172,7 +172,7 @@ const selectCategory = (category: Category) => {
   align-items: center;
   justify-content: center;
   padding: 16px 8px;
-  border: 2px solid #dce6e9;
+  border: 2px solid #e0e5e7;
   border-radius: 12px;
   background: white;
   cursor: pointer;
@@ -182,13 +182,13 @@ const selectCategory = (category: Category) => {
 
 .category-card:hover {
   transform: translateY(-2px);
-  border-color: #b8ccd2;
+  border-color: #b8c5cc;
 }
 
 .category-selected {
-  border-color: #3D5E6B;
-  background: #f0f5f6;
-  box-shadow: 0 4px 12px rgba(61, 94, 107, 0.15);
+  border-color: #3d5f6b;
+  background: rgba(61, 95, 107, 0.05);
+  box-shadow: 0 4px 12px rgba(61, 95, 107, 0.15);
 }
 
 .category-icon {
@@ -197,33 +197,33 @@ const selectCategory = (category: Category) => {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f5f6;
+  background: #f4f6f7;
   border-radius: 10px;
   margin-bottom: 8px;
-  color: #3D5E6B;
 }
 
 .category-selected .category-icon {
-  background: #dce6e9;
+  background: #3d5f6b;
+  color: white !important;
 }
 
 .category-name {
   font-size: 12px;
   font-weight: 600;
-  color: #344f5a;
+  color: #2c3e44;
   text-align: center;
 }
 
 .subcategories-section {
   margin-top: 24px;
   padding-top: 20px;
-  border-top: 1px solid #dce6e9;
+  border-top: 1px solid #e0e5e7;
 }
 
 .subcategories-title {
   font-size: 16px;
   font-weight: 600;
-  color: #2c424b;
+  color: #2c3e44;
   margin-bottom: 12px;
 }
 
@@ -235,16 +235,16 @@ const selectCategory = (category: Category) => {
 
 @media (prefers-color-scheme: dark) {
   .category-card {
-    background: #26373f;
-    border-color: #2c424b;
+    background: #2c3e44;
+    border-color: #3d4a50;
   }
 
   .category-name {
-    color: #b8ccd2;
+    color: #b8c5cc;
   }
 
   .category-icon {
-    background: #2c424b;
+    background: #3d4a50;
   }
 }
 

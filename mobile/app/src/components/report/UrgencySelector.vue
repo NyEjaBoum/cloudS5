@@ -7,7 +7,7 @@
         :key="level.id"
         class="urgency-card"
         :class="`urgency-${level.id}`"
-        :style="{ borderColor: modelValue === level.id ? level.color : '#dce6e9' }"
+        :style="{ borderColor: modelValue === level.id ? level.color : '#e0e5e7' }"
         @click="$emit('update:modelValue', level.id)"
         type="button"
       >
@@ -59,28 +59,28 @@ withDefaults(defineProps<Props>(), {
       id: 'low',
       name: 'Low',
       description: 'Minor inconvenience',
-      color: '#48bb78',
+      color: '#4a9c6d',
       icon: alertCircleOutline
     },
     {
       id: 'medium',
       name: 'Medium',
       description: 'Needs attention',
-      color: '#ed8936',
+      color: '#d4a857',
       icon: warningOutline
     },
     {
       id: 'high',
       name: 'High',
       description: 'Serious issue',
-      color: '#ed8936',
+      color: '#8b6f5c',
       icon: warningOutline
     },
     {
       id: 'critical',
       name: 'Critical',
       description: 'Emergency/danger',
-      color: '#f56565',
+      color: '#c45c5c',
       icon: medicalOutline
     }
   ]
@@ -95,7 +95,7 @@ defineEmits<{
 .section-subtitle {
   font-size: 16px;
   font-weight: 600;
-  color: #2c424b;
+  color: #2c3e44;
   margin-bottom: 12px;
 }
 
@@ -110,7 +110,7 @@ defineEmits<{
   align-items: center;
   gap: 12px;
   padding: 12px 16px;
-  border: 2px solid #dce6e9;
+  border: 2px solid #e0e5e7;
   border-radius: 12px;
   background: white;
   cursor: pointer;
@@ -119,7 +119,7 @@ defineEmits<{
 }
 
 .urgency-card:hover {
-  border-color: #b8ccd2;
+  border-color: #b8c5cc;
 }
 
 .urgency-icon {
@@ -128,7 +128,7 @@ defineEmits<{
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #f0f5f6;
+  background: #f4f6f7;
   border-radius: 10px;
   font-size: 20px;
 }
@@ -141,14 +141,14 @@ defineEmits<{
 .urgency-name {
   display: block;
   font-weight: 600;
-  color: #2c424b;
+  color: #2c3e44;
   margin-bottom: 2px;
 }
 
 .urgency-desc {
   display: block;
   font-size: 12px;
-  color: #44474D;
+  color: #5a6b73;
 }
 
 .selected-icon {
@@ -157,20 +157,20 @@ defineEmits<{
 
 @media (prefers-color-scheme: dark) {
   .urgency-card {
-    background: #26373f;
-    border-color: #2c424b;
+    background: #2c3e44;
+    border-color: #3d4a50;
   }
 
   .urgency-icon {
-    background: #2c424b;
+    background: #3d4a50;
   }
 
   .urgency-name {
-    color: #dce6e9;
+    color: #b8c5cc;
   }
 
   .urgency-desc {
-    color: #9CA5B1;
+    color: #7a8994;
   }
 }
 </style>

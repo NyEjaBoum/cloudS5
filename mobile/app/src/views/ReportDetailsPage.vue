@@ -398,7 +398,7 @@ onMounted(() => {
 /* Header Section */
 .header-section {
   padding: 24px 20px;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 100%);
   color: white;
 }
 
@@ -511,7 +511,7 @@ onMounted(() => {
 
 .card-icon {
   font-size: 24px;
-  color: #FF6B6B;
+  color: #3d5f6b;
 }
 
 .card-title {
@@ -554,10 +554,10 @@ ion-card-content {
 }
 
 .map-button {
-  --background: #FF6B6B;
-  --background-activated: #ff5252;
-  --background-focused: #ff5252;
-  --background-hover: #ff5252;
+  --background: #3d5f6b;
+  --background-activated: #36525e;
+  --background-focused: #36525e;
+  --background-hover: #36525e;
   --border-radius: 10px;
   height: 44px;
   font-weight: 600;
@@ -631,7 +631,7 @@ ion-card-content {
 }
 
 .budget-value {
-  color: #FF6B6B;
+  color: #3d5f6b;
   font-size: 18px;
 }
 

@@ -200,7 +200,7 @@ const resetBlockedState = () => {
   left: 0;
   right: 0;
   bottom: 0;
-  background: linear-gradient(135deg, #FF6B6B 0%, #FF8E53 50%, #FFD166 100%);
+  background: linear-gradient(135deg, #3d5f6b 0%, #5a8a96 50%, #7ba3ae 100%);
 }
 
 .gradient-bg::before,
@@ -286,12 +286,12 @@ const resetBlockedState = () => {
 .form-title {
   font-size: 22px;
   font-weight: 700;
-  color: #1A1A2E;
+  color: #2c3e44;
   margin-bottom: 8px;
 }
 
 .form-subtitle {
-  color: #4A4458;
+  color: #5a6b73;
   margin: 0;
   font-size: 14px;
 }
@@ -360,12 +360,12 @@ ion-input {
   font-weight: 700;
   font-size: 16px;
   letter-spacing: 0.5px;
-  box-shadow: 0 4px 12px rgba(255, 107, 107, 0.25);
+  box-shadow: 0 4px 12px rgba(61, 95, 107, 0.25);
   transition: all 0.3s ease;
 }
 
 .login-button:hover {
-  box-shadow: 0 6px 16px rgba(255, 107, 107, 0.35);
+  box-shadow: 0 6px 16px rgba(61, 95, 107, 0.35);
 }
 
 .login-button:active {
