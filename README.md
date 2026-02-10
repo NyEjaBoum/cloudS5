@@ -1,6 +1,3 @@
-docker-compose up -d --build
-docker-compose ps
-
 # Mapéo - Système de Gestion des Signalements Routiers
 
 ## Table des Matières
@@ -78,10 +75,10 @@ docker-compose ps
 
 **Services démarrés :**
 
-- Backend API : http://localhost:8080
+- Backend API : <http://localhost:8080>
 - PostgreSQL : localhost:5432
-- Serveur de cartes : http://localhost:8081
-- Frontend : http://localhost:5173/login
+- Serveur de cartes : <http://localhost:8081>
+- Frontend : <http://localhost:5173/login>
 
 ### Installation de l'Application Mobile
 
@@ -93,38 +90,41 @@ cd mobile
 # - apk.bat : génération de l'APK
 ```
 
-
 ## API et Endpoints
 
 L'API REST est documentée via Swagger UI : [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
 
 ### Authentification (local)
-| Méthode | Endpoint                | Description                                 |
-|---------|-------------------------|---------------------------------------------|
+
+| Méthode | Endpoint                | Description                                   |
+|---------|-------------------------|-----------------------------------------------|
 | POST    | /api/auth/register      | Inscription d’un nouvel utilisateur (MANAGER) |
-| POST    | /api/auth/login         | Connexion email/mot de passe                |
+| POST    | /api/auth/login         | Connexion email/mot de passe                  |
 
 ### Authentification (Firebase)
-| Méthode | Endpoint                        | Description                                 |
-|---------|-------------------------------|---------------------------------------------|
-| POST    | /api/auth/firebase/login       | Connexion via Firebase                      |
-| POST    | /api/auth/firebase/check-status| Vérification de l’état d’un utilisateur     |
-| POST    | /api/auth/firebase/failed-attempt | Enregistrement d’un échec d’inscription |
+
+| Méthode | Endpoint                          | Description                                 |
+|---------|-----------------------------------|---------------------------------------------|
+| POST    | /api/auth/firebase/login          | Connexion via Firebase                      |
+| POST    | /api/auth/firebase/check-status   | Vérification de l’état d’un utilisateur     |
+| POST    | /api/auth/firebase/failed-attempt | Enregistrement d’un échec d’inscription     |
 
 ### Utilisateurs
+
 | Méthode | Endpoint                                         | Description                                 |
 |---------|--------------------------------------------------|---------------------------------------------|
-| GET     | /api/utilisateurs                                 | Liste des utilisateurs                      |
-| GET     | /api/utilisateurs/{id}                            | Détail d’un utilisateur                     |
-| PUT     | /api/utilisateurs/{id}                            | Modifier un utilisateur (soi-même/MANAGER)  |
-| POST    | /api/utilisateurs/unblock/{userId}                | Débloquer un utilisateur                    |
-| GET     | /api/utilisateurs/historique-blocage              | Historique des blocages                     |
-| GET     | /api/utilisateurs/{id}/historique-blocage         | Historique de blocage d’un utilisateur      |
-| POST    | /api/utilisateurs/firebase/import                 | Importer depuis Firebase (MANAGER)          |
-| POST    | /api/utilisateurs/firebase/export                 | Exporter vers Firebase (MANAGER)            |
-| POST    | /api/utilisateurs/firebase/sync                   | Synchroniser avec Firebase (MANAGER)        |
+| GET     | /api/utilisateurs                                | Liste des utilisateurs                      |
+| GET     | /api/utilisateurs/{id}                           | Détail d’un utilisateur                     |
+| PUT     | /api/utilisateurs/{id}                           | Modifier un utilisateur (soi-même/MANAGER)  |
+| POST    | /api/utilisateurs/unblock/{userId}               | Débloquer un utilisateur                    |
+| GET     | /api/utilisateurs/historique-blocage             | Historique des blocages                     |
+| GET     | /api/utilisateurs/{id}/historique-blocage        | Historique de blocage d’un utilisateur      |
+| POST    | /api/utilisateurs/firebase/import                | Importer depuis Firebase (MANAGER)          |
+| POST    | /api/utilisateurs/firebase/export                | Exporter vers Firebase (MANAGER)            |
+| POST    | /api/utilisateurs/firebase/sync                  | Synchroniser avec Firebase (MANAGER)        |
 
 ### Signalements
+
 | Méthode | Endpoint                                         | Description                                 |
 |---------|--------------------------------------------------|---------------------------------------------|
 | GET     | /api/signalements                                | Liste des signalements                      |
@@ -142,16 +142,17 @@ L'API REST est documentée via Swagger UI : [http://localhost:8080/swagger-ui.h
 | POST    | /api/signalements/sync                           | Synchroniser avec Firebase (MANAGER)        |
 
 ### Entreprises
+
 | Méthode | Endpoint                | Description                                 |
 |---------|-------------------------|---------------------------------------------|
 | GET     | /api/entreprises        | Liste des entreprises                       |
 | GET     | /api/entreprises/{id}   | Détail d’une entreprise                     |
 
 ### Prix
-| Méthode | Endpoint                | Description                                 |
-|---------|-------------------------|---------------------------------------------|
-| GET     | /api/prix               | Obtenir le prix global                      |
-| PUT     | /api/prix               | Modifier le prix (MANAGER)                  |
-| GET     | /api/prix/historique    | Historique des prix                         |
-| GET     | /api/prix/calculer      | Calculer un budget (params: surfaceM2, niveau) |
 
+| Méthode | Endpoint                | Description                                    |
+|---------|-------------------------|------------------------------------------------|
+| GET     | /api/prix               | Obtenir le prix global                         |
+| PUT     | /api/prix               | Modifier le prix (MANAGER)                     |
+| GET     | /api/prix/historique    | Historique des prix                            |
+| GET     | /api/prix/calculer      | Calculer un budget (params: surfaceM2, niveau) |
