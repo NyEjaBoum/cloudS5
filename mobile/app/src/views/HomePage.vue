@@ -126,6 +126,7 @@ import {
   addOutline
 } from 'ionicons/icons';
 import authService from '../services/auth.service';
+import reportsService from '../services/reports.service';
 import { NavBar, StatCard, QuickActionCard, ReportCard, NotificationBell } from '../components';
 
 const router = useRouter();
@@ -141,6 +142,40 @@ const stats = reactive({
 
 // Signalements récents
 const recentReports = reactive([]);
+
+// Charger les statistiques et signalements
+const loadReports = async () => {
+  const storedUser = authService.getStoredUser();
+  if (storedUser && storedUser.email) {
+    const result = await reportsService.getSignalementsByEmail(storedUser.email);
+    if (result.success) {
+      // Mettre à jour le nombre total de signalements
+      stats.totalReports = result.signalements.length;
+      
+      // Charger les 3 signalements les plus récents
+      const sorted = result.signalements
+        .sort((a, b) => {
+          const dateA = new Date(a.dateCreation).getTime();
+          const dateB = new Date(b.dateCreation).getTime();
+          return dateB - dateA;
+        })
+        .slice(0, 3);
+      
+      // Vider et remplir le tableau réactif
+      recentReports.length = 0;
+      sorted.forEach(report => {
+        recentReports.push({
+          id: report.id,
+          title: report.titre,
+          description: report.description,
+          status: report.statut === 1 ? 'pending' : report.statut === 11 ? 'in_progress' : 'resolved',
+          category: 'infrastructure',
+          date: new Date(report.dateCreation).toLocaleDateString('fr-FR')
+        });
+      });
+    }
+  }
+};
 
 // Navigation
 const goToNewReport = () => {
@@ -159,12 +194,15 @@ const viewReport = (id) => {
   router.push(`/report/${id}`);
 };
 
-// Charger les données utilisateur
-onMounted(() => {
+// Charger les données utilisateur et les signalements
+onMounted(async () => {
   const storedUser = authService.getStoredUser();
   if (storedUser) {
     user.name = storedUser.displayName || storedUser.email?.split('@')[0] || 'Utilisateur';
   }
+  
+  // Charger les signalements
+  await loadReports();
 });
 </script>
 
