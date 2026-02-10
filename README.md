@@ -81,7 +81,7 @@ docker-compose ps
 - Backend API : http://localhost:8080
 - PostgreSQL : localhost:5432
 - Serveur de cartes : http://localhost:8081
-- Frontend : http://localhost:5173/login
+- Frontend Module Web: http://localhost:5173/login pour commencer 
 
 ### Installation de l'Application Mobile
 
