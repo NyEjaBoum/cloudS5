@@ -1,46 +1,156 @@
-# cloudS5
-cloudS5 project
+docker-compose up -d --build
+docker-compose ps
 
-## Tâches réalisées
+# Mapéo - Système de Gestion des Signalements Routiers
 
-- Création du schéma de base de données PostgreSQL (tables, vues, relations)
-- Insertion de données d’exemple pour les rôles, utilisateurs, entreprises, signalements, etc.
-- Création des entités JPA pour chaque table (Utilisateur, Signalement, Entreprise, etc.)
-- Création des repositories Spring Data JPA pour accéder aux données
-- Création de DTOs pour exposer les données via l’API (récapitulatif, infos signalement…)
-- Création de services pour la logique métier (SignalementService, FirebaseSignalementService…)
-- Création de contrôleurs REST pour exposer les endpoints :
-  - `/api/signalements` : liste des signalements
-  - `/api/signalements/recapitulatif` : tableau de récapitulatif global
-  - `/api/signalements/infos` : infos détaillées sur chaque signalement
-  - `/api/signalements/sync/{id}` et `/api/signalements/syncAll` : synchronisation Firebase
-- Gestion des utilisateurs bloqués (champ `compte_bloque` dans la table `utilisateurs`)
-- Mise en place de la configuration Firebase pour la synchronisation
+## Table des Matières
 
-## Fonctionnement
+- [Fonctionnalités](#fonctionnalités)
+- [Installation et Démarrage](#installation-et-démarrage)
+- [Système d'Authentification](#système-dauthentification)
+- [API et Endpoints](#api-et-endpoints)
+- [Application Mobile](#application-mobile)
+- [Déploiement](#déploiement)
 
-- **Backend Spring Boot** connecté à une base PostgreSQL.
-- Les données sont accessibles via des endpoints REST.
-- Les vues SQL (`vue_recapitulatif_signalement`, `vue_infos_signalement`) permettent de simplifier les requêtes pour le tableau de bord et les infos signalement.
-- Les DTOs servent à formater les réponses de l’API.
-- Les endpoints REST renvoient toujours une réponse structurée :
-  ```json
-  {
-    "status": "success",
-    "data": { ... },
-    "error": null
-  }
-  ```
-- La synchronisation Firebase permet d’envoyer les signalements en ligne pour affichage mobile.
-- Les utilisateurs bloqués peuvent être listés via une requête sur le champ `compte_bloque`.
+## Fonctionnalités
 
----
+### Module Authentification
 
-Pour lancer le backend :
-1. Crée la base de données avec les scripts `base.sql` et `base_donnees.sql`.
-2. Configure la connexion dans `src/main/resources/application.properties`.
-3. Lance l’application avec Maven :
-   ```sh
-   ./mvnw spring-boot:run
-   ```
-4. Les endpoints sont accessibles sur `http://localhost:8080/api/signalements`.
+- Authentification hybride : Email/mot de passe avec base PostgreSQL locale et Firebase
+- Inscription/Connexion avec gestion de sessions configurable
+- Limite de tentatives (3 par défaut, paramétrable) avec système de blocage
+- API de déblocage pour les administrateurs
+- Documentation API complète via Swagger UI
+
+### Module Cartes
+
+- Serveur de cartes offline conteneurisé (Docker) avec tuiles d'Antananarivo
+- Visualisation interactive via Leaflet.js
+- Géolocalisation des signalements
+
+### Application Web (React)
+
+#### Visiteur (sans compte)
+
+- Visualisation de la carte avec tous les points de signalement
+- Survol interactif pour afficher les détails (date, statut, surface, budget, entreprise)
+- Tableau de récapitulation global (nombre de points, surface totale, % d'avancement, budget total)
+
+#### Manager (compte administrateur)
+
+- Gestion des utilisateurs : Création de comptes, déblocage, historique
+- Synchronisation intelligente : Récupération/envoi des données vers Firebase
+- Gestion complète des signalements :
+  - Ajout/modification des informations (surface, budget, entreprise)
+  - Mise à jour des statuts (Nouveau → En cours → Terminé)
+  - Catégorisation des réparations (niveaux 1 à 10)
+  - Calcul automatique du budget : `prix_par_m² × niveau × surface_m²`
+  - Suivi d'avancement automatisé : 0% (Nouveau), 50% (En cours), 100% (Terminé)
+- Tableau de bord analytique :
+  - Statistiques de délai moyen de traitement
+  - Indicateurs de performance clés (KPIs)
+  - Visualisation des coûts et avancements
+
+### Application Mobile (Vue.js)
+
+- Formulaire : Photos, géolocalisation, catégorisation
+- Consultation des signalements
+
+## Installation et Démarrage
+
+### Prérequis
+
+- Docker & Docker Compose
+- Node.js 18+ et npm
+- Java JDK 17+
+- Android Studio (pour build mobile)
+- Un compte Firebase (optionnel pour le mode cloud)
+
+### 1. Installation via Docker (Backend, BD, Carte)
+
+```bash
+# Lancez les services conteneurisés
+docker-compose up -d --build
+
+# Vérifiez que les services sont en ligne
+docker-compose ps
+```
+
+**Services démarrés :**
+
+- Backend API : http://localhost:8080
+- PostgreSQL : localhost:5432
+- Serveur de cartes : http://localhost:8081
+
+### Installation de l'Application Mobile
+
+```bash
+cd mobile
+# Configuration (modifiez les chemins dans les fichiers .bat selon votre environnement)
+# - setup.bat : setup de base
+# - run.bat : lancement sur émulateur
+# - apk.bat : génération de l'APK
+```
+
+
+## API et Endpoints
+
+L'API REST est documentée via Swagger UI : [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
+
+### Authentification (local)
+| Méthode | Endpoint                | Description                                 |
+|---------|-------------------------|---------------------------------------------|
+| POST    | /api/auth/register      | Inscription d’un nouvel utilisateur (MANAGER) |
+| POST    | /api/auth/login         | Connexion email/mot de passe                |
+
+### Authentification (Firebase)
+| Méthode | Endpoint                        | Description                                 |
+|---------|-------------------------------|---------------------------------------------|
+| POST    | /api/auth/firebase/login       | Connexion via Firebase                      |
+| POST    | /api/auth/firebase/check-status| Vérification de l’état d’un utilisateur     |
+| POST    | /api/auth/firebase/failed-attempt | Enregistrement d’un échec d’inscription |
+
+### Utilisateurs
+| Méthode | Endpoint                                         | Description                                 |
+|---------|--------------------------------------------------|---------------------------------------------|
+| GET     | /api/utilisateurs                                 | Liste des utilisateurs                      |
+| GET     | /api/utilisateurs/{id}                            | Détail d’un utilisateur                     |
+| PUT     | /api/utilisateurs/{id}                            | Modifier un utilisateur (soi-même/MANAGER)  |
+| POST    | /api/utilisateurs/unblock/{userId}                | Débloquer un utilisateur                    |
+| GET     | /api/utilisateurs/historique-blocage              | Historique des blocages                     |
+| GET     | /api/utilisateurs/{id}/historique-blocage         | Historique de blocage d’un utilisateur      |
+| POST    | /api/utilisateurs/firebase/import                 | Importer depuis Firebase (MANAGER)          |
+| POST    | /api/utilisateurs/firebase/export                 | Exporter vers Firebase (MANAGER)            |
+| POST    | /api/utilisateurs/firebase/sync                   | Synchroniser avec Firebase (MANAGER)        |
+
+### Signalements
+| Méthode | Endpoint                                         | Description                                 |
+|---------|--------------------------------------------------|---------------------------------------------|
+| GET     | /api/signalements                                | Liste des signalements                      |
+| GET     | /api/signalements/{id}                           | Détail d’un signalement (SignalementCpl)    |
+| PUT     | /api/signalements/{id}                           | Modifier un signalement (MANAGER)           |
+| POST    | /api/signalements                                | Créer un signalement                        |
+| GET     | /api/signalements/duree                          | Délai de traitement (MANAGER)               |
+| GET     | /api/signalements/stats-delai-moyen              | Statistiques de délai moyen (MANAGER)       |
+| GET     | /api/signalements/{id}/historique                | Historique d’un signalement (MANAGER)       |
+| GET     | /api/signalements/complet                        | Liste complète (SignalementCpl)             |
+| GET     | /api/signalements/recapitulatif                  | Récapitulatif global                        |
+| GET     | /api/signalements/infos                          | Infos signalements (MANAGER)                |
+| POST    | /api/signalements/firebase/import                | Importer depuis Firebase (MANAGER)          |
+| POST    | /api/signalements/firebase/export                | Exporter vers Firebase (MANAGER)            |
+| POST    | /api/signalements/sync                           | Synchroniser avec Firebase (MANAGER)        |
+
+### Entreprises
+| Méthode | Endpoint                | Description                                 |
+|---------|-------------------------|---------------------------------------------|
+| GET     | /api/entreprises        | Liste des entreprises                       |
+| GET     | /api/entreprises/{id}   | Détail d’une entreprise                     |
+
+### Prix
+| Méthode | Endpoint                | Description                                 |
+|---------|-------------------------|---------------------------------------------|
+| GET     | /api/prix               | Obtenir le prix global                      |
+| PUT     | /api/prix               | Modifier le prix (MANAGER)                  |
+| GET     | /api/prix/historique    | Historique des prix                         |
+| GET     | /api/prix/calculer      | Calculer un budget (params: surfaceM2, niveau) |
+
