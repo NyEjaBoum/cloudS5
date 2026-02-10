@@ -25,6 +25,9 @@ public class Signalement {
 
     private BigDecimal budget;
 
+    @Column(name = "niveau")
+    private Integer niveau;
+
     @ManyToOne
     @JoinColumn(name = "id_entreprise")
     private Entreprise entreprise;
@@ -71,4 +74,7 @@ public class Signalement {
 
     public LocalDateTime getDateCreation() { return dateCreation; }
     public void setDateCreation(LocalDateTime dateCreation) { this.dateCreation = dateCreation; }
+
+        public Integer getNiveau() { return niveau; }
+    public void setNiveau(Integer niveau) { this.niveau = niveau; }
 }

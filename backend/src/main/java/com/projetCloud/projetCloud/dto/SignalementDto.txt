@@ -13,7 +13,6 @@ public class SignalementDto {
     private String longitude; // String pour Firebase
     private String surfaceM2; // String pour Firebase
     private String budget;    // String pour Firebase
-    private Integer niveau;   // ✅ Nouveau champ
 
     // Champs simplifiés pour Firebase
     private Integer entrepriseId;
@@ -36,7 +35,6 @@ public class SignalementDto {
         this.longitude = s.getLongitude() != null ? s.getLongitude().toString() : null;
         this.surfaceM2 = s.getSurfaceM2() != null ? s.getSurfaceM2().toString() : null;
         this.budget = s.getBudget() != null ? s.getBudget().toString() : null;
-        this.niveau = s.getNiveau(); // ✅ Ajout du niveau
 
         if (s.getEntreprise() != null) {
             this.entrepriseId = s.getEntreprise().getId();
@@ -80,9 +78,6 @@ public class SignalementDto {
 
     public String getBudget() { return budget; }
     public void setBudget(String budget) { this.budget = budget; }
-
-    public Integer getNiveau() { return niveau; } // ✅ Getter
-    public void setNiveau(Integer niveau) { this.niveau = niveau; } // ✅ Setter
 
     public Integer getEntrepriseId() { return entrepriseId; }
     public void setEntrepriseId(Integer entrepriseId) { this.entrepriseId = entrepriseId; }

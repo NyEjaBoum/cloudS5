@@ -1,6 +1,6 @@
 import React from "react";
 import { NavLink } from "react-router-dom";
-import { LayoutDashboard, Users, UserPlus, ShieldOff, Clock, MapPin, Map } from "lucide-react";
+import { LayoutDashboard, Users, UserPlus, ShieldOff, Clock, MapPin, Map, DollarSign } from "lucide-react";
 import logo from "../../assets/mapeo.png";
 
 export default function Sidebar() {
@@ -76,6 +76,10 @@ export default function Sidebar() {
             <NavLink to="/carte" className={linkClass}>
               <Map size={18} />
               Carte visiteur
+            </NavLink>
+            <NavLink to="/manager/prix-global" className={linkClass}>
+              <DollarSign size={18} />
+              Prix par m²
             </NavLink>
           </div>
         </div>

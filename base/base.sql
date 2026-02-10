@@ -60,6 +60,7 @@ CREATE TABLE signalements (
     longitude NUMERIC(9,6) NOT NULL,
     surface_m2 NUMERIC(10,2),
     budget NUMERIC(15,2),
+    niveau INTEGER CHECK (niveau BETWEEN 1 AND 10), -- ✅ NULL par défaut
     id_entreprise INT REFERENCES entreprises(id) ON DELETE SET NULL,
     id_utilisateur INT NOT NULL REFERENCES utilisateurs(id) ON DELETE CASCADE,
     date_creation TIMESTAMP DEFAULT NOW()
@@ -102,3 +103,36 @@ CREATE TABLE historique_blocage (
     date_action TIMESTAMP NOT NULL,
     raison VARCHAR(255)
 );
+
+
+-- ...existing code...
+
+-- =========================
+-- Table du prix forfaitaire global par m²
+-- =========================
+CREATE TABLE prix_global (
+    id SERIAL PRIMARY KEY,
+    prix_m2 NUMERIC(10,2) NOT NULL DEFAULT 5000,
+    date_modification TIMESTAMP DEFAULT NOW()
+);
+
+-- Valeur initiale
+INSERT INTO prix_global (prix_m2) VALUES (5000);
+
+-- =========================
+-- Historique des modifications du prix par m²
+-- =========================
+CREATE TABLE historique_prix (
+    id SERIAL PRIMARY KEY,
+    ancien_prix NUMERIC(10,2) NOT NULL,
+    nouveau_prix NUMERIC(10,2) NOT NULL,
+    date_modification TIMESTAMP DEFAULT NOW(),
+    id_utilisateur INT REFERENCES utilisateurs(id)
+);
+
+
+
+-- Modifier la table signalements pour ajouter le niveau
+-- ALTER TABLE signalements ADD COLUMN niveau INTEGER CHECK (niveau BETWEEN 1 AND 10) DEFAULT 1;
+-- ALTER TABLE signalements ALTER COLUMN niveau DROP DEFAULT;
+-- ALTER TABLE signalements ALTER COLUMN niveau DROP NOT NULL;

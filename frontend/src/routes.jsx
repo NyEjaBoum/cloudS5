@@ -14,6 +14,7 @@ import UserDetails from "./pages/manager/UserDetails.jsx";
 import BlockedUsers from "./pages/manager/BlockedUsers.jsx";
 import HistoriqueBlocages from "./pages/manager/HistoriqueBlocages.jsx";
 import DashboardHome from "./pages/manager/DashboardHome.jsx"; // Assurez-vous d'importer le composant DashboardHome
+import PrixGlobal from "./pages/manager/PrixGlobal.jsx";
 
 const AppRoutes = () => (
   <Router>
@@ -37,6 +38,7 @@ const AppRoutes = () => (
         <Route path="users/:id" element={<UserDetails />} />
         <Route path="blocked-users" element={<BlockedUsers />} />
         <Route path="historique-blocages" element={<HistoriqueBlocages />} />
+        <Route path="prix-global" element={<PrixGlobal />} /> {/* ✅ Nouvelle route */}
       </Route>
     </Routes>
   </Router>

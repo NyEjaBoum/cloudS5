@@ -48,6 +48,9 @@ public class SignalementService {
     @Autowired
     private NotificationService notificationService;
 
+    @Autowired
+    private PrixService prixService;
+
     public List<DureeSignalementDto> getDureeSignalement() {
         try {
             List<Object[]> rows = signalementRepository.getDureeSignalementRaw();
@@ -95,7 +98,7 @@ public class SignalementService {
     public Signalement save(Signalement signalement){
         try {
             Signalement saved = signalementRepository.save(signalement);
-
+            
             SignalementHistorique historique = new SignalementHistorique();
             historique.setSignalement(saved);
             historique.setAncienStatut(saved.getStatut());
@@ -104,10 +107,8 @@ public class SignalementService {
             historique.setUtilisateur(saved.getUtilisateur());
             signalementHistoriqueService.save(historique);
 
-            // ...existing code...
-System.out.println("[DEBUG] Ajout historique : " + historique);
-signalementHistoriqueService.save(historique);
-// ...existing code...
+            System.out.println("[DEBUG] Ajout historique : " + historique);
+            signalementHistoriqueService.save(historique);
 
             return saved;
         } catch (Exception e) {
@@ -129,7 +130,21 @@ signalementHistoriqueService.save(historique);
             signalement.setLatitude(updated.getLatitude());
             signalement.setLongitude(updated.getLongitude());
             signalement.setSurfaceM2(updated.getSurfaceM2());
-            signalement.setBudget(updated.getBudget());
+            
+            // ✅ Niveau : modifiable UNIQUEMENT si actuellement NULL
+            if (signalement.getNiveau() == null && updated.getNiveau() != null) {
+                signalement.setNiveau(updated.getNiveau());
+                System.out.println("[SignalementService] Niveau défini pour la première fois : " + updated.getNiveau());
+            } else if (signalement.getNiveau() != null) {
+                System.out.println("[SignalementService] Niveau déjà défini, modification interdite");
+            }
+            
+            // ✅ Calculer automatiquement le budget si surface et niveau sont présents
+            if (signalement.getSurfaceM2() != null && signalement.getNiveau() != null) {
+                BigDecimal budgetCalcule = prixService.calculerBudget(signalement.getSurfaceM2(), signalement.getNiveau());
+                signalement.setBudget(budgetCalcule);
+            }
+
             signalement.setEntreprise(updated.getEntreprise());
 
             Signalement saved = signalementRepository.save(signalement);
@@ -142,10 +157,8 @@ signalementHistoriqueService.save(historique);
             historique.setUtilisateur(signalement.getUtilisateur());
             signalementHistoriqueService.save(historique);
 
-            // ...existing code...
-System.out.println("[DEBUG] Ajout historique : " + historique);
-signalementHistoriqueService.save(historique);
-// ...existing code...
+            System.out.println("[DEBUG] Ajout historique : " + historique);
+            signalementHistoriqueService.save(historique);
 
             // Notifier l'utilisateur mobile du changement de statut
             if (!ancienStatut.equals(updated.getStatut())) {
@@ -215,14 +228,15 @@ signalementHistoriqueService.save(historique);
             List<InfosSignalementDto> result = new java.util.ArrayList<>();
             for (Object[] row : rows) {
                 InfosSignalementDto dto = new InfosSignalementDto(
-                    ((Number) row[0]).intValue(),
-                    (String) row[1],
-                    (String) row[2],
-                    (Integer) row[3],
-                    row[4] != null ? ((Number) row[4]).doubleValue() : null,
-                    row[5] != null ? ((Number) row[5]).doubleValue() : null,
-                    (String) row[6],
-                    row[7] != null ? row[7].toString() : null
+                    ((Number) row[0]).intValue(),           // id
+                    (String) row[1],                        // titre
+                    (String) row[2],                        // description
+                    (Integer) row[3],                       // statut
+                    row[4] != null ? ((Number) row[4]).doubleValue() : null, // ❌ row[4] = surface_m2 (pas latitude)
+                    row[5] != null ? ((Number) row[5]).doubleValue() : null, // ❌ row[5] = budget (pas longitude)
+                    (String) row[6],                        // entreprise
+                    row[7] != null ? row[7].toString() : null, // date_creation
+                    row[8] != null ? ((Number) row[8]).intValue() : null // niveau
                 );
                 result.add(dto);
             }
@@ -261,16 +275,17 @@ signalementHistoriqueService.save(historique);
                 row[5] != null ? new java.math.BigDecimal(row[5].toString()) : null,
                 row[6] != null ? new java.math.BigDecimal(row[6].toString()) : null,
                 row[7] != null ? new java.math.BigDecimal(row[7].toString()) : null,
-                row[8] != null ? ((Number) row[8]).intValue() : null,
-                (String) row[9],
+                row[8] != null ? ((Number) row[8]).intValue() : null, // ✅ Niveau
+                row[9] != null ? ((Number) row[9]).intValue() : null,
                 (String) row[10],
                 (String) row[11],
-                row[12] != null ? ((Number) row[12]).intValue() : null,
-                (String) row[13],
+                (String) row[12],
+                row[13] != null ? ((Number) row[13]).intValue() : null,
                 (String) row[14],
                 (String) row[15],
-                row[16] != null ? row[16].toString() : null,
-                row[17] != null ? ((Number) row[17]).intValue() : null
+                (String) row[16],
+                row[17] != null ? row[17].toString() : null,
+                row[18] != null ? ((Number) row[18]).intValue() : null
             );
             
             // Récupérer les photos (base64) depuis la table signalement_photo
@@ -302,16 +317,17 @@ signalementHistoriqueService.save(historique);
                     row[5] != null ? new java.math.BigDecimal(row[5].toString()) : null,
                     row[6] != null ? new java.math.BigDecimal(row[6].toString()) : null,
                     row[7] != null ? new java.math.BigDecimal(row[7].toString()) : null,
-                    row[8] != null ? ((Number) row[8]).intValue() : null,
-                    (String) row[9],
+                    row[8] != null ? ((Number) row[8]).intValue() : null, // ✅ Niveau
+                    row[9] != null ? ((Number) row[9]).intValue() : null,
                     (String) row[10],
                     (String) row[11],
-                    row[12] != null ? ((Number) row[12]).intValue() : null,
-                    (String) row[13],
+                    (String) row[12],
+                    row[13] != null ? ((Number) row[13]).intValue() : null,
                     (String) row[14],
                     (String) row[15],
-                    row[16] != null ? row[16].toString() : null,
-                    row[17] != null ? ((Number) row[17]).intValue() : null
+                    (String) row[16],
+                    row[17] != null ? row[17].toString() : null,
+                    row[18] != null ? ((Number) row[18]).intValue() : null
                 );
                 result.add(dto);
             }
