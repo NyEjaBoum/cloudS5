@@ -3,6 +3,7 @@ package com.projetCloud.projetCloud.service;
 import com.projetCloud.projetCloud.dto.RecapSignalementDto;
 import com.projetCloud.projetCloud.repository.signalement.SignalementRepository;
 import com.projetCloud.projetCloud.repository.utilisateur.UtilisateurRepository;
+import com.projetCloud.projetCloud.repository.entreprise.EntrepriseRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import com.projetCloud.projetCloud.dto.InfosSignalementDto;
@@ -35,6 +36,9 @@ public class SignalementService {
 
     @Autowired
     private SignalementRepository signalementRepository;
+
+    @Autowired
+    private EntrepriseRepository entrepriseRepository;
 
     @Autowired
     private SignalementHistoriqueService signalementHistoriqueService;
@@ -141,8 +145,9 @@ public class SignalementService {
             
             // ✅ Calculer automatiquement le budget si surface et niveau sont présents
             if (signalement.getSurfaceM2() != null && signalement.getNiveau() != null) {
-                BigDecimal budgetCalcule = prixService.calculerBudget(signalement.getSurfaceM2(), signalement.getNiveau());
-                signalement.setBudget(budgetCalcule);
+                signalement.setBudget(
+                    prixService.calculerBudget(signalement.getSurfaceM2(), signalement.getNiveau(), signalement.getDateCreation())
+                );
             }
 
             signalement.setEntreprise(updated.getEntreprise());
@@ -371,7 +376,7 @@ public class SignalementService {
         }
     }
 
-    public Map<String, Integer> importSignalementsFromFirebase() {
+        public Map<String, Integer> importSignalementsFromFirebase() {
         int imported = 0, updated = 0;
         try {
             Firestore db = FirestoreClient.getFirestore();
@@ -384,6 +389,12 @@ public class SignalementService {
                 Integer statut = doc.getLong("statut") != null ? doc.getLong("statut").intValue() : 1;
                 String latitude = doc.getString("latitude");
                 String longitude = doc.getString("longitude");
+                String surfaceM2 = doc.getString("surfaceM2");
+                String budget = doc.getString("budget");
+                Long niveauLong = doc.getLong("niveau");
+                Integer niveau = niveauLong != null ? niveauLong.intValue() : null;
+                Long entrepriseIdLong = doc.getLong("entrepriseId");
+                Integer entrepriseId = entrepriseIdLong != null ? entrepriseIdLong.intValue() : null;
                 String dateCreation = doc.getString("dateCreation");
                 String userEmail = doc.getString("userEmail");
                 
@@ -398,11 +409,18 @@ public class SignalementService {
                 if (s == null) {
                     // Nouveau signalement
                     s = new Signalement();
+                    // s.setId(id);
                     s.setTitre(titre);
                     s.setDescription(description);
                     s.setStatut(statut);
                     if (latitude != null) s.setLatitude(new BigDecimal(latitude));
                     if (longitude != null) s.setLongitude(new BigDecimal(longitude));
+                    if (surfaceM2 != null) s.setSurfaceM2(new BigDecimal(surfaceM2));
+                    if (budget != null) s.setBudget(new BigDecimal(budget));
+                    if (niveau != null) s.setNiveau(niveau);
+                    if (entrepriseId != null) {
+                        s.setEntreprise(entrepriseRepository.findById(entrepriseId).orElse(null));
+                    }
                     s.setUtilisateur(utilisateur);
                     s.setDateCreation(dateCreation != null ? LocalDateTime.parse(dateCreation) : LocalDateTime.now());
                     s = signalementRepository.save(s);
@@ -421,6 +439,16 @@ public class SignalementService {
                     if (statut != null && !statut.equals(s.getStatut())) { s.setStatut(statut); modif = true; }
                     if (latitude != null && (s.getLatitude() == null || !new BigDecimal(latitude).equals(s.getLatitude()))) { s.setLatitude(new BigDecimal(latitude)); modif = true; }
                     if (longitude != null && (s.getLongitude() == null || !new BigDecimal(longitude).equals(s.getLongitude()))) { s.setLongitude(new BigDecimal(longitude)); modif = true; }
+                    if (surfaceM2 != null && (s.getSurfaceM2() == null || !new BigDecimal(surfaceM2).equals(s.getSurfaceM2()))) { s.setSurfaceM2(new BigDecimal(surfaceM2)); modif = true; }
+                    if (budget != null && (s.getBudget() == null || !new BigDecimal(budget).equals(s.getBudget()))) { s.setBudget(new BigDecimal(budget)); modif = true; }
+                    if (niveau != null && s.getNiveau() == null) { s.setNiveau(niveau); modif = true; }
+                    if (entrepriseId != null) {
+                        var entreprise = entrepriseRepository.findById(entrepriseId).orElse(null);
+                        if (entreprise != null && !entreprise.equals(s.getEntreprise())) {
+                            s.setEntreprise(entreprise);
+                            modif = true;
+                        }
+                    }
                     
                     if (modif) { 
                         signalementRepository.save(s); 

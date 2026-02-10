@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
+import java.time.LocalDateTime;
 
 @RestController
 @RequestMapping("/api/prix")
@@ -38,7 +39,7 @@ public class PrixController {
         }
         try {
             BigDecimal nouveauPrix = new BigDecimal(body.get("prixM2").toString());
-            PrixGlobal updated = prixService.updatePrix(nouveauPrix, user);
+            PrixGlobal updated = prixService.save(nouveauPrix, user);
             return new ApiResponse<>("success", updated, null);
         } catch (Exception e) {
             return new ApiResponse<>("error", null, e.getMessage());
@@ -53,9 +54,11 @@ public class PrixController {
     @GetMapping("/calculer")
     public ApiResponse<BigDecimal> calculerBudget(
         @RequestParam BigDecimal surfaceM2,
-        @RequestParam Integer niveau
+        @RequestParam Integer niveau,
+        @RequestParam String dateSignalement // format ISO
     ) {
-        BigDecimal budget = prixService.calculerBudget(surfaceM2, niveau);
+        LocalDateTime date = LocalDateTime.parse(dateSignalement);
+        BigDecimal budget = prixService.calculerBudget(surfaceM2, niveau, date);
         return new ApiResponse<>("success", budget, null);
     }
 }
