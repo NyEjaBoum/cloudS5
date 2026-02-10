@@ -12,6 +12,7 @@ export default function UserDetails() {
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [historique, setHistorique] = useState([]);
+  const [nouveauMotDePasse, setNouveauMotDePasse] = useState(""); // ✅ Nouveau state
 
   useEffect(() => {
     fetchUserById(id)
@@ -38,11 +39,17 @@ export default function UserDetails() {
     setSaving(true);
     setError("");
     try {
-      await updateUser(id, form);
+      const payload = { ...form };
+      // ✅ Ajouter le mot de passe uniquement s'il est renseigné
+      if (nouveauMotDePasse.trim() !== "") {
+        payload.motDePasse = nouveauMotDePasse;
+      }
+      await updateUser(id, payload);
       const refreshed = await fetchUserById(id);
       setUser(refreshed.data);
       setForm(refreshed.data);
       setEdit(false);
+      setNouveauMotDePasse(""); // ✅ Réinitialiser
       fetchBlocageHistorique(id).then(setHistorique);
       alert("Utilisateur modifie !");
     } catch (e) {
@@ -132,18 +139,31 @@ export default function UserDetails() {
               )}
             </div>
 
-            {/* Email */}
+            {/* Email (lecture seule) */}
             <div className="md:col-span-2">
               <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
                 <Mail size={13} />
                 Email
               </label>
-              {edit ? (
-                <input name="email" value={form.email || ""} onChange={handleInput} className="input-clean" />
-              ) : (
-                <p className="text-base font-semibold text-slate-700">{user.email}</p>
-              )}
+              <p className="text-base font-semibold text-slate-700">{user.email}</p>
             </div>
+
+            {/* Nouveau mot de passe (uniquement en mode édition) */}
+            {edit && (
+              <div className="md:col-span-2">
+                <label className="flex items-center gap-1.5 text-sm text-slate-400 mb-1.5">
+                  <Lock size={13} />
+                  Nouveau mot de passe (laisser vide pour ne pas changer)
+                </label>
+                <input
+                  type="password"
+                  value={nouveauMotDePasse}
+                  onChange={(e) => setNouveauMotDePasse(e.target.value)}
+                  placeholder="Entrer un nouveau mot de passe..."
+                  className="input-clean"
+                />
+              </div>
+            )}
 
             {/* Role */}
             <div>

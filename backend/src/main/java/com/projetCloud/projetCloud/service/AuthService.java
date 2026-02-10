@@ -188,22 +188,22 @@ public class AuthService {
         // }
 
         String decryptedPassword = decryptPassword(utilisateur.getMotDePasse());
-        // if (!motDePasse.equals(decryptedPassword)) {
-        //     int tentatives = utilisateur.getTentativesEchouees() != null ?
-        //                    utilisateur.getTentativesEchouees() : 0;
-        //     tentatives++;
-        //     utilisateur.setTentativesEchouees(tentatives);
+        if (!motDePasse.equals(decryptedPassword)) {
+            // int tentatives = utilisateur.getTentativesEchouees() != null ?
+            //                utilisateur.getTentativesEchouees() : 0;
+            // tentatives++;
+            // utilisateur.setTentativesEchouees(tentatives);
 
-        //     if (tentatives >= maxAttempts) {
-        //         utilisateur.setCompteBloque(true);
-        //         utilisateur.setDateBlocage(LocalDateTime.now());
-        //         utilisateurRepository.save(utilisateur);
-        //         historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion echouees (" + maxAttempts + " max)");
-        //     } else {
-        //         utilisateurRepository.save(utilisateur);
-        //     }
-        //     throw new IllegalArgumentException("Invalid password");
-        // }
+            // if (tentatives >= maxAttempts) {
+            //     utilisateur.setCompteBloque(true);
+            //     utilisateur.setDateBlocage(LocalDateTime.now());
+            //     utilisateurRepository.save(utilisateur);
+            //     historiqueBlocageService.enregistrer(utilisateur, "BLOCAGE_AUTO", "Tentatives de connexion echouees (" + maxAttempts + " max)");
+            // } else {
+            //     utilisateurRepository.save(utilisateur);
+            // }
+            throw new IllegalArgumentException("Invalid password");
+        }
 
         utilisateur.setTentativesEchouees(0);
         utilisateurRepository.save(utilisateur);
