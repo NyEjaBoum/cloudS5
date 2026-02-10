@@ -7,6 +7,7 @@ import ProfilPage from '../views/ProfilPage.vue'
 import ReportPage from '../views/ReportPage.vue'
 import ReportsListPage from '../views/ReportsListPage.vue'
 import NotificationsPage from '../views/NotificationsPage.vue'
+import authService from '../services/auth.service';
 
 const routes: Array<RouteRecordRaw> = [
   {
@@ -59,5 +60,16 @@ const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
   routes
 })
+
+router.beforeEach((to, from, next) => {
+  const isLoggedIn = authService.isLoggedIn();
+  if (to.path !== '/login' && !isLoggedIn) {
+    next('/login');
+  } else if (to.path === '/login' && isLoggedIn) {
+    next('/home');
+  } else {
+    next();
+  }
+});
 
 export default router
